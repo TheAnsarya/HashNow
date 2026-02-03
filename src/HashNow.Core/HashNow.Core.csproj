@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+<PropertyGroup>
+<TargetFramework>net10.0</TargetFramework>
+<LangVersion>latest</LangVersion>
+<ImplicitUsings>enable</ImplicitUsings>
+<Nullable>enable</Nullable>
+<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+<AssemblyName>HashNow.Core</AssemblyName>
+<RootNamespace>HashNow.Core</RootNamespace>
+<Description>Core library for file hashing - CRC32, MD5, SHA1, SHA256, SHA512</Description>
+<Authors>TheAnsarya</Authors>
+<Company>TheAnsarya</Company>
+<Product>HashNow</Product>
+<Copyright>Copyright (c) 2025 TheAnsarya</Copyright>
+
+<GenerateDocumentationFile>true</GenerateDocumentationFile>
+</PropertyGroup>
+
+<ItemGroup>
+  <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
+</ItemGroup>
+
+</Project>

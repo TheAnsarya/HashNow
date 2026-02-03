@@ -1,0 +1,84 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+build/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# .NET
+*.dll
+*.exe
+*.pdb
+*.cache
+*.snk
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+*.nuget.props
+*.nuget.targets
+
+# Rider
+.idea/
+
+# VS Code
+# .vscode/  # Keep our settings
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+
+# Test Results
+[Tt]est[Rr]esult*/
+*.trx
+*.Coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# BenchmarkDotNet
+BenchmarkDotNet.Artifacts/
+
+# JetBrains
+*.DotSettings.user
+
+# NCrunch
+*.ncrunch*
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+# Publish folders
+publish/
+out/

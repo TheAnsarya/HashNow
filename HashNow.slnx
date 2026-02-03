@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/HashNow.Cli/HashNow.Cli.csproj" />
+    <Project Path="src/HashNow.Core/HashNow.Core.csproj" />
+  </Folder>
+</Solution>
