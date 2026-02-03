@@ -4,7 +4,7 @@
 
 [![License: Unlicense](https://img.shields.io/badge/License-Unlicense-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
-[![Tests](https://img.shields.io/badge/tests-92%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-108%20passing-brightgreen)](tests/)
 [![Release](https://img.shields.io/github/v/release/TheAnsarya/HashNow)](https://github.com/TheAnsarya/HashNow/releases/latest)
 
 ## 📥 Download
@@ -14,12 +14,11 @@
 ## 🚀 Quick Start
 
 1. **Download** `HashNow.exe` from [Releases](https://github.com/TheAnsarya/HashNow/releases/latest)
-2. **Install context menu** (run as Administrator):
-	```powershell
-	HashNow.exe --install
-	```
+2. **Double-click** `HashNow.exe` - it will prompt to install the context menu
 3. **Right-click any file** → Select **"Hash this file now"**
 4. **Find** `{filename}.hashes.json` in the same folder
+
+> **Tip:** If prompted by Windows SmartScreen, click "More info" → "Run anyway"
 
 ## Features
 
@@ -39,9 +38,13 @@
 
 ## 📋 Usage
 
-### Explorer Context Menu (Recommended)
+### Quickest Way: Double-Click
 
-### Explorer Context Menu (Recommended)
+1. **Double-click** `HashNow.exe`
+2. **Say yes** to install the context menu
+3. **Done!** Right-click any file → "Hash this file now"
+
+### Explorer Context Menu
 
 1. Right-click any file
 2. Select **"Hash this file now"**
@@ -50,6 +53,9 @@
 ### Command Line
 
 ```powershell
+# Double-click or run without args to auto-install
+HashNow.exe
+
 # Hash a single file
 HashNow.exe myfile.zip
 
@@ -61,6 +67,9 @@ HashNow.exe --install
 
 # Uninstall context menu
 HashNow.exe --uninstall
+
+# Check installation status
+HashNow.exe --status
 
 # Show help
 HashNow.exe --help
@@ -228,7 +237,7 @@ cd HashNow
 # Build
 dotnet build
 
-# Run tests (92 tests)
+# Run tests (108 tests)
 dotnet test
 
 # Publish self-contained executable
@@ -246,18 +255,20 @@ dotnet run -c Release --project benchmarks/HashNow.Benchmarks -- --filter "*"
 ```
 HashNow/
 ├── src/
-│   ├── HashNow.Core/         # Core library (FileHasher, FileHashResult)
-│   │   │                     # 58 hash algorithms, reusable in any project
-│   │   ├── FileHasher.cs     # All hashing implementations
-│   │   └── FileHashResult.cs # Result model with all 58 properties
-│   └── HashNow.Cli/          # Command-line interface
+│   ├── HashNow.Core/              # Core library (reusable in any project)
+│   │   ├── FileHasher.cs          # 58 hash algorithm implementations
+│   │   ├── FileHashResult.cs      # Result model with all 58 properties
+│   │   └── PerformanceDiagnostics.cs  # Timing analysis by category
+│   └── HashNow.Cli/               # Command-line interface
+│       ├── Program.cs             # CLI entry point with auto-install
+│       └── ContextMenuInstaller.cs  # Windows Explorer integration
 ├── tests/
-│   └── HashNow.Core.Tests/   # 31 xUnit tests
+│   └── HashNow.Core.Tests/        # 108 xUnit tests
 ├── benchmarks/
-│   └── HashNow.Benchmarks/   # BenchmarkDotNet performance tests
+│   └── HashNow.Benchmarks/        # BenchmarkDotNet performance tests
 ├── docs/
-│   └── ALGORITHM_ROADMAP.md  # Algorithm implementation status
-└── publish/                  # Published executable
+│   └── ALGORITHM_ROADMAP.md       # Algorithm implementation status
+└── publish/                       # Published executable
 ```
 
 ## Using the Core Library
@@ -296,9 +307,19 @@ Typical throughput: ~300-500 MB/s depending on disk speed.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+[The Unlicense](LICENSE) - Public domain, free for any use.
 
 ## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for full history.
+
+### [Unreleased]
+- **Auto-install on double-click** - Just double-click to install context menu (prompts for UAC)
+- **`--status` command** - Check if context menu is installed correctly
+- **Performance diagnostics** - New `PerformanceDiagnostics` class for timing analysis
+- **Comprehensive XML documentation** - All public and private members documented
+- **Colored console output** - Better visual feedback during installation
+- **108 unit tests** (up from 92)
 
 ### v2.0.0
 - **58 hash algorithms** (up from 13)
