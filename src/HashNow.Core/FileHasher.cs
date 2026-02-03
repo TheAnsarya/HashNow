@@ -1104,15 +1104,21 @@ public static class FileHasher {
 	}
 
 	/// <summary>
-	/// Asynchronously computes all 58 hash algorithms for the specified file.
+	/// Asynchronously computes all 58 hash algorithms for the specified file using streaming.
 	/// </summary>
 	/// <param name="filePath">The path to the file to hash.</param>
 	/// <param name="progress">Optional callback for progress reporting (0.0 to 1.0).</param>
 	/// <param name="cancellationToken">Optional cancellation token.</param>
 	/// <returns>A task that resolves to a <see cref="FileHashResult"/> containing all computed hashes.</returns>
 	/// <remarks>
-	/// This method wraps the synchronous <see cref="HashFile"/> in a task.
-	/// Progress reporting is simplified (reports 0.5 during processing, 1.0 when complete).
+	/// <para>
+	/// This method uses streaming to handle large files efficiently without loading them
+	/// entirely into memory. Progress is reported based on bytes read from the file.
+	/// </para>
+	/// <para>
+	/// For files larger than ~100MB, this is significantly more memory-efficient than
+	/// the synchronous <see cref="HashFile"/> method.
+	/// </para>
 	/// </remarks>
 	/// <example>
 	/// <code>
@@ -1127,24 +1133,7 @@ public static class FileHasher {
 		Action<double>? progress = null,
 		CancellationToken cancellationToken = default) {
 
-		return Task.Run(() => {
-			// Report initial progress
-			progress?.Invoke(0.0);
-
-			// Check for cancellation before starting
-			cancellationToken.ThrowIfCancellationRequested();
-
-			// Report mid-progress (actual progress tracking would require streaming)
-			progress?.Invoke(0.5);
-
-			// Compute hashes synchronously
-			var result = HashFile(filePath);
-
-			// Report completion
-			progress?.Invoke(1.0);
-
-			return result;
-		}, cancellationToken);
+		return Task.Run(() => StreamingHasher.HashFileStreaming(filePath, progress, cancellationToken), cancellationToken);
 	}
 
 	#endregion
