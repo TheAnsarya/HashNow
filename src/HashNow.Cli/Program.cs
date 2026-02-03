@@ -176,12 +176,54 @@ internal static class Program {
 	///   <item><description>If not installed: Prompt user and attempt installation</description></item>
 	///   <item><description>If not admin: Offer to restart with elevation</description></item>
 	/// </list>
+	/// <para>
+	/// Uses GUI dialogs when double-clicked, console prompts when run from terminal.
+	/// </para>
 	/// </remarks>
 	private static int HandleNoArguments() {
 		// First, check current installation status
 		bool isInstalled = ContextMenuInstaller.IsInstalled();
 		bool isCorrect = ContextMenuInstaller.IsInstalledCorrectly();
+		bool isAdmin = IsRunningAsAdmin();
 
+		// Detect if we're in a console or GUI context
+		bool isDoubleClick = DetectDoubleClickLaunch();
+
+		if (isDoubleClick) {
+			// Use GUI dialogs
+			return HandleNoArgumentsGui(isInstalled, isCorrect, isAdmin);
+		} else {
+			// Use console prompts
+			return HandleNoArgumentsConsole(isInstalled, isCorrect, isAdmin);
+		}
+	}
+
+	/// <summary>
+	/// Handles no-arguments mode with GUI dialogs (double-click).
+	/// </summary>
+	private static int HandleNoArgumentsGui(bool isInstalled, bool isCorrect, bool isAdmin) {
+		var (shouldRestart, shouldInstall, cancelled) = GuiDialogs.ShowInstallPrompts(
+			isAdmin, isInstalled, isCorrect);
+
+		if (cancelled) {
+			return 2;
+		}
+
+		if (shouldRestart) {
+			return RestartAsAdmin();
+		}
+
+		if (shouldInstall) {
+			return InstallContextMenuGui();
+		}
+
+		return 0;
+	}
+
+	/// <summary>
+	/// Handles no-arguments mode with console prompts (CLI).
+	/// </summary>
+	private static int HandleNoArgumentsConsole(bool isInstalled, bool isCorrect, bool isAdmin) {
 		// Banner
 		PrintBanner();
 
@@ -244,6 +286,86 @@ internal static class Program {
 
 		// Perform installation
 		return InstallContextMenu();
+	}
+
+	/// <summary>
+	/// Installs context menu with GUI result dialog.
+	/// </summary>
+	private static int InstallContextMenuGui() {
+		try {
+			ContextMenuInstaller.Install();
+			GuiDialogs.ShowInstallResult(true);
+			return 0;
+		} catch (UnauthorizedAccessException) {
+			GuiDialogs.ShowInstallResult(false, "Administrator privileges required.");
+			return 1;
+		} catch (Exception ex) {
+			GuiDialogs.ShowInstallResult(false, ex.Message);
+			return 1;
+		}
+	}
+
+	/// <summary>
+	/// Detects if the application was launched by double-clicking (vs command line).
+	/// </summary>
+	/// <returns><see langword="true"/> if launched by double-click; otherwise, <see langword="false"/>.</returns>
+	/// <remarks>
+	/// <para>
+	/// Detection methods:
+	/// </para>
+	/// <list type="bullet">
+	///   <item><description>Check if console is available and interactive</description></item>
+	///   <item><description>Check parent process (explorer.exe = double-click)</description></item>
+	/// </list>
+	/// </remarks>
+	private static bool DetectDoubleClickLaunch() {
+		try {
+			// If input is redirected, we're likely in a script/pipe
+			if (Console.IsInputRedirected) {
+				return false;
+			}
+
+			// Check parent process
+			using var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+			using var parentProcess = GetParentProcess(currentProcess);
+
+			if (parentProcess != null) {
+				var parentName = parentProcess.ProcessName.ToLowerInvariant();
+				// If launched from explorer, it's a double-click
+				if (parentName == "explorer") {
+					return true;
+				}
+				// If launched from cmd, powershell, pwsh, etc., it's CLI
+				if (parentName is "cmd" or "powershell" or "pwsh" or "windowsterminal"
+					or "conhost" or "code" or "devenv") {
+					return false;
+				}
+			}
+
+			// Fallback: check if console window was created for us
+			// (Double-click creates a new console, CLI reuses existing)
+			return false;
+		} catch {
+			// If detection fails, default to console mode
+			return false;
+		}
+	}
+
+	/// <summary>
+	/// Gets the parent process of the specified process.
+	/// </summary>
+	private static System.Diagnostics.Process? GetParentProcess(System.Diagnostics.Process process) {
+		try {
+			using var query = new System.Management.ManagementObjectSearcher(
+				$"SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = {process.Id}");
+			var result = query.Get().Cast<System.Management.ManagementObject>().FirstOrDefault();
+			if (result?["ParentProcessId"] is uint parentId) {
+				return System.Diagnostics.Process.GetProcessById((int)parentId);
+			}
+		} catch {
+			// Ignore errors in parent process detection
+		}
+		return null;
 	}
 
 	/// <summary>
@@ -368,7 +490,7 @@ internal static class Program {
 	}
 
 	/// <summary>
-	/// Processes a file with full console output (progress, results, timing).
+	/// Processes a file with full console output (progress bar, results, timing).
 	/// </summary>
 	/// <param name="filePath">Path to the file.</param>
 	/// <param name="fileInfo">FileInfo object for the file.</param>
@@ -377,16 +499,16 @@ internal static class Program {
 		// Display file info header
 		Console.WriteLine($"Hashing: {fileInfo.Name} ({FileHasher.FormatFileSize(fileInfo.Length)})");
 
+		// Create console progress bar
+		using var progressBar = new ConsoleProgressBar(useColor: true);
+
 		// Hash with progress callback
 		var result = await FileHasher.HashFileAsync(
 			filePath,
-			progress => {
-				// Update progress on same line using carriage return
-				Console.Write($"\rProgress: {progress:P0}  ");
-			});
+			progress => progressBar.Update(progress));
 
-		// Clear progress line and show completion
-		Console.WriteLine("\rProgress: 100%    ");
+		// Complete the progress bar
+		progressBar.Complete();
 
 		// Save results to JSON
 		var outputPath = filePath + ".hashes.json";
@@ -404,7 +526,7 @@ internal static class Program {
 	}
 
 	/// <summary>
-	/// Processes a file silently or with minimal UI (Explorer mode).
+	/// Processes a file silently or with GUI progress dialog (Explorer mode).
 	/// </summary>
 	/// <param name="filePath">Path to the file.</param>
 	/// <param name="fileInfo">FileInfo object for the file.</param>
@@ -412,9 +534,8 @@ internal static class Program {
 	/// <returns>Exit code.</returns>
 	private static async Task<int> ProcessFileExplorerMode(string filePath, FileInfo fileInfo, long estimatedMs) {
 		if (estimatedMs > ProgressUiThresholdMs) {
-			// Long operation - could show a progress dialog here
-			// For now, just process in background
-			await ProcessWithProgressDialogAsync(filePath, fileInfo);
+			// Long operation - show progress dialog
+			return await ProcessWithProgressDialogAsync(filePath, fileInfo);
 		} else {
 			// Short operation - process silently
 			var result = await FileHasher.HashFileAsync(filePath);
@@ -426,46 +547,27 @@ internal static class Program {
 	}
 
 	/// <summary>
-	/// Processes a file with optional progress dialog for long operations.
+	/// Processes a file with a GUI progress dialog for long operations.
 	/// </summary>
 	/// <param name="filePath">Path to the file.</param>
 	/// <param name="fileInfo">FileInfo object for the file.</param>
-	/// <remarks>
-	/// This method is designed to support a future progress dialog UI.
-	/// Currently processes silently but tracks progress internally.
-	/// </remarks>
-	private static async Task ProcessWithProgressDialogAsync(string filePath, FileInfo fileInfo) {
-		// Create cancellation source for potential user cancellation
-		using var cts = new CancellationTokenSource();
+	/// <returns>Exit code: 0 for success, 2 for cancelled.</returns>
+	private static async Task<int> ProcessWithProgressDialogAsync(string filePath, FileInfo fileInfo) {
+		FileHashResult? result = null;
+		var outputPath = filePath + ".hashes.json";
 
-		// Track progress for potential UI updates
-		double currentProgress = 0;
-
-		// Start hashing task with progress callback
-		var hashTask = FileHasher.HashFileAsync(
+		var success = await ProgressDialog.ShowDialogAsync(
 			filePath,
-			progress => currentProgress = progress,
-			cts.Token);
+			async (progressCallback, cancellationToken) => {
+				result = await FileHasher.HashFileAsync(filePath, progressCallback, cancellationToken);
+			});
 
-		// Monitor progress while hashing
-		var sw = Stopwatch.StartNew();
-		bool dialogShown = false;
-
-		while (!hashTask.IsCompleted) {
-			await Task.Delay(100, CancellationToken.None);
-
-			// Placeholder for future progress dialog integration
-			if (sw.ElapsedMilliseconds > ProgressUiThresholdMs && !dialogShown) {
-				dialogShown = true;
-				// TODO: Could show a WinForms/WPF progress dialog here
-				// For now, continue processing silently
-			}
+		if (success && result != null) {
+			await FileHasher.SaveResultAsync(result, outputPath);
+			return 0;
 		}
 
-		// Save results
-		var result = await hashTask;
-		var outputPath = filePath + ".hashes.json";
-		await FileHasher.SaveResultAsync(result, outputPath);
+		return 2; // Cancelled
 	}
 
 	/// <summary>

@@ -5,6 +5,25 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-02-03
+
+### Added
+- **GUI Progress Dialog** - Visual progress bar for large files (>3 seconds) when launched from context menu
+- **Console Progress Bar** - Beautiful text-based progress bar with color for CLI usage
+- **GUI Install Dialogs** - MessageBox dialogs for double-click installation prompts
+- **Parent Process Detection** - Distinguishes between double-click and command-line launch
+
+### Changed
+- **Improved Icon** - Larger hash symbol (#) with better anti-aliasing on diagonal strokes
+- **Smarter UI Mode Selection** - Uses GUI dialogs when double-clicked, console prompts when run from terminal
+
+### Technical
+- Added Windows Forms support for progress dialog
+- New `ProgressDialog.cs` - Modal dialog with progress bar and cancel button
+- New `ConsoleProgressBar.cs` - Text-based progress bar with Unicode block characters
+- New `GuiDialogs.cs` - MessageBox wrapper for installation prompts
+- Added System.Management for parent process detection
+
 ## [1.0.2] - 2026-02-03
 
 ### Added
