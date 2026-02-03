@@ -9,7 +9,7 @@
 
 ## 📥 Download
 
-**[Download HashNow v1.0.1](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
+**[Download HashNow v1.0.2](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
 
 ## 🚀 Quick Start
 
@@ -313,6 +313,11 @@ Typical throughput: ~300-500 MB/s depending on disk speed.
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
 
+### v1.0.2 (2026-02-03)
+- **Custom application icon** - Blue button with white hash symbol (#)
+- **Blank lines between JSON sections** - Improved readability
+- **Trailing newline** - JSON files end with blank line
+
 ### v1.0.1 (2026-02-03)
 - **Auto-install on double-click** - Just double-click to install context menu (prompts for UAC)
 - **`--status` command** - Check if context menu is installed correctly
@@ -322,28 +327,7 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **108 unit tests** (up from 92)
 
 ### v1.0.0 (2026-02-02)
-- **58 hash algorithms** (up from 13)
-- Added checksums: CRC32C, Adler32, Fletcher16, Fletcher32
-- Added fast hashes: MurmurHash3, CityHash, SpookyHash, SipHash, FNV1a, BLAKE3
-- Added crypto: BLAKE2b/s, RIPEMD-160, Whirlpool, Tiger/Tiger2, SM3, GOST/Streebog, HAVAL
-- Added Keccak variants, SHAKE128/256, Skein family, Groestl, JH
-- SHA3 now always available via BouncyCastle (no OS dependency)
-- Core library reusable in any .NET project
-- Added hashNowVersion and algorithmCount to output
-- Improved error handling and documentation
-
-### v1.1.0
-- Added 13 hash algorithms (up from 5)
-- Added CRC64, SHA384, SHA3-256/384/512, XXHash3/64/128
-- Single-pass computation for all hashes
-- Progress reporting for large files
-- Duration tracking (durationMs in output)
-- Platform detection for SHA3 support
-- 31 unit tests with comprehensive coverage
-- BenchmarkDotNet benchmarks
-
-### v1.0.0
-- Initial release
-- CRC32, MD5, SHA1, SHA256, SHA512
+- Initial release with 58 hash algorithms
 - Windows Explorer context menu integration
-- JSON output format
+- Parallel hash computation
+- JSON output with tab indentation

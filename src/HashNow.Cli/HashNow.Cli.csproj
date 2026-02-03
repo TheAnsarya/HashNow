@@ -10,12 +10,15 @@
 
 <AssemblyName>HashNow</AssemblyName>
 <RootNamespace>HashNow.Cli</RootNamespace>
-<Version>1.0.1</Version>
+<Version>1.0.2</Version>
 <Description>Hash files instantly from Windows Explorer context menu - 58 algorithms</Description>
 <Authors>TheAnsarya</Authors>
 <Company>TheAnsarya</Company>
 <Product>HashNow</Product>
-<Copyright>Copyright (c) 2025 TheAnsarya</Copyright>
+<Copyright>Copyright (c) 2026 TheAnsarya</Copyright>
+
+<!-- Application Icon -->
+<ApplicationIcon>HashNow.ico</ApplicationIcon>
 
 <!-- Single-file deployment for easy distribution -->
 <PublishSingleFile>true</PublishSingleFile>

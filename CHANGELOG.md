@@ -5,6 +5,45 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-02-03
+
+### Added
+- **Custom Application Icon** - Blue button with white hash symbol (#) for exe and context menu
+- **Blank Lines Between JSON Sections** - Improved readability with visual separation between:
+	- File Metadata
+	- Checksums & CRCs
+	- Non-Crypto Fast Hashes
+	- Cryptographic Hashes
+	- Other Crypto Hashes
+	- Hashing Metadata
+- **Trailing Newline** - JSON files now end with a blank line for better compatibility
+
+### Changed
+- **JSON Output Format** - Now includes blank lines between logical sections for easier reading
+
+## [1.0.1] - 2026-02-03
+
+### Added
+- **Comprehensive XML Documentation** - Every class, method, property, and field now has detailed XML documentation
+- **Auto-Install on Double-Click** - Running the exe without arguments now prompts to install context menu
+- **UAC Elevation Support** - Application can auto-restart with admin privileges for installation
+- **Performance Diagnostics** - New `HashFileWithDiagnostics()` method for detailed timing analysis
+- **PerformanceDiagnostics Class** - Tracks timing per algorithm category (checksums, fast hashes, SHA, BLAKE, etc.)
+- **Installation Status Check** - New `--status` command shows context menu installation status
+- **Colored Console Output** - Success/error messages now use green/red/yellow coloring
+- **Pretty Banner** - Application shows a nice ASCII banner when run without args
+- **108 Unit Tests** - Expanded test coverage from 92 to 108 tests
+
+### Changed
+- **Double-click behavior** - Now prompts for context menu installation instead of showing help
+- **Error messages** - More descriptive error messages with color coding
+- **Code organization** - All source files reorganized with #regions and inline comments
+
+### Technical
+- All 4 source files fully documented (FileHasher.cs, FileHashResult.cs, ContextMenuInstaller.cs, Program.cs)
+- Added ContextMenuInstaller.IsInstalledCorrectly() to detect when exe path changed
+- Added ContextMenuInstaller.GetInstalledCommand() to retrieve registered command
+
 ## [1.0.0] - 2026-02-02
 
 ### Added
@@ -50,28 +89,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Known Issues
 - Context menu requires administrator privileges to install
 - Windows-only (context menu integration)
-
-## [1.0.1] - 2026-02-03
-
-### Added
-- **Comprehensive XML Documentation** - Every class, method, property, and field now has detailed XML documentation
-- **Auto-Install on Double-Click** - Running the exe without arguments now prompts to install context menu
-- **UAC Elevation Support** - Application can auto-restart with admin privileges for installation
-- **Performance Diagnostics** - New `HashFileWithDiagnostics()` method for detailed timing analysis
-- **PerformanceDiagnostics Class** - Tracks timing per algorithm category (checksums, fast hashes, SHA, BLAKE, etc.)
-- **Installation Status Check** - New `--status` command shows context menu installation status
-- **Colored Console Output** - Success/error messages now use green/red/yellow coloring
-- **Pretty Banner** - Application shows a nice ASCII banner when run without args
-- **108 Unit Tests** - Expanded test coverage from 92 to 108 tests
-
-### Changed
-- **Double-click behavior** - Now prompts for context menu installation instead of showing help
-- **Error messages** - More descriptive error messages with color coding
-- **Code organization** - All source files reorganized with #regions and inline comments
-
-### Technical
-- All 4 source files fully documented (FileHasher.cs, FileHashResult.cs, ContextMenuInstaller.cs, Program.cs)
-- Added ContextMenuInstaller.IsInstalledCorrectly() to detect when exe path changed
-- Added ContextMenuInstaller.GetInstalledCommand() to retrieve registered command
-- Batch file hashing
-- Custom algorithm selection

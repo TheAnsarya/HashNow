@@ -60,7 +60,7 @@ public static class FileHasher {
 	/// Version follows semantic versioning (MAJOR.MINOR.PATCH).
 	/// This value is included in the JSON output for traceability.
 	/// </remarks>
-	public const string Version = "1.0.1";
+	public const string Version = "1.0.2";
 
 	/// <summary>
 	/// The total number of hash algorithms supported.
@@ -1238,6 +1238,67 @@ public static class FileHasher {
 	};
 
 	/// <summary>
+	/// Property names that mark the start of a new section in JSON output.
+	/// A blank line will be inserted before these properties.
+	/// </summary>
+	private static readonly HashSet<string> SectionStartProperties = [
+		"crc32",           // Start of Checksums section
+		"xxHash32",        // Start of Non-Crypto Fast Hashes section
+		"md2",             // Start of Cryptographic Hashes section
+		"whirlpool",       // Start of Other Crypto section
+		"hashedAtUtc"      // Start of Hashing Metadata section
+	];
+
+	/// <summary>
+	/// Formats JSON output with blank lines between sections for improved readability.
+	/// </summary>
+	/// <param name="json">The raw JSON string from serialization.</param>
+	/// <returns>JSON string with blank lines between logical sections.</returns>
+	/// <remarks>
+	/// This post-processes the JSON to add visual separation between:
+	/// <list type="bullet">
+	///   <item><description>File Metadata</description></item>
+	///   <item><description>Checksums &amp; CRCs</description></item>
+	///   <item><description>Non-Crypto Fast Hashes</description></item>
+	///   <item><description>Cryptographic Hashes</description></item>
+	///   <item><description>Other Crypto Hashes</description></item>
+	///   <item><description>Hashing Metadata</description></item>
+	/// </list>
+	/// </remarks>
+	private static string FormatJsonWithSections(string json) {
+		var lines = json.Split('\n');
+		var result = new System.Text.StringBuilder();
+
+		for (int i = 0; i < lines.Length; i++) {
+			var line = lines[i];
+			var trimmed = line.TrimStart();
+
+			// Check if this line starts a new section
+			foreach (var prop in SectionStartProperties) {
+				if (trimmed.StartsWith($"\"{prop}\":", StringComparison.Ordinal)) {
+					// Add blank line before section (unless it's the first property after opening brace)
+					if (result.Length > 0 && !result.ToString().TrimEnd().EndsWith("{")) {
+						result.AppendLine();
+					}
+					break;
+				}
+			}
+
+			result.Append(line);
+			if (i < lines.Length - 1) {
+				result.AppendLine();
+			}
+		}
+
+		// Ensure trailing newline
+		if (!result.ToString().EndsWith(Environment.NewLine)) {
+			result.AppendLine();
+		}
+
+		return result.ToString();
+	}
+
+	/// <summary>
 	/// Saves a hash result to a JSON file asynchronously.
 	/// </summary>
 	/// <param name="result">The hash result to save.</param>
@@ -1254,7 +1315,8 @@ public static class FileHasher {
 	/// </example>
 	public static async Task SaveResultAsync(FileHashResult result, string outputPath) {
 		var json = System.Text.Json.JsonSerializer.Serialize(result, JsonOptions);
-		await File.WriteAllTextAsync(outputPath, json);
+		var formatted = FormatJsonWithSections(json);
+		await File.WriteAllTextAsync(outputPath, formatted);
 	}
 
 	/// <summary>
@@ -1267,7 +1329,8 @@ public static class FileHasher {
 	/// </remarks>
 	public static void SaveResult(FileHashResult result, string outputPath) {
 		var json = System.Text.Json.JsonSerializer.Serialize(result, JsonOptions);
-		File.WriteAllText(outputPath, json);
+		var formatted = FormatJsonWithSections(json);
+		File.WriteAllText(outputPath, formatted);
 	}
 
 	/// <summary>
@@ -1277,7 +1340,8 @@ public static class FileHasher {
 	/// <param name="outputPath">The path to write the JSON file.</param>
 	public static async Task SaveDiagnosticResultAsync(DiagnosticHashResult result, string outputPath) {
 		var json = System.Text.Json.JsonSerializer.Serialize(result, JsonOptions);
-		await File.WriteAllTextAsync(outputPath, json);
+		var formatted = FormatJsonWithSections(json);
+		await File.WriteAllTextAsync(outputPath, formatted);
 	}
 
 	#endregion
