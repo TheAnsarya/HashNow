@@ -2,10 +2,10 @@ using System.IO.Hashing;
 using System.Security.Cryptography;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
+using Blake2Fast;
 using Blake3;
 using HashNow.Core;
 using Org.BouncyCastle.Crypto.Digests;
-using SauceControl.Blake2Fast;
 
 namespace HashNow.Benchmarks;
 
@@ -14,7 +14,6 @@ namespace HashNow.Benchmarks;
 /// Compares parallel (all 58 algorithms) vs sequential execution.
 /// </summary>
 [MemoryDiagnoser]
-[SimpleJob(RuntimeMoniker.Net100)]
 public class FileHasherBenchmarks {
 	private string _smallFilePath = null!;
 	private string _mediumFilePath = null!;
@@ -97,7 +96,7 @@ public class FileHasherBenchmarks {
 		FileHasher.ComputeCityHash64(_largeData);
 		FileHasher.ComputeCityHash128(_largeData);
 		FileHasher.ComputeFarmHash64(_largeData);
-		FileHasher.ComputeSpookyV2(_largeData);
+		FileHasher.ComputeSpookyV2_128(_largeData);
 		FileHasher.ComputeSipHash24(_largeData);
 		FileHasher.ComputeHighwayHash64(_largeData);
 	}

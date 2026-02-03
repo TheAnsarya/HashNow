@@ -5,59 +5,62 @@
 [![License: Unlicense](https://img.shields.io/badge/License-Unlicense-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
 [![Tests](https://img.shields.io/badge/tests-92%20passing-brightgreen)](tests/)
+[![Release](https://img.shields.io/github/v/release/TheAnsarya/HashNow)](https://github.com/TheAnsarya/HashNow/releases/latest)
+
+## 📥 Download
+
+**[Download HashNow v1.0.0](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
+
+## 🚀 Quick Start
+
+1. **Download** `HashNow.exe` from [Releases](https://github.com/TheAnsarya/HashNow/releases/latest)
+2. **Install context menu** (run as Administrator):
+	```powershell
+	HashNow.exe --install
+	```
+3. **Right-click any file** → Select **"Hash this file now"**
+4. **Find** `{filename}.hashes.json` in the same folder
 
 ## Features
 
 - **Instant Hashing** - Right-click any file and select "Hash this file now"
 - **58 Algorithms** - Comprehensive coverage across 4 categories:
-  - **Checksums** (6): CRC32, CRC32C, CRC64, Adler32, Fletcher16, Fletcher32
-  - **Fast Non-Crypto** (13): xxHash3, xxHash64, xxHash128, MurmurHash3-32/128, CityHash64/128, SpookyHash64/128, SipHash-2-4, FNV1a-32/64, BLAKE3
-  - **Cryptographic** (28): MD5, SHA1, SHA2 family, SHA3 family, BLAKE2b/s, RIPEMD-160, Whirlpool, Tiger, SM3, Streebog
-  - **Other Crypto** (11): SHAKE128/256, Keccak variants, Skein, Groestl, JH, KangarooTwelve
+	- **Checksums** (6): CRC32, CRC32C, CRC64, Adler32, Fletcher16, Fletcher32
+	- **Fast Non-Crypto** (12): xxHash family, MurmurHash3, CityHash, FarmHash, SpookyHash, SipHash, HighwayHash
+	- **Cryptographic** (26): MD family, SHA family (0/1/2/3), BLAKE family, RIPEMD family
+	- **Other Crypto** (14): Whirlpool, Tiger, SM3, GOST variants, Streebog, Skein, KangarooTwelve
+- **Parallel Processing** - All 58 algorithms run concurrently for maximum speed
 - **Single Pass** - Computes all hashes in one efficient file read
-- **JSON Output** - Creates `{filename}.hashes.json` with all hashes and metadata
+- **JSON Output** - Creates `{filename}.hashes.json` with tab indentation
 - **Fast** - Streams large files with 1MB buffer and ArrayPool memory management
 - **Progress Reporting** - Shows progress for large files (>3 seconds estimated)
 - **Reusable Library** - HashNow.Core can be used in any .NET project
-- **Portable** - Single-file executable, no dependencies
+- **Public Domain** - The Unlicense, free for any use
 
-## Installation
+## 📋 Usage
 
-### Download
+### Explorer Context Menu (Recommended)
 
-Download the latest release from [Releases](https://github.com/TheAnsarya/HashNow/releases).
-
-### Install Context Menu
-
-1. Run **as Administrator**:
-   ```
-   HashNow.exe --install
-   ```
-2. Right-click any file in Explorer
-3. Select **"Hash this file now"**
-
-### Uninstall Context Menu
-
-```
-HashNow.exe --uninstall
-```
-
-## Usage
-
-### From Explorer (Recommended)
+### Explorer Context Menu (Recommended)
 
 1. Right-click any file
 2. Select **"Hash this file now"**
 3. Find the generated `{filename}.hashes.json` in the same folder
 
-### From Command Line
+### Command Line
 
-```bash
+```powershell
 # Hash a single file
 HashNow.exe myfile.zip
 
 # Hash multiple files
 HashNow.exe file1.iso file2.zip file3.bin
+
+# Install context menu (requires admin)
+HashNow.exe --install
+
+# Uninstall context menu
+HashNow.exe --uninstall
 
 # Show help
 HashNow.exe --help
@@ -66,7 +69,7 @@ HashNow.exe --help
 HashNow.exe --version
 ```
 
-## Output Format
+## 📊 Output Format
 
 The generated JSON file contains all 58 hashes organized by category:
 

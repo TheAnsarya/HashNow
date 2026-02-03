@@ -6,6 +6,44 @@
 
 **Home Folder:** `C:\Users\me\source\repos\HashNow`
 
+# HashNow Project - AI Copilot Directives
+
+## Project Overview
+
+**HashNow** is a Windows file hashing utility that computes 58+ hash algorithms and outputs results to JSON. Features Explorer context menu integration for instant right-click hashing.
+
+**Home Folder:** `C:\Users\me\source\repos\HashNow`
+
+## ⚠️ CRITICAL: Always Use Latest Modern Versions
+
+**ALWAYS use the most modern, latest versions of everything:**
+
+- **.NET 10** (not .NET 9, 8, 7, or older)
+- **C# 14** (latest language version)
+- **Visual Studio 2026** (if applicable)
+- **Latest NuGet packages** - Always check for and use newest stable versions
+- **Node.js LTS** (latest long-term support)
+- **React 19+** (if using React)
+- **TypeScript 5+** (if using TypeScript)
+- **Modern code patterns:**
+	- File-scoped namespaces
+	- Primary constructors
+	- Collection expressions `[item1, item2]`
+	- Pattern matching with `when` guards
+	- Nullable reference types
+	- Spans and Memory<T>
+	- `async`/`await` best practices
+	- ArrayPool for memory pooling
+	- Modern JSON serialization (System.Text.Json)
+	- LINQ optimizations
+	- `required` modifier for properties
+	- `init` accessors
+	- Record types where appropriate
+	- Global usings
+
+**Never downgrade to older versions** - If a newer version exists, use it.
+**Always check for updates** - Before starting work, verify you're using the latest packages and frameworks.
+
 ## Architecture
 
 ### Solution Structure

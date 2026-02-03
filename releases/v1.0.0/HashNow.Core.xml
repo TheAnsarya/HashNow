@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HashNow.Core</name>
+    </assembly>
+    <members>
+        <member name="T:HashNow.Core.FileHasher">
+            <summary>
+            High-performance file hasher supporting 58 hash algorithms.
+            Provides methods to compute individual hashes or all at once.
+            </summary>
+        </member>
+        <member name="M:HashNow.Core.FileHasher.HashFile(System.String)">
+            <summary>
+            Computes all 58 hash algorithms for the specified file using parallel execution.
+            </summary>
+        </member>
+        <member name="M:HashNow.Core.FileHasher.FormatFileSize(System.Int64)">
+            <summary>Formats a byte count as a human-readable size string.</summary>
+        </member>
+        <member name="M:HashNow.Core.FileHasher.EstimateHashDurationMs(System.Int64)">
+            <summary>Estimates hash duration in milliseconds based on file size.</summary>
+        </member>
+        <member name="M:HashNow.Core.FileHasher.HashFileAsync(System.String,System.Action{System.Double},System.Threading.CancellationToken)">
+            <summary>Async version of HashFile with optional progress callback.</summary>
+        </member>
+        <member name="F:HashNow.Core.FileHasher.JsonOptions">
+            <summary>JSON serialization options with tab indentation.</summary>
+        </member>
+        <member name="M:HashNow.Core.FileHasher.SaveResultAsync(HashNow.Core.FileHashResult,System.String)">
+            <summary>Saves hash result to a JSON file.</summary>
+        </member>
+        <member name="M:HashNow.Core.FileHasher.SaveResult(HashNow.Core.FileHashResult,System.String)">
+            <summary>Saves hash result to a JSON file (sync version).</summary>
+        </member>
+        <member name="T:HashNow.Core.FileHashResult">
+            <summary>
+            Represents the result of hashing a file, containing all computed hashes and file metadata.
+            Supports 58 hash algorithms across 4 categories.
+            </summary>
+        </member>
+    </members>
+</doc>

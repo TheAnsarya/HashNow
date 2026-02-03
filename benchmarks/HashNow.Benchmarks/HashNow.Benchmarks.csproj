@@ -6,6 +6,9 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageReference Include="Blake3" Version="2.2.0" />
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
+    <PackageReference Include="SauceControl.Blake2Fast" Version="2.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
