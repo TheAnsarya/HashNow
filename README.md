@@ -2,9 +2,9 @@
 
 **Right-click any file in Windows Explorer to instantly generate 58 different hashes to JSON.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Unlicense](https://img.shields.io/badge/License-Unlicense-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
-[![Tests](https://img.shields.io/badge/tests-31%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-92%20passing-brightgreen)](tests/)
 
 ## Features
 
@@ -72,76 +72,66 @@ The generated JSON file contains all 58 hashes organized by category:
 
 ```json
 {
-  "fileName": "example.zip",
-  "fullPath": "C:\\Downloads\\example.zip",
-  "sizeBytes": 1048576,
-  "sizeFormatted": "1 MB",
-  "createdUtc": "2025-02-03T10:30:00Z",
-  "modifiedUtc": "2025-02-03T10:30:00Z",
-  
-  "crc32": "a1b2c3d4",
-  "crc32C": "12345678",
-  "crc64": "0123456789abcdef",
-  "adler32": "abcd1234",
-  "fletcher16": "1234",
-  "fletcher32": "12345678",
-  
-  "xxHash3": "1234567890abcdef",
-  "xxHash64": "fedcba0987654321",
-  "xxHash128": "0123456789abcdef0123456789abcdef",
-  "murmurHash3_32": "12345678",
-  "murmurHash3_128": "0123456789abcdef0123456789abcdef",
-  "cityHash64": "1234567890abcdef",
-  "cityHash128": "0123456789abcdef0123456789abcdef",
-  "spookyHash64": "1234567890abcdef",
-  "spookyHash128": "0123456789abcdef0123456789abcdef",
-  "sipHash_2_4": "1234567890abcdef",
-  "fnv1a_32": "12345678",
-  "fnv1a_64": "1234567890abcdef",
-  "blake3": "a7ffc6f8bf1ed76651c14756a061d662...",
-  
-  "md5": "d41d8cd98f00b204e9800998ecf8427e",
-  "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "sha384": "38b060a751ac9638...",
-  "sha512": "cf83e1357eefb8bdf1542850d66d8007...",
-  "sha512_256": "c672b8d1ef56ed28...",
-  "sha3_256": "a7ffc6f8bf1ed76651c14756a061d662...",
-  "sha3_384": "0c63a75b845e4f7d01107d852e4c2485...",
-  "sha3_512": "a69f73cca23a9ac5c8b567dc185a756e...",
-  "blake2b_256": "0e5751c026e543b2e8ab2eb06099daa1...",
-  "blake2b_384": "b32811423377f52d...",
-  "blake2b_512": "786a02f742015903...",
-  "blake2s_128": "64550d6ffe2c0a01...",
-  "blake2s_256": "69217a3079908094e11121d042354a7c...",
-  "ripemd160": "9c1185a5c5e9fc54612808977ee8f548b2258d31",
-  "whirlpool": "19fa61d75522a4669b44e39c1d2e1726...",
-  "tiger": "3293ac630c13f0245f92bbb1766e1616...",
-  "tiger2": "4441be75f6018773c206c22745374b924aa8313f...",
-  "sm3": "66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0",
-  "gost3411": "ce85b99cc46752fffee35cab9a7b0278...",
-  "gost3411_2012_256": "3f539a213e97c802cc229d474c6aa32a...",
-  "gost3411_2012_512": "b1c5648b78c1ce1d52f5a63f2f2a4d9b...",
-  "streebog256": "3f539a213e97c802cc229d474c6aa32a...",
-  "streebog512": "b1c5648b78c1ce1d52f5a63f2f2a4d9b...",
-  "haval256_5": "be417bb4dd5cfb76c7126f4f8eeb1553...",
-  
-  "shake128": "7f9c2ba4e88f827d616045507605853ed73b8093...",
-  "shake256": "46b9dd2b0ba88d13233b3feb743eeb243fcd52ea...",
-  "keccak224": "f71837502ba8e10837bdd8d365adb855...",
-  "keccak256": "c5d2460186f7233c927e7db2dcc703c0...",
-  "keccak384": "2c23146a63a29acf99e73b88f8c24eaa...",
-  "keccak512": "0eab42de4c3ceb9235fc91acffe746b29c29a8c3...",
-  "skein256": "39ccc4554a8b31853b9de7a1fe638a24...",
-  "skein512": "bc5b4c50925519c290cc634277ae3d6257212395...",
-  "skein1024": "0fff9563bb3279289227ac77d319b6fff8d7e9f0...",
-  "groestl256": "1a52d11d550039be16107f9c58db9ebcc417f16f...",
-  "jh256": "46e64619c18bb0a92a5e87185bf871613b7f1c2e...",
-  
-  "hashedAtUtc": "2025-02-03T10:30:15Z",
-  "durationMs": 1003,
-  "hashNowVersion": "2.0.0",
-  "algorithmCount": 58
+	"fileName": "example.zip",
+	"fullPath": "C:\\Downloads\\example.zip",
+	"sizeBytes": 1048576,
+	"sizeFormatted": "1 MB",
+	"createdUtc": "2025-02-03T10:30:00Z",
+	"modifiedUtc": "2025-02-03T10:30:00Z",
+
+	"crc32": "a1b2c3d4",
+	"crc32C": "12345678",
+	"crc64": "0123456789abcdef",
+	"adler32": "abcd1234",
+	"fletcher16": "1234",
+	"fletcher32": "12345678",
+
+	"xxHash3": "1234567890abcdef",
+	"xxHash64": "fedcba0987654321",
+	"xxHash128": "0123456789abcdef0123456789abcdef",
+	"murmurHash3_32": "12345678",
+	"murmurHash3_128": "0123456789abcdef0123456789abcdef",
+	"cityHash64": "1234567890abcdef",
+	"cityHash128": "0123456789abcdef0123456789abcdef",
+	"spookyHash64": "1234567890abcdef",
+	"spookyHash128": "0123456789abcdef0123456789abcdef",
+	"sipHash_2_4": "1234567890abcdef",
+	"highwayHash64": "1234567890abcdef",
+
+	"md5": "d41d8cd98f00b204e9800998ecf8427e",
+	"sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+	"sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+	"sha384": "38b060a751ac9638...",
+	"sha512": "cf83e1357eefb8bdf1542850d66d8007...",
+	"sha512_256": "c672b8d1ef56ed28...",
+	"sha3_224": "6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7",
+	"sha3_256": "a7ffc6f8bf1ed76651c14756a061d662...",
+	"sha3_384": "0c63a75b845e4f7d01107d852e4c2485...",
+	"sha3_512": "a69f73cca23a9ac5c8b567dc185a756e...",
+	"blake256": "0e5751c026e543b2e8ab2eb06099daa1...",
+	"blake512": "786a02f742015903...",
+	"blake2b": "786a02f742015903c6c6fd852552d272...",
+	"blake2s": "69217a3079908094e11121d042354a7c...",
+	"blake3": "af1349b9f5f9a1a6a0404dea36dcc949...",
+	"ripemd128": "cdf26213a150dc3ecb610f18f6b38b46",
+	"ripemd160": "9c1185a5c5e9fc54612808977ee8f548b2258d31",
+	"ripemd256": "02ba4c4e5f8ecd1877fc52d64d30e37a...",
+	"ripemd320": "22d65d5661536cdc75c1fdf5c6de7b41...",
+	"whirlpool": "19fa61d75522a4669b44e39c1d2e1726...",
+	"tiger192": "3293ac630c13f0245f92bbb1766e1616...",
+	"sm3": "66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0",
+	"gost94": "ce85b99cc46752fffee35cab9a7b0278...",
+	"streebog256": "3f539a213e97c802cc229d474c6aa32a...",
+	"streebog512": "b1c5648b78c1ce1d52f5a63f2f2a4d9b...",
+	"skein256": "39ccc4554a8b31853b9de7a1fe638a24...",
+	"skein512": "bc5b4c50925519c290cc634277ae3d6257212395...",
+	"skein1024": "0fff9563bb3279289227ac77d319b6fff8d7e9f0...",
+	"kangarooTwelve": "1ac2d450fc3b4205d19da7bfca1b37513c0803577ac7167f06fe2ce1f0ef39e5",
+
+	"hashedAtUtc": "2025-02-03T10:30:15Z",
+	"durationMs": 1003,
+	"generatedBy": "HashNow 2.0.0",
+	"algorithmCount": 58
 }
 ```
 
@@ -235,7 +225,7 @@ cd HashNow
 # Build
 dotnet build
 
-# Run tests (31 tests)
+# Run tests (92 tests)
 dotnet test
 
 # Publish self-contained executable

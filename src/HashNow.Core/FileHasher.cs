@@ -321,7 +321,7 @@ public static class FileHasher {
 	// ========== File Hashing ==========
 
 	/// <summary>
-	/// Computes all 58 hash algorithms for the specified file.
+	/// Computes all 58 hash algorithms for the specified file using parallel execution.
 	/// </summary>
 	public static FileHashResult HashFile(string filePath) {
 		var fileInfo = new FileInfo(filePath);
@@ -330,6 +330,91 @@ public static class FileHasher {
 
 		var sw = Stopwatch.StartNew();
 		byte[] data = File.ReadAllBytes(filePath);
+
+		// Compute all hashes in parallel for maximum performance
+		string crc32 = "", crc32c = "", crc64 = "", adler32 = "", fletcher16 = "", fletcher32 = "";
+		string xxHash32 = "", xxHash64 = "", xxHash3 = "", xxHash128 = "";
+		string murmur3_32 = "", murmur3_128 = "", cityHash64 = "", cityHash128 = "";
+		string farmHash64 = "", spookyV2_128 = "", sipHash24 = "", highwayHash64 = "";
+		string md2 = "", md4 = "", md5 = "", sha0 = "", sha1 = "";
+		string sha224 = "", sha256 = "", sha384 = "", sha512 = "";
+		string sha512_224 = "", sha512_256 = "";
+		string sha3_224 = "", sha3_256 = "", sha3_384 = "", sha3_512 = "";
+		string keccak256 = "", keccak512 = "";
+		string blake256 = "", blake512 = "", blake2b = "", blake2s = "", blake3 = "";
+		string ripemd128 = "", ripemd160 = "", ripemd256 = "", ripemd320 = "";
+		string whirlpool = "", tiger192 = "", gost94 = "";
+		string streebog256 = "", streebog512 = "";
+		string skein256 = "", skein512 = "", skein1024 = "";
+		string groestl256 = "", groestl512 = "", jh256 = "", jh512 = "";
+		string kangarooTwelve = "", sm3 = "";
+
+		Parallel.Invoke(
+			// Checksums & CRCs
+			() => crc32 = ComputeCrc32(data),
+			() => crc32c = ComputeCrc32C(data),
+			() => crc64 = ComputeCrc64(data),
+			() => adler32 = ComputeAdler32(data),
+			() => fletcher16 = ComputeFletcher16(data),
+			() => fletcher32 = ComputeFletcher32(data),
+			// Non-Crypto Fast Hashes
+			() => xxHash32 = ComputeXxHash32(data),
+			() => xxHash64 = ComputeXxHash64(data),
+			() => xxHash3 = ComputeXxHash3(data),
+			() => xxHash128 = ComputeXxHash128(data),
+			() => murmur3_32 = ComputeMurmur3_32(data),
+			() => murmur3_128 = ComputeMurmur3_128(data),
+			() => cityHash64 = ComputeCityHash64(data),
+			() => cityHash128 = ComputeCityHash128(data),
+			() => farmHash64 = ComputeFarmHash64(data),
+			() => spookyV2_128 = ComputeSpookyV2_128(data),
+			() => sipHash24 = ComputeSipHash24(data),
+			() => highwayHash64 = ComputeHighwayHash64(data),
+			// Cryptographic Hashes
+			() => md2 = ComputeMd2(data),
+			() => md4 = ComputeMd4(data),
+			() => md5 = ComputeMd5(data),
+			() => sha0 = ComputeSha0(data),
+			() => sha1 = ComputeSha1(data),
+			() => sha224 = ComputeSha224(data),
+			() => sha256 = ComputeSha256(data),
+			() => sha384 = ComputeSha384(data),
+			() => sha512 = ComputeSha512(data),
+			() => sha512_224 = ComputeSha512_224(data),
+			() => sha512_256 = ComputeSha512_256(data),
+			() => sha3_224 = ComputeSha3_224(data),
+			() => sha3_256 = ComputeSha3_256(data),
+			() => sha3_384 = ComputeSha3_384(data),
+			() => sha3_512 = ComputeSha3_512(data),
+			() => keccak256 = ComputeKeccak256(data),
+			() => keccak512 = ComputeKeccak512(data),
+			() => blake256 = ComputeBlake256(data),
+			() => blake512 = ComputeBlake512(data),
+			() => blake2b = ComputeBlake2b(data),
+			() => blake2s = ComputeBlake2s(data),
+			() => blake3 = ComputeBlake3(data),
+			() => ripemd128 = ComputeRipemd128(data),
+			() => ripemd160 = ComputeRipemd160(data),
+			() => ripemd256 = ComputeRipemd256(data),
+			() => ripemd320 = ComputeRipemd320(data),
+			// Other Crypto Hashes
+			() => whirlpool = ComputeWhirlpool(data),
+			() => tiger192 = ComputeTiger192(data),
+			() => gost94 = ComputeGost94(data),
+			() => streebog256 = ComputeStreebog256(data),
+			() => streebog512 = ComputeStreebog512(data),
+			() => skein256 = ComputeSkein256(data),
+			() => skein512 = ComputeSkein512(data),
+			() => skein1024 = ComputeSkein1024(data),
+			() => groestl256 = ComputeGroestl256(data),
+			() => groestl512 = ComputeGroestl512(data),
+			() => jh256 = ComputeJh256(data),
+			() => jh512 = ComputeJh512(data),
+			() => kangarooTwelve = ComputeKangarooTwelve(data),
+			() => sm3 = ComputeSm3(data)
+		);
+
+		sw.Stop();
 
 		var result = new FileHashResult {
 			FileName = fileInfo.Name,
@@ -340,70 +425,70 @@ public static class FileHasher {
 			ModifiedUtc = fileInfo.LastWriteTimeUtc.ToString("O"),
 
 			// Checksums & CRCs
-			Crc32 = ComputeCrc32(data),
-			Crc32C = ComputeCrc32C(data),
-			Crc64 = ComputeCrc64(data),
-			Adler32 = ComputeAdler32(data),
-			Fletcher16 = ComputeFletcher16(data),
-			Fletcher32 = ComputeFletcher32(data),
+			Crc32 = crc32,
+			Crc32C = crc32c,
+			Crc64 = crc64,
+			Adler32 = adler32,
+			Fletcher16 = fletcher16,
+			Fletcher32 = fletcher32,
 
 			// Non-Crypto Fast Hashes
-			XxHash32 = ComputeXxHash32(data),
-			XxHash64 = ComputeXxHash64(data),
-			XxHash3 = ComputeXxHash3(data),
-			XxHash128 = ComputeXxHash128(data),
-			Murmur3_32 = ComputeMurmur3_32(data),
-			Murmur3_128 = ComputeMurmur3_128(data),
-			CityHash64 = ComputeCityHash64(data),
-			CityHash128 = ComputeCityHash128(data),
-			FarmHash64 = ComputeFarmHash64(data),
-			SpookyV2_128 = ComputeSpookyV2_128(data),
-			SipHash24 = ComputeSipHash24(data),
-			HighwayHash64 = ComputeHighwayHash64(data),
+			XxHash32 = xxHash32,
+			XxHash64 = xxHash64,
+			XxHash3 = xxHash3,
+			XxHash128 = xxHash128,
+			Murmur3_32 = murmur3_32,
+			Murmur3_128 = murmur3_128,
+			CityHash64 = cityHash64,
+			CityHash128 = cityHash128,
+			FarmHash64 = farmHash64,
+			SpookyV2_128 = spookyV2_128,
+			SipHash24 = sipHash24,
+			HighwayHash64 = highwayHash64,
 
 			// Cryptographic Hashes
-			Md2 = ComputeMd2(data),
-			Md4 = ComputeMd4(data),
-			Md5 = ComputeMd5(data),
-			Sha0 = ComputeSha0(data),
-			Sha1 = ComputeSha1(data),
-			Sha224 = ComputeSha224(data),
-			Sha256 = ComputeSha256(data),
-			Sha384 = ComputeSha384(data),
-			Sha512 = ComputeSha512(data),
-			Sha512_224 = ComputeSha512_224(data),
-			Sha512_256 = ComputeSha512_256(data),
-			Sha3_224 = ComputeSha3_224(data),
-			Sha3_256 = ComputeSha3_256(data),
-			Sha3_384 = ComputeSha3_384(data),
-			Sha3_512 = ComputeSha3_512(data),
-			Keccak256 = ComputeKeccak256(data),
-			Keccak512 = ComputeKeccak512(data),
-			Blake256 = ComputeBlake256(data),
-			Blake512 = ComputeBlake512(data),
-			Blake2b = ComputeBlake2b(data),
-			Blake2s = ComputeBlake2s(data),
-			Blake3 = ComputeBlake3(data),
-			Ripemd128 = ComputeRipemd128(data),
-			Ripemd160 = ComputeRipemd160(data),
-			Ripemd256 = ComputeRipemd256(data),
-			Ripemd320 = ComputeRipemd320(data),
+			Md2 = md2,
+			Md4 = md4,
+			Md5 = md5,
+			Sha0 = sha0,
+			Sha1 = sha1,
+			Sha224 = sha224,
+			Sha256 = sha256,
+			Sha384 = sha384,
+			Sha512 = sha512,
+			Sha512_224 = sha512_224,
+			Sha512_256 = sha512_256,
+			Sha3_224 = sha3_224,
+			Sha3_256 = sha3_256,
+			Sha3_384 = sha3_384,
+			Sha3_512 = sha3_512,
+			Keccak256 = keccak256,
+			Keccak512 = keccak512,
+			Blake256 = blake256,
+			Blake512 = blake512,
+			Blake2b = blake2b,
+			Blake2s = blake2s,
+			Blake3 = blake3,
+			Ripemd128 = ripemd128,
+			Ripemd160 = ripemd160,
+			Ripemd256 = ripemd256,
+			Ripemd320 = ripemd320,
 
 			// Other Crypto Hashes
-			Whirlpool = ComputeWhirlpool(data),
-			Tiger192 = ComputeTiger192(data),
-			Gost94 = ComputeGost94(data),
-			Streebog256 = ComputeStreebog256(data),
-			Streebog512 = ComputeStreebog512(data),
-			Skein256 = ComputeSkein256(data),
-			Skein512 = ComputeSkein512(data),
-			Skein1024 = ComputeSkein1024(data),
-			Groestl256 = ComputeGroestl256(data),
-			Groestl512 = ComputeGroestl512(data),
-			Jh256 = ComputeJh256(data),
-			Jh512 = ComputeJh512(data),
-			KangarooTwelve = ComputeKangarooTwelve(data),
-			Sm3 = ComputeSm3(data),
+			Whirlpool = whirlpool,
+			Tiger192 = tiger192,
+			Gost94 = gost94,
+			Streebog256 = streebog256,
+			Streebog512 = streebog512,
+			Skein256 = skein256,
+			Skein512 = skein512,
+			Skein1024 = skein1024,
+			Groestl256 = groestl256,
+			Groestl512 = groestl512,
+			Jh256 = jh256,
+			Jh512 = jh512,
+			KangarooTwelve = kangarooTwelve,
+			Sm3 = sm3,
 
 			HashedAtUtc = DateTime.UtcNow.ToString("O"),
 			DurationMs = sw.ElapsedMilliseconds
@@ -450,21 +535,22 @@ public static class FileHasher {
 		}, cancellationToken);
 	}
 
+	/// <summary>JSON serialization options with tab indentation.</summary>
+	private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new() {
+		WriteIndented = true,
+		IndentCharacter = '\t',
+		IndentSize = 1
+	};
+
 	/// <summary>Saves hash result to a JSON file.</summary>
 	public static async Task SaveResultAsync(FileHashResult result, string outputPath) {
-		var options = new System.Text.Json.JsonSerializerOptions {
-			WriteIndented = true
-		};
-		var json = System.Text.Json.JsonSerializer.Serialize(result, options);
+		var json = System.Text.Json.JsonSerializer.Serialize(result, JsonOptions);
 		await File.WriteAllTextAsync(outputPath, json);
 	}
 
 	/// <summary>Saves hash result to a JSON file (sync version).</summary>
 	public static void SaveResult(FileHashResult result, string outputPath) {
-		var options = new System.Text.Json.JsonSerializerOptions {
-			WriteIndented = true
-		};
-		var json = System.Text.Json.JsonSerializer.Serialize(result, options);
+		var json = System.Text.Json.JsonSerializer.Serialize(result, JsonOptions);
 		File.WriteAllText(outputPath, json);
 	}
 }
