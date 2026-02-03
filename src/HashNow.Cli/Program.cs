@@ -137,24 +137,72 @@ await FileHasher.SaveResultAsync(result, outputPath);
 }
 
 private static void PrintResults(FileHashResult result) {
-Console.WriteLine("--- Standard Hashes ---");
-Console.WriteLine($"CRC32:    {result.Crc32}");
-Console.WriteLine($"CRC64:    {result.Crc64}");
-Console.WriteLine($"MD5:      {result.Md5}");
-Console.WriteLine("--- SHA-1 ---");
-Console.WriteLine($"SHA1:     {result.Sha1}");
-Console.WriteLine("--- SHA-2 Family ---");
-Console.WriteLine($"SHA256:   {result.Sha256}");
-Console.WriteLine($"SHA384:   {result.Sha384}");
-Console.WriteLine($"SHA512:   {result.Sha512}");
-Console.WriteLine("--- SHA-3 Family ---");
-Console.WriteLine($"SHA3-256: {result.Sha3_256}");
-Console.WriteLine($"SHA3-384: {result.Sha3_384}");
-Console.WriteLine($"SHA3-512: {result.Sha3_512}");
-Console.WriteLine("--- Fast Hashes ---");
-Console.WriteLine($"XXH3:     {result.XxHash3}");
-Console.WriteLine($"XXH64:    {result.XxHash64}");
-Console.WriteLine($"XXH128:   {result.XxHash128}");
+Console.WriteLine("--- Checksums & CRCs ---");
+Console.WriteLine($"CRC32:      {result.Crc32}");
+Console.WriteLine($"CRC32C:     {result.Crc32C}");
+Console.WriteLine($"CRC64:      {result.Crc64}");
+Console.WriteLine($"Adler-32:   {result.Adler32}");
+Console.WriteLine($"Fletcher16: {result.Fletcher16}");
+Console.WriteLine($"Fletcher32: {result.Fletcher32}");
+Console.WriteLine("--- Fast Non-Crypto Hashes ---");
+Console.WriteLine($"XXH32:      {result.XxHash32}");
+Console.WriteLine($"XXH64:      {result.XxHash64}");
+Console.WriteLine($"XXH3:       {result.XxHash3}");
+Console.WriteLine($"XXH128:     {result.XxHash128}");
+Console.WriteLine($"Murmur3-32: {result.Murmur3_32}");
+Console.WriteLine($"Murmur3-128:{result.Murmur3_128}");
+Console.WriteLine($"City64:     {result.CityHash64}");
+Console.WriteLine($"City128:    {result.CityHash128}");
+Console.WriteLine($"Farm64:     {result.FarmHash64}");
+Console.WriteLine($"SpookyV2:   {result.SpookyV2_128}");
+Console.WriteLine($"SipHash24:  {result.SipHash24}");
+Console.WriteLine($"Highway64:  {result.HighwayHash64}");
+Console.WriteLine("--- MD Family ---");
+Console.WriteLine($"MD2:        {result.Md2}");
+Console.WriteLine($"MD4:        {result.Md4}");
+Console.WriteLine($"MD5:        {result.Md5}");
+Console.WriteLine("--- SHA-1/2 Family ---");
+Console.WriteLine($"SHA-0:      {result.Sha0}");
+Console.WriteLine($"SHA-1:      {result.Sha1}");
+Console.WriteLine($"SHA-224:    {result.Sha224}");
+Console.WriteLine($"SHA-256:    {result.Sha256}");
+Console.WriteLine($"SHA-384:    {result.Sha384}");
+Console.WriteLine($"SHA-512:    {result.Sha512}");
+Console.WriteLine($"SHA512/224: {result.Sha512_224}");
+Console.WriteLine($"SHA512/256: {result.Sha512_256}");
+Console.WriteLine("--- SHA-3 & Keccak ---");
+Console.WriteLine($"SHA3-224:   {result.Sha3_224}");
+Console.WriteLine($"SHA3-256:   {result.Sha3_256}");
+Console.WriteLine($"SHA3-384:   {result.Sha3_384}");
+Console.WriteLine($"SHA3-512:   {result.Sha3_512}");
+Console.WriteLine($"Keccak-256: {result.Keccak256}");
+Console.WriteLine($"Keccak-512: {result.Keccak512}");
+Console.WriteLine("--- BLAKE Family ---");
+Console.WriteLine($"BLAKE-256:  {result.Blake256}");
+Console.WriteLine($"BLAKE-512:  {result.Blake512}");
+Console.WriteLine($"BLAKE2b:    {result.Blake2b}");
+Console.WriteLine($"BLAKE2s:    {result.Blake2s}");
+Console.WriteLine($"BLAKE3:     {result.Blake3}");
+Console.WriteLine("--- RIPEMD Family ---");
+Console.WriteLine($"RIPEMD-128: {result.Ripemd128}");
+Console.WriteLine($"RIPEMD-160: {result.Ripemd160}");
+Console.WriteLine($"RIPEMD-256: {result.Ripemd256}");
+Console.WriteLine($"RIPEMD-320: {result.Ripemd320}");
+Console.WriteLine("--- Other Crypto Hashes ---");
+Console.WriteLine($"Whirlpool:  {result.Whirlpool}");
+Console.WriteLine($"Tiger-192:  {result.Tiger192}");
+Console.WriteLine($"GOST-94:    {result.Gost94}");
+Console.WriteLine($"Streebog256:{result.Streebog256}");
+Console.WriteLine($"Streebog512:{result.Streebog512}");
+Console.WriteLine($"Skein-256:  {result.Skein256}");
+Console.WriteLine($"Skein-512:  {result.Skein512}");
+Console.WriteLine($"Skein-1024: {result.Skein1024}");
+Console.WriteLine($"Groestl-256:{result.Groestl256}");
+Console.WriteLine($"Groestl-512:{result.Groestl512}");
+Console.WriteLine($"JH-256:     {result.Jh256}");
+Console.WriteLine($"JH-512:     {result.Jh512}");
+Console.WriteLine($"K12:        {result.KangarooTwelve}");
+Console.WriteLine($"SM3:        {result.Sm3}");
 }
 
 private static int InstallContextMenu() {
@@ -189,7 +237,7 @@ return 1;
 }
 
 private static void ShowUsage() {
-Console.WriteLine($@"HashNow v{FileHasher.Version} - Instant File Hashing (13 algorithms)
+Console.WriteLine($@"HashNow v{FileHasher.Version} - Instant File Hashing (58 algorithms)
 
 Usage:
   HashNow <file> [file2] [file3] ...   Hash one or more files
@@ -198,12 +246,15 @@ Usage:
   HashNow --help                       Show this help
   HashNow --version                    Show version
 
-Algorithms (computed in single pass):
-  Standard:  CRC32, CRC64, MD5
-  SHA-1:     SHA1
-  SHA-2:     SHA256, SHA384, SHA512
-  SHA-3:     SHA3-256, SHA3-384, SHA3-512
-  Fast:      XXHash3, XXHash64, XXHash128
+Algorithms (58 total, computed in single pass):
+  Checksums:   CRC32, CRC32C, CRC64, Adler-32, Fletcher-16, Fletcher-32
+  Fast:        XXHash32/64/3/128, MurmurHash3, CityHash, FarmHash, SpookyV2, SipHash
+  MD Family:   MD2, MD4, MD5
+  SHA-1/2:     SHA-0, SHA-1, SHA-224/256/384/512, SHA-512/224, SHA-512/256
+  SHA-3:       SHA3-224/256/384/512, Keccak-256/512
+  BLAKE:       BLAKE-256/512, BLAKE2b/2s, BLAKE3
+  RIPEMD:      RIPEMD-128/160/256/320
+  Other:       Whirlpool, Tiger, GOST, Streebog, Skein, Groestl, JH, K12, SM3
 
 Output:
   Creates {{filename}}.hashes.json containing all hashes and metadata.

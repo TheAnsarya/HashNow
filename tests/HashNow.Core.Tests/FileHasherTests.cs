@@ -196,20 +196,13 @@ Assert.Equal(16, result.XxHash3.Length); // 8 bytes
 Assert.Equal(16, result.XxHash64.Length); // 8 bytes
 Assert.Equal(32, result.XxHash128.Length); // 16 bytes
 
-// SHA3 may or may not be supported
+// SHA3 is always supported via BouncyCastle
 Assert.NotNull(result.Sha3_256);
 Assert.NotNull(result.Sha3_384);
 Assert.NotNull(result.Sha3_512);
-
-if (FileHasher.IsSha3Supported) {
 Assert.Equal(64, result.Sha3_256.Length); // 32 bytes
 Assert.Equal(96, result.Sha3_384.Length); // 48 bytes
 Assert.Equal(128, result.Sha3_512.Length); // 64 bytes
-} else {
-Assert.Equal("not supported", result.Sha3_256);
-Assert.Equal("not supported", result.Sha3_384);
-Assert.Equal("not supported", result.Sha3_512);
-}
 }
 
 #endregion
@@ -268,10 +261,10 @@ Assert.Equal(result.XxHash64, result.XxHash64.ToLowerInvariant());
 public async Task SaveResultAsync_CreatesJsonFile() {
 var path = CreateTestFile("test.bin", [0x42]);
 var result = await FileHasher.HashFileAsync(path);
-
-await FileHasher.SaveResultAsync(result);
-
 var jsonPath = path + ".hashes.json";
+
+await FileHasher.SaveResultAsync(result, jsonPath);
+
 Assert.True(File.Exists(jsonPath));
 
 var json = await File.ReadAllTextAsync(jsonPath);
@@ -377,11 +370,12 @@ Assert.Equal(expectedXxHash64, result.XxHash64);
 #region SHA3 Platform Support Tests
 
 [Fact]
-public void IsSha3Supported_ReturnsConsistentValue() {
-// Should return consistent value
-var first = FileHasher.IsSha3Supported;
-var second = FileHasher.IsSha3Supported;
-Assert.Equal(first, second);
+public void Sha3_IsAlwaysSupported() {
+// SHA3 is always supported via BouncyCastle
+var testData = new byte[] { 0x42 };
+var hash = FileHasher.ComputeSha3_256(testData);
+Assert.NotNull(hash);
+Assert.Equal(64, hash.Length); // 32 bytes = 64 hex chars
 }
 
 #endregion
