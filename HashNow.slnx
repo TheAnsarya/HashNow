@@ -1,6 +1,12 @@
 <Solution>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/HashNow.Benchmarks/HashNow.Benchmarks.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/HashNow.Cli/HashNow.Cli.csproj" />
     <Project Path="src/HashNow.Core/HashNow.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/HashNow.Core.Tests/HashNow.Core.Tests.csproj" />
   </Folder>
 </Solution>
