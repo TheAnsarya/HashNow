@@ -9,7 +9,7 @@
 
 ## 📥 Download
 
-**[Download HashNow v1.0.0](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
+**[Download HashNow v1.0.1](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
 
 ## 🚀 Quick Start
 
@@ -313,7 +313,7 @@ Typical throughput: ~300-500 MB/s depending on disk speed.
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
 
-### [Unreleased]
+### v1.0.1 (2026-02-03)
 - **Auto-install on double-click** - Just double-click to install context menu (prompts for UAC)
 - **`--status` command** - Check if context menu is installed correctly
 - **Performance diagnostics** - New `PerformanceDiagnostics` class for timing analysis
@@ -321,7 +321,7 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **Colored console output** - Better visual feedback during installation
 - **108 unit tests** (up from 92)
 
-### v2.0.0
+### v1.0.0 (2026-02-02)
 - **58 hash algorithms** (up from 13)
 - Added checksums: CRC32C, Adler32, Fletcher16, Fletcher32
 - Added fast hashes: MurmurHash3, CityHash, SpookyHash, SipHash, FNV1a, BLAKE3

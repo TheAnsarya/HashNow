@@ -10,7 +10,8 @@
 
 <AssemblyName>HashNow</AssemblyName>
 <RootNamespace>HashNow.Cli</RootNamespace>
-<Description>Hash files instantly from Windows Explorer context menu</Description>
+<Version>1.0.1</Version>
+<Description>Hash files instantly from Windows Explorer context menu - 58 algorithms</Description>
 <Authors>TheAnsarya</Authors>
 <Company>TheAnsarya</Company>
 <Product>HashNow</Product>

@@ -9,7 +9,8 @@
 
 <AssemblyName>HashNow.Core</AssemblyName>
 <RootNamespace>HashNow.Core</RootNamespace>
-<Description>Core library for file hashing - CRC32, MD5, SHA1, SHA256, SHA512</Description>
+<Version>1.0.1</Version>
+<Description>Core library for computing 58 hash algorithms in parallel</Description>
 <Authors>TheAnsarya</Authors>
 <Company>TheAnsarya</Company>
 <Product>HashNow</Product>

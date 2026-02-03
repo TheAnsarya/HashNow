@@ -51,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Context menu requires administrator privileges to install
 - Windows-only (context menu integration)
 
-## [Unreleased]
+## [1.0.1] - 2026-02-03
 
 ### Added
 - **Comprehensive XML Documentation** - Every class, method, property, and field now has detailed XML documentation
@@ -62,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Installation Status Check** - New `--status` command shows context menu installation status
 - **Colored Console Output** - Success/error messages now use green/red/yellow coloring
 - **Pretty Banner** - Application shows a nice ASCII banner when run without args
+- **108 Unit Tests** - Expanded test coverage from 92 to 108 tests
 
 ### Changed
 - **Double-click behavior** - Now prompts for context menu installation instead of showing help
@@ -72,11 +73,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All 4 source files fully documented (FileHasher.cs, FileHashResult.cs, ContextMenuInstaller.cs, Program.cs)
 - Added ContextMenuInstaller.IsInstalledCorrectly() to detect when exe path changed
 - Added ContextMenuInstaller.GetInstalledCommand() to retrieve registered command
-
-### Planned
-- macOS and Linux support
-- GUI application
-- Hash comparison features
-- File verification against known checksums
 - Batch file hashing
 - Custom algorithm selection
