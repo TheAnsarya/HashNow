@@ -538,7 +538,7 @@ public static class FileHasher {
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (4 bytes).</returns>
 	public static byte[] GetMurmur3_32Bytes(byte[] data) {
-		uint hash = MurmurHash3.ComputeHash32(data);
+		uint hash = MurmurHash3_32.Hash(data);
 		return BitConverter.GetBytes(hash);
 	}
 
@@ -546,7 +546,7 @@ public static class FileHasher {
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (16 bytes).</returns>
 	public static byte[] GetMurmur3_128Bytes(byte[] data) {
-		UInt128 hash = MurmurHash3.ComputeHash128(data);
+		UInt128 hash = MurmurHash3_128.Hash(data);
 		var bytes = new byte[16];
 		BitConverter.TryWriteBytes(bytes.AsSpan(0, 8), (ulong)(hash >> 64));
 		BitConverter.TryWriteBytes(bytes.AsSpan(8, 8), (ulong)hash);
@@ -557,7 +557,7 @@ public static class FileHasher {
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (8 bytes).</returns>
 	public static byte[] GetCityHash64Bytes(byte[] data) {
-		ulong hash = CityHash.ComputeHash64(data);
+		ulong hash = CityHash64.Hash(data);
 		return BitConverter.GetBytes(hash);
 	}
 
@@ -565,7 +565,7 @@ public static class FileHasher {
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (16 bytes).</returns>
 	public static byte[] GetCityHash128Bytes(byte[] data) {
-		UInt128 hash = CityHash.ComputeHash128(data);
+		UInt128 hash = CityHash128.Hash(data);
 		var bytes = new byte[16];
 		BitConverter.TryWriteBytes(bytes.AsSpan(0, 8), (ulong)(hash >> 64));
 		BitConverter.TryWriteBytes(bytes.AsSpan(8, 8), (ulong)hash);
@@ -576,7 +576,7 @@ public static class FileHasher {
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (8 bytes).</returns>
 	public static byte[] GetFarmHash64Bytes(byte[] data) {
-		ulong hash = FarmHash.ComputeHash64(data);
+		ulong hash = FarmHash64.Hash(data);
 		return BitConverter.GetBytes(hash);
 	}
 
@@ -584,7 +584,7 @@ public static class FileHasher {
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (16 bytes).</returns>
 	public static byte[] GetSpookyV2_128Bytes(byte[] data) {
-		UInt128 hash = SpookyHash.ComputeHash(data);
+		UInt128 hash = SpookyHash128.Hash(data);
 		var bytes = new byte[16];
 		BitConverter.TryWriteBytes(bytes.AsSpan(0, 8), (ulong)(hash >> 64));
 		BitConverter.TryWriteBytes(bytes.AsSpan(8, 8), (ulong)hash);
@@ -600,7 +600,7 @@ public static class FileHasher {
 	/// </remarks>
 	public static byte[] GetSipHash24Bytes(byte[] data) {
 		// SipHash-2-4 with default (zero) key for deterministic results
-		ulong hash = SipHash.ComputeHash(data, 0, 0);
+		ulong hash = SipHash24.Hash(data, 0, 0);
 		return BitConverter.GetBytes(hash);
 	}
 
@@ -611,7 +611,7 @@ public static class FileHasher {
 	/// HighwayHash is designed for SIMD acceleration.
 	/// </remarks>
 	public static byte[] GetHighwayHash64Bytes(byte[] data) {
-		ulong hash = HighwayHash.ComputeHash64(data);
+		ulong hash = HighwayHash64.Hash(data);
 		return BitConverter.GetBytes(hash);
 	}
 
@@ -863,7 +863,7 @@ public static class FileHasher {
 	public static byte[] GetKangarooTwelveBytes(byte[] data) {
 		using var hasher = new KangarooTwelve();
 		hasher.Update(data);
-		return hasher.FinalizeBytes();
+		return hasher.Finalize();
 	}
 
 	/// <summary>Computes the SM3 hash and returns raw bytes.</summary>
