@@ -9,8 +9,8 @@
 
 <AssemblyName>HashNow.Core</AssemblyName>
 <RootNamespace>HashNow.Core</RootNamespace>
-<Version>1.0.3</Version>
-<Description>Core library for computing 58 hash algorithms in parallel</Description>
+<Version>1.1.0</Version>
+<Description>Core library for computing 58 hash algorithms in parallel using StreamHash</Description>
 <Authors>TheAnsarya</Authors>
 <Company>TheAnsarya</Company>
 <Product>HashNow</Product>
