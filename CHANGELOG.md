@@ -5,6 +5,29 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-05
+
+### Added
+- **13 New Hash Algorithms** - Expanded from 58 to 71 total algorithms
+- **StreamHash Integration** - Now uses StreamHash 1.6.3 for streaming implementations
+- **New CRC16 Variants**:
+	- CRC16-CCITT (Polynomial 0x1021)
+	- CRC16-MODBUS (Industrial protocol)
+	- CRC16-USB (USB protocol)
+- **New Fast Hash Algorithms**:
+	- MetroHash64 (Very fast 64-bit)
+	- MetroHash128 (128-bit variant)
+	- Wyhash64 (One of the fastest hashes)
+	- FNV-1a 32/64 (Simple, fast)
+	- DJB2 (Dan Bernstein's hash)
+	- DJB2a (XOR variant)
+	- SDBM (Database hash)
+	- LoseLose (Simple byte sum)
+
+### Changed
+- **Streaming Architecture** - All non-crypto hashes now use StreamHash streaming implementations
+- **Updated Dependencies** - StreamHash 1.6.3 replaces individual hash library implementations
+
 ## [1.0.3] - 2026-02-03
 
 ### Added

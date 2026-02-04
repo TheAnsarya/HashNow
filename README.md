@@ -1,6 +1,6 @@
 # HashNow
 
-**Right-click any file in Windows Explorer to instantly generate 58 different hashes to JSON.**
+**Right-click any file in Windows Explorer to instantly generate 71 different hashes to JSON.**
 
 [![License: Unlicense](https://img.shields.io/badge/License-Unlicense-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
@@ -9,7 +9,7 @@
 
 ## 📥 Download
 
-**[Download HashNow v1.0.2](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
+**[Download HashNow v1.2.0](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
 
 ## 🚀 Quick Start
 
@@ -23,17 +23,18 @@
 ## Features
 
 - **Instant Hashing** - Right-click any file and select "Hash this file now"
-- **58 Algorithms** - Comprehensive coverage across 4 categories:
-	- **Checksums** (6): CRC32, CRC32C, CRC64, Adler32, Fletcher16, Fletcher32
-	- **Fast Non-Crypto** (12): xxHash family, MurmurHash3, CityHash, FarmHash, SpookyHash, SipHash, HighwayHash
+- **71 Algorithms** - Comprehensive coverage across 4 categories:
+	- **Checksums** (9): CRC32, CRC32C, CRC64, CRC16 (3 variants), Adler32, Fletcher16, Fletcher32
+	- **Fast Non-Crypto** (22): xxHash family, MurmurHash3, CityHash, FarmHash, SpookyHash, SipHash, HighwayHash, MetroHash, Wyhash, FNV-1a, DJB2, SDBM, LoseLose
 	- **Cryptographic** (26): MD family, SHA family (0/1/2/3), BLAKE family, RIPEMD family
 	- **Other Crypto** (14): Whirlpool, Tiger, SM3, GOST variants, Streebog, Skein, KangarooTwelve
-- **Parallel Processing** - All 58 algorithms run concurrently for maximum speed
+- **Parallel Processing** - All 71 algorithms run concurrently for maximum speed
 - **Single Pass** - Computes all hashes in one efficient file read
 - **JSON Output** - Creates `{filename}.hashes.json` with tab indentation
 - **Fast** - Streams large files with 1MB buffer and ArrayPool memory management
 - **Progress Reporting** - Shows progress for large files (>3 seconds estimated)
 - **Reusable Library** - HashNow.Core can be used in any .NET project
+- **Powered by StreamHash** - Uses [StreamHash](https://www.nuget.org/packages/StreamHash) for all 71 algorithms
 - **Public Domain** - The Unlicense, free for any use
 
 ## 📋 Usage
@@ -80,7 +81,7 @@ HashNow.exe --version
 
 ## 📊 Output Format
 
-The generated JSON file contains all 58 hashes organized by category:
+The generated JSON file contains all 71 hashes organized by category:
 
 ```json
 {
@@ -94,10 +95,14 @@ The generated JSON file contains all 58 hashes organized by category:
 	"crc32": "a1b2c3d4",
 	"crc32C": "12345678",
 	"crc64": "0123456789abcdef",
+	"crc16Ccitt": "1234",
+	"crc16Modbus": "5678",
+	"crc16Usb": "9abc",
 	"adler32": "abcd1234",
 	"fletcher16": "1234",
 	"fletcher32": "12345678",
 
+	"xxHash32": "12345678",
 	"xxHash3": "1234567890abcdef",
 	"xxHash64": "fedcba0987654321",
 	"xxHash128": "0123456789abcdef0123456789abcdef",
@@ -105,10 +110,19 @@ The generated JSON file contains all 58 hashes organized by category:
 	"murmurHash3_128": "0123456789abcdef0123456789abcdef",
 	"cityHash64": "1234567890abcdef",
 	"cityHash128": "0123456789abcdef0123456789abcdef",
-	"spookyHash64": "1234567890abcdef",
-	"spookyHash128": "0123456789abcdef0123456789abcdef",
-	"sipHash_2_4": "1234567890abcdef",
+	"farmHash64": "1234567890abcdef",
+	"spookyV2_128": "0123456789abcdef0123456789abcdef",
+	"sipHash24": "1234567890abcdef",
 	"highwayHash64": "1234567890abcdef",
+	"metroHash64": "1234567890abcdef",
+	"metroHash128": "0123456789abcdef0123456789abcdef",
+	"wyhash64": "1234567890abcdef",
+	"fnv1a32": "12345678",
+	"fnv1a64": "1234567890abcdef",
+	"djb2": "12345678",
+	"djb2a": "12345678",
+	"sdbm": "12345678",
+	"loseLose": "00001234",
 
 	"md5": "d41d8cd98f00b204e9800998ecf8427e",
 	"sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
@@ -142,26 +156,30 @@ The generated JSON file contains all 58 hashes organized by category:
 
 	"hashedAtUtc": "2025-02-03T10:30:15Z",
 	"durationMs": 1003,
-	"generatedBy": "HashNow 2.0.0",
-	"algorithmCount": 58
+	"generatedBy": "HashNow 1.2.0",
+	"algorithmCount": 71
 }
 ```
 
 ## Hash Algorithms
 
-### Checksums (6)
+### Checksums (9)
 | Algorithm | Output | Notes |
 |-----------|--------|-------|
 | CRC32 | 4 bytes | Standard CRC-32 |
 | CRC32C | 4 bytes | Castagnoli variant (SSE4.2 accelerated) |
 | CRC64 | 8 bytes | CRC-64/ECMA-182 |
+| CRC16-CCITT | 2 bytes | Polynomial 0x1021 |
+| CRC16-MODBUS | 2 bytes | Industrial protocol |
+| CRC16-USB | 2 bytes | USB protocol |
 | Adler32 | 4 bytes | Fast checksum, used in zlib |
 | Fletcher16 | 2 bytes | Simple checksum |
 | Fletcher32 | 4 bytes | Simple checksum |
 
-### Fast Non-Cryptographic (13)
+### Fast Non-Cryptographic (22)
 | Algorithm | Output | Notes |
 |-----------|--------|-------|
+| xxHash32 | 4 bytes | Fast 32-bit |
 | xxHash3 | 8 bytes | Extremely fast, SIMD optimized |
 | xxHash64 | 8 bytes | Very fast 64-bit |
 | xxHash128 | 16 bytes | Fast 128-bit |
@@ -169,12 +187,19 @@ The generated JSON file contains all 58 hashes organized by category:
 | MurmurHash3-128 | 16 bytes | 128-bit variant |
 | CityHash64 | 8 bytes | Google's fast hash |
 | CityHash128 | 16 bytes | 128-bit variant |
-| SpookyHash64 | 8 bytes | Bob Jenkins' hash |
-| SpookyHash128 | 16 bytes | 128-bit variant |
+| FarmHash64 | 8 bytes | Google's successor to CityHash |
+| SpookyHash V2 | 16 bytes | Bob Jenkins' 128-bit hash |
 | SipHash-2-4 | 8 bytes | DoS-resistant |
-| FNV1a-32 | 4 bytes | Simple, fast |
-| FNV1a-64 | 8 bytes | 64-bit variant |
-| BLAKE3 | 32 bytes | Modern, parallelizable |
+| HighwayHash64 | 8 bytes | Google's SIMD-accelerated hash |
+| MetroHash64 | 8 bytes | Very fast 64-bit |
+| MetroHash128 | 16 bytes | 128-bit variant |
+| Wyhash64 | 8 bytes | One of the fastest hashes |
+| FNV-1a 32 | 4 bytes | Simple, fast |
+| FNV-1a 64 | 8 bytes | 64-bit variant |
+| DJB2 | 4 bytes | Dan Bernstein's hash |
+| DJB2a | 4 bytes | XOR variant |
+| SDBM | 4 bytes | Database hash |
+| LoseLose | 4 bytes | Simple byte sum |
 
 ### Cryptographic (28)
 | Algorithm | Output | Notes |
@@ -256,8 +281,8 @@ dotnet run -c Release --project benchmarks/HashNow.Benchmarks -- --filter "*"
 HashNow/
 ├── src/
 │   ├── HashNow.Core/              # Core library (reusable in any project)
-│   │   ├── FileHasher.cs          # 58 hash algorithm implementations
-│   │   ├── FileHashResult.cs      # Result model with all 58 properties
+│   │   ├── FileHasher.cs          # 71 hash algorithm implementations
+│   │   ├── FileHashResult.cs      # Result model with all 71 properties
 │   │   └── PerformanceDiagnostics.cs  # Timing analysis by category
 │   └── HashNow.Cli/               # Command-line interface
 │       ├── Program.cs             # CLI entry point with auto-install
@@ -278,7 +303,7 @@ The `HashNow.Core` library can be referenced in any .NET project:
 ```csharp
 using HashNow.Core;
 
-// Hash a file and get all 58 hashes
+// Hash a file and get all 71 hashes
 var result = FileHasher.HashFile("myfile.zip");
 Console.WriteLine($"SHA256: {result.Sha256}");
 Console.WriteLine($"BLAKE3: {result.Blake3}");
@@ -294,16 +319,17 @@ FileHasher.SaveResult(result, "myfile.zip.hashes.json");
 
 ## Performance
 
-All 58 hashes are computed in a **single file read** for maximum efficiency:
+All 71 hashes are computed in a **single file read** for maximum efficiency:
 
 - **1 MB buffer** reduces system calls
 - **ArrayPool** minimizes GC pressure
 - **Streaming** handles files of any size
 - **Single pass** - no multiple file reads
+- **StreamHash** provides streaming implementations for non-crypto hashes
 - **BouncyCastle** provides optimized crypto implementations
 
 Typical throughput: ~300-500 MB/s depending on disk speed.
-58 algorithms on a 5KB file: ~1000ms (most time in algorithm initialization).
+71 algorithms on a 5KB file: ~1000ms (most time in algorithm initialization).
 
 ## License
 
@@ -312,6 +338,12 @@ Typical throughput: ~300-500 MB/s depending on disk speed.
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
+
+### v1.2.0 (2026-02-05)
+- **71 hash algorithms** - Up from 58, powered by StreamHash 1.6.3
+- **New fast hashes** - MetroHash64/128, Wyhash64, FNV-1a 32/64, DJB2, DJB2a, SDBM, LoseLose
+- **New CRC16 variants** - CRC16-CCITT, CRC16-MODBUS, CRC16-USB
+- **StreamHash integration** - Streaming implementations for all non-crypto hashes
 
 ### v1.0.2 (2026-02-03)
 - **Custom application icon** - Blue button with white hash symbol (#)
