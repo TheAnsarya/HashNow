@@ -1,6 +1,6 @@
 # HashNow
 
-**Right-click any file in Windows Explorer to instantly generate 71 different hashes to JSON.**
+**Right-click any file in Windows Explorer to instantly generate 70 different hashes to JSON.**
 
 [![License: Unlicense](https://img.shields.io/badge/License-Unlicense-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
@@ -23,18 +23,18 @@
 ## Features
 
 - **Instant Hashing** - Right-click any file and select "Hash this file now"
-- **71 Algorithms** - Comprehensive coverage across 4 categories:
+- **70 Algorithms** - Comprehensive coverage across 4 categories:
 	- **Checksums** (9): CRC32, CRC32C, CRC64, CRC16 (3 variants), Adler32, Fletcher16, Fletcher32
 	- **Fast Non-Crypto** (22): xxHash family, MurmurHash3, CityHash, FarmHash, SpookyHash, SipHash, HighwayHash, MetroHash, Wyhash, FNV-1a, DJB2, SDBM, LoseLose
 	- **Cryptographic** (26): MD family, SHA family (0/1/2/3), BLAKE family, RIPEMD family
 	- **Other Crypto** (14): Whirlpool, Tiger, SM3, GOST variants, Streebog, Skein, KangarooTwelve
-- **Parallel Processing** - All 71 algorithms run concurrently for maximum speed
+- **Parallel Processing** - All 70 algorithms run concurrently for maximum speed
 - **Single Pass** - Computes all hashes in one efficient file read
 - **JSON Output** - Creates `{filename}.hashes.json` with tab indentation
 - **Fast** - Streams large files with 1MB buffer and ArrayPool memory management
 - **Progress Reporting** - Shows progress for large files (>3 seconds estimated)
 - **Reusable Library** - HashNow.Core can be used in any .NET project
-- **Powered by StreamHash** - Uses [StreamHash](https://www.nuget.org/packages/StreamHash) for all 71 algorithms
+- **Powered by StreamHash** - Uses [StreamHash](https://www.nuget.org/packages/StreamHash) for all 70 algorithms
 - **Public Domain** - The Unlicense, free for any use
 
 ## 📋 Usage
@@ -81,7 +81,7 @@ HashNow.exe --version
 
 ## 📊 Output Format
 
-The generated JSON file contains all 71 hashes organized by category:
+The generated JSON file contains all 70 hashes organized by category:
 
 ```json
 {
@@ -157,7 +157,7 @@ The generated JSON file contains all 71 hashes organized by category:
 	"hashedAtUtc": "2025-02-03T10:30:15Z",
 	"durationMs": 1003,
 	"generatedBy": "HashNow 1.2.0",
-	"algorithmCount": 71
+	"algorithmCount": 70
 }
 ```
 
@@ -281,8 +281,8 @@ dotnet run -c Release --project benchmarks/HashNow.Benchmarks -- --filter "*"
 HashNow/
 ├── src/
 │   ├── HashNow.Core/              # Core library (reusable in any project)
-│   │   ├── FileHasher.cs          # 71 hash algorithm implementations
-│   │   ├── FileHashResult.cs      # Result model with all 71 properties
+│   │   ├── FileHasher.cs          # 70 hash algorithm implementations
+│   │   ├── FileHashResult.cs      # Result model with all 70 properties
 │   │   └── PerformanceDiagnostics.cs  # Timing analysis by category
 │   └── HashNow.Cli/               # Command-line interface
 │       ├── Program.cs             # CLI entry point with auto-install
@@ -303,7 +303,7 @@ The `HashNow.Core` library can be referenced in any .NET project:
 ```csharp
 using HashNow.Core;
 
-// Hash a file and get all 71 hashes
+// Hash a file and get all 70 hashes
 var result = FileHasher.HashFile("myfile.zip");
 Console.WriteLine($"SHA256: {result.Sha256}");
 Console.WriteLine($"BLAKE3: {result.Blake3}");
@@ -319,7 +319,7 @@ FileHasher.SaveResult(result, "myfile.zip.hashes.json");
 
 ## Performance
 
-All 71 hashes are computed in a **single file read** for maximum efficiency:
+All 70 hashes are computed in a **single file read** for maximum efficiency:
 
 - **1 MB buffer** reduces system calls
 - **ArrayPool** minimizes GC pressure
@@ -329,7 +329,7 @@ All 71 hashes are computed in a **single file read** for maximum efficiency:
 - **BouncyCastle** provides optimized crypto implementations
 
 Typical throughput: ~300-500 MB/s depending on disk speed.
-71 algorithms on a 5KB file: ~1000ms (most time in algorithm initialization).
+70 algorithms on a 5KB file: ~1000ms (most time in algorithm initialization).
 
 ## License
 
@@ -340,7 +340,7 @@ Typical throughput: ~300-500 MB/s depending on disk speed.
 See [CHANGELOG.md](CHANGELOG.md) for full history.
 
 ### v1.2.0 (2026-02-05)
-- **71 hash algorithms** - Up from 58, powered by StreamHash 1.6.3
+- **70 hash algorithms** - Up from 58, powered by StreamHash 1.6.3
 - **New fast hashes** - MetroHash64/128, Wyhash64, FNV-1a 32/64, DJB2, DJB2a, SDBM, LoseLose
 - **New CRC16 variants** - CRC16-CCITT, CRC16-MODBUS, CRC16-USB
 - **StreamHash integration** - Streaming implementations for all non-crypto hashes

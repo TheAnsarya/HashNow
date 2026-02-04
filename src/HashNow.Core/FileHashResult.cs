@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace HashNow.Core;
 
 /// <summary>
-/// Represents the complete result of hashing a file with all 71 supported hash algorithms.
+/// Represents the complete result of hashing a file with all 70 supported hash algorithms.
 /// </summary>
 /// <remarks>
 /// <para>

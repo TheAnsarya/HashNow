@@ -10,12 +10,12 @@ using StreamHash.Core;
 namespace HashNow.Core;
 
 /// <summary>
-/// High-performance file hasher supporting 71 hash algorithms computed in parallel.
+/// High-performance file hasher supporting 70 hash algorithms computed in parallel.
 /// </summary>
 /// <remarks>
 /// <para>
 /// <see cref="FileHasher"/> is the core class for computing cryptographic and non-cryptographic
-/// hash values for files and byte arrays. It supports 71 different algorithms organized into
+/// hash values for files and byte arrays. It supports 70 different algorithms organized into
 /// four categories:
 /// </para>
 /// <list type="bullet">
@@ -65,7 +65,7 @@ public static class FileHasher {
 	/// <remarks>
 	/// This constant should match the number of hash properties in <see cref="FileHashResult"/>.
 	/// </remarks>
-	public const int AlgorithmCount = 71;
+	public const int AlgorithmCount = 70;
 
 	/// <summary>
 	/// Default buffer size for file reading operations (1 MB).
@@ -1071,7 +1071,7 @@ public static class FileHasher {
 	#region File Hashing
 
 	/// <summary>
-	/// Computes all 71 hash algorithms for the specified file using parallel execution.
+	/// Computes all 70 hash algorithms for the specified file using parallel execution.
 	/// </summary>
 	/// <param name="filePath">The path to the file to hash.</param>
 	/// <returns>A <see cref="FileHashResult"/> containing all computed hashes and metadata.</returns>
@@ -1108,7 +1108,7 @@ public static class FileHasher {
 		// This is faster than multiple sequential reads for multiple algorithms
 		byte[] data = File.ReadAllBytes(filePath);
 
-		// Declare variables for all 71 hash results
+		// Declare variables for all 70 hash results
 		// Using explicit variables allows Parallel.Invoke to capture them efficiently
 		string crc32 = "", crc32c = "", crc64 = "", adler32 = "", fletcher16 = "", fletcher32 = "";
 		string crc16Ccitt = "", crc16Modbus = "", crc16Usb = "";

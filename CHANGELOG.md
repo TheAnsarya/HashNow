@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2026-02-05
 
 ### Added
-- **13 New Hash Algorithms** - Expanded from 58 to 71 total algorithms
+- **13 New Hash Algorithms** - Expanded from 58 to 70 total algorithms
 - **StreamHash Integration** - Now uses StreamHash 1.6.3 for streaming implementations
 - **New CRC16 Variants**:
 	- CRC16-CCITT (Polynomial 0x1021)
