@@ -5,6 +5,21 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-05
+
+### Changed
+- **HashFacade Refactoring** - All 70 algorithms now use StreamHash's unified HashFacade API
+- **Simplified Dependencies** - Removed direct BouncyCastle, Blake3, and Blake2Fast dependencies
+- **Single Dependency** - Only depends on StreamHash 1.6.3 (which transitively includes all hash libraries)
+- **Cleaner Codebase** - FileHasher and StreamingHasher completely rewritten using HashFacade
+- **Unified API** - All compute methods delegate to `HashFacade.ComputeHashHex()` and `HashFacade.CreateStreaming()`
+
+### Technical
+- Removed: `BouncyCastle.Cryptography`, `Blake3`, `SauceControl.Blake2Fast`
+- FileHasher: Now ~500 lines (was 1800+) - all methods delegate to HashFacade
+- StreamingHasher: Now ~330 lines (was 600+) - uses HashFacade.CreateStreaming()
+- All 108 tests pass
+
 ## [1.2.0] - 2026-02-05
 
 ### Added
