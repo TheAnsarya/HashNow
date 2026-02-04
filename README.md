@@ -9,7 +9,7 @@
 
 ## 📥 Download
 
-**[Download HashNow v1.2.0](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
+**[Download HashNow v1.3.0](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
 
 ## 🚀 Quick Start
 
@@ -154,9 +154,9 @@ The generated JSON file contains all 70 hashes organized by category:
 	"skein1024": "0fff9563bb3279289227ac77d319b6fff8d7e9f0...",
 	"kangarooTwelve": "1ac2d450fc3b4205d19da7bfca1b37513c0803577ac7167f06fe2ce1f0ef39e5",
 
-	"hashedAtUtc": "2025-02-03T10:30:15Z",
+	"hashedAtUtc": "2025-02-05T10:30:15Z",
 	"durationMs": 1003,
-	"generatedBy": "HashNow 1.2.0",
+	"generatedBy": "HashNow 1.3.0",
 	"algorithmCount": 70
 }
 ```
@@ -325,10 +325,10 @@ All 70 hashes are computed in a **single file read** for maximum efficiency:
 - **ArrayPool** minimizes GC pressure
 - **Streaming** handles files of any size
 - **Single pass** - no multiple file reads
-- **StreamHash** provides streaming implementations for non-crypto hashes
-- **BouncyCastle** provides optimized crypto implementations
+- **HashFacade API** - Unified interface from StreamHash 1.6.3
+- **Modular architecture** - Clean separation of concerns
 
-Typical throughput: ~300-500 MB/s depending on disk speed.
+Typical throughput: ~200-300 MB/s for all 70 algorithms simultaneously.
 70 algorithms on a 5KB file: ~1000ms (most time in algorithm initialization).
 
 ## License
@@ -338,6 +338,12 @@ Typical throughput: ~300-500 MB/s depending on disk speed.
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
+
+### v1.3.0 (2026-02-05)
+- **HashFacade refactoring** - All 70 algorithms now use StreamHash's unified HashFacade API
+- **Simplified dependencies** - Single dependency on StreamHash 1.6.3
+- **Cleaner codebase** - FileHasher and StreamingHasher completely rewritten
+- **Removed** - Direct BouncyCastle, Blake3, Blake2Fast dependencies
 
 ### v1.2.0 (2026-02-05)
 - **70 hash algorithms** - Up from 58, powered by StreamHash 1.6.3
