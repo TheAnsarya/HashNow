@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
 using Blake2Fast;
+using StreamHash.Core;
 
 namespace HashNow.Core;
 
@@ -78,7 +79,7 @@ internal sealed class StreamingHasher : IDisposable {
 	private readonly RipeMD160Digest _ripemd160 = new();
 	private readonly RipeMD256Digest _ripemd256 = new();
 	private readonly RipeMD320Digest _ripemd320 = new();
-	private readonly WhirlpoolDigest _whirlpool = new();
+	private readonly Org.BouncyCastle.Crypto.Digests.WhirlpoolDigest _whirlpool = new();
 	private readonly TigerDigest _tiger192 = new();
 	private readonly Gost3411Digest _gost94 = new();
 	private readonly Gost3411_2012_256Digest _streebog256 = new();
@@ -107,6 +108,24 @@ internal sealed class StreamingHasher : IDisposable {
 
 	// CRC32C via System.IO.Hashing (streaming)
 	private readonly Crc32 _crc32c = new();
+
+	// StreamHash streaming implementations - CRC16 variants
+	private readonly Crc16Streaming _crc16Ccitt = new(Crc16Variant.Ccitt);
+	private readonly Crc16Streaming _crc16Modbus = new(Crc16Variant.Modbus);
+	private readonly Crc16Streaming _crc16Usb = new(Crc16Variant.Usb);
+
+	// StreamHash streaming implementations - simple hashes
+	private readonly Fnv1a32Streaming _fnv1a32 = new();
+	private readonly Fnv1a64Streaming _fnv1a64 = new();
+	private readonly Djb2Streaming _djb2 = new(useXor: false);
+	private readonly Djb2Streaming _djb2a = new(useXor: true);
+	private readonly SdbmStreaming _sdbm = new();
+	private readonly LoseLoseStreaming _loseLose = new();
+
+	// StreamHash streaming implementations - fast hashes
+	private readonly MetroHash64 _metroHash64 = new();
+	private readonly MetroHash128 _metroHash128Streaming = new();
+	private readonly Wyhash64 _wyhash64Streaming = new();
 
 	// Streaming checksums - maintain state manually
 	private uint _adler32_a = 1;
@@ -223,6 +242,24 @@ internal sealed class StreamingHasher : IDisposable {
 		// CRC32C streaming (note: using standard CRC32 polynomial, not Castagnoli)
 		_crc32c.Append(data);
 
+		// StreamHash CRC16 variants
+		_crc16Ccitt.Update(data);
+		_crc16Modbus.Update(data);
+		_crc16Usb.Update(data);
+
+		// StreamHash simple hashes
+		_fnv1a32.Update(data);
+		_fnv1a64.Update(data);
+		_djb2.Update(data);
+		_djb2a.Update(data);
+		_sdbm.Update(data);
+		_loseLose.Update(data);
+
+		// StreamHash fast hashes
+		_metroHash64.Update(data);
+		_metroHash128Streaming.Update(data);
+		_wyhash64Streaming.Update(data);
+
 		// Adler-32 streaming
 		const uint MOD_ADLER = 65521;
 		foreach (byte b in data) {
@@ -331,6 +368,24 @@ internal sealed class StreamingHasher : IDisposable {
 
 		// CRC32C (streaming)
 		results["Crc32C"] = ToHex(_crc32c.GetCurrentHash());
+
+		// StreamHash CRC16 variants
+		results["Crc16Ccitt"] = _crc16Ccitt.Finalize().ToString("x4");
+		results["Crc16Modbus"] = _crc16Modbus.Finalize().ToString("x4");
+		results["Crc16Usb"] = _crc16Usb.Finalize().ToString("x4");
+
+		// StreamHash simple hashes
+		results["Fnv1a32"] = _fnv1a32.Finalize().ToString("x8");
+		results["Fnv1a64"] = _fnv1a64.Finalize().ToString("x16");
+		results["Djb2"] = _djb2.Finalize().ToString("x8");
+		results["Djb2a"] = _djb2a.Finalize().ToString("x8");
+		results["Sdbm"] = _sdbm.Finalize().ToString("x8");
+		results["LoseLose"] = _loseLose.Finalize().ToString("x8");
+
+		// StreamHash fast hashes
+		results["MetroHash64"] = _metroHash64.Finalize().ToString("x16");
+		results["MetroHash128"] = ToHex(((IStreamingHashBytes)_metroHash128Streaming).FinalizeBytes());
+		results["Wyhash64"] = ToHex(_wyhash64Streaming.FinalizeToBytes());
 
 		// Adler-32 (streaming) - combine state into final hash
 		results["Adler32"] = ((_adler32_b << 16) | _adler32_a).ToString("x8");
@@ -453,6 +508,9 @@ internal sealed class StreamingHasher : IDisposable {
 			Crc32 = results["Crc32"],
 			Crc32C = results["Crc32C"],
 			Crc64 = results["Crc64"],
+			Crc16Ccitt = results["Crc16Ccitt"],
+			Crc16Modbus = results["Crc16Modbus"],
+			Crc16Usb = results["Crc16Usb"],
 			Adler32 = results["Adler32"],
 			Fletcher16 = results["Fletcher16"],
 			Fletcher32 = results["Fletcher32"],
@@ -470,6 +528,15 @@ internal sealed class StreamingHasher : IDisposable {
 			SpookyV2_128 = results["SpookyV2_128"],
 			SipHash24 = results["SipHash24"],
 			HighwayHash64 = results["HighwayHash64"],
+			MetroHash64 = results["MetroHash64"],
+			MetroHash128 = results["MetroHash128"],
+			Wyhash64 = results["Wyhash64"],
+			Fnv1a32 = results["Fnv1a32"],
+			Fnv1a64 = results["Fnv1a64"],
+			Djb2 = results["Djb2"],
+			Djb2a = results["Djb2a"],
+			Sdbm = results["Sdbm"],
+			LoseLose = results["LoseLose"],
 
 			// MD Family
 			Md2 = results["Md2"],

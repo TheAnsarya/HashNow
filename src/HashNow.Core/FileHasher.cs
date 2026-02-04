@@ -10,17 +10,17 @@ using StreamHash.Core;
 namespace HashNow.Core;
 
 /// <summary>
-/// High-performance file hasher supporting 58 hash algorithms computed in parallel.
+/// High-performance file hasher supporting 71 hash algorithms computed in parallel.
 /// </summary>
 /// <remarks>
 /// <para>
 /// <see cref="FileHasher"/> is the core class for computing cryptographic and non-cryptographic
-/// hash values for files and byte arrays. It supports 58 different algorithms organized into
+/// hash values for files and byte arrays. It supports 71 different algorithms organized into
 /// four categories:
 /// </para>
 /// <list type="bullet">
-///   <item><description><strong>Checksums &amp; CRCs (6):</strong> CRC32, CRC32C, CRC64, Adler-32, Fletcher-16, Fletcher-32</description></item>
-///   <item><description><strong>Fast Non-Crypto (12):</strong> xxHash family, MurmurHash3, CityHash, FarmHash, SpookyHash, SipHash</description></item>
+///   <item><description><strong>Checksums &amp; CRCs (9):</strong> CRC32, CRC32C, CRC64, CRC16 (3 variants), Adler-32, Fletcher-16, Fletcher-32</description></item>
+///   <item><description><strong>Fast Non-Crypto (22):</strong> xxHash family, MurmurHash3, CityHash, FarmHash, SpookyHash, SipHash, HighwayHash, MetroHash, wyhash, FNV-1a, DJB2, SDBM, LoseLose</description></item>
 ///   <item><description><strong>Cryptographic (26):</strong> MD family, SHA family, SHA-3, Keccak, BLAKE family, RIPEMD family</description></item>
 ///   <item><description><strong>Other Crypto (14):</strong> Whirlpool, Tiger, GOST, Streebog, Skein, Groestl, JH, KangarooTwelve, SM3</description></item>
 /// </list>
@@ -57,7 +57,7 @@ public static class FileHasher {
 	/// Version follows semantic versioning (MAJOR.MINOR.PATCH).
 	/// This value is included in the JSON output for traceability.
 	/// </remarks>
-	public const string Version = "1.1.0";
+	public const string Version = "1.2.0";
 
 	/// <summary>
 	/// The total number of hash algorithms supported.
@@ -65,7 +65,7 @@ public static class FileHasher {
 	/// <remarks>
 	/// This constant should match the number of hash properties in <see cref="FileHashResult"/>.
 	/// </remarks>
-	public const int AlgorithmCount = 58;
+	public const int AlgorithmCount = 71;
 
 	/// <summary>
 	/// Default buffer size for file reading operations (1 MB).
@@ -111,6 +111,21 @@ public static class FileHasher {
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
 	public static string ComputeFletcher32(byte[] data) => ToHex(GetFletcher32Bytes(data));
+
+	/// <summary>Computes the CRC-16-CCITT checksum of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	public static string ComputeCrc16Ccitt(byte[] data) => ToHex(GetCrc16CcittBytes(data));
+
+	/// <summary>Computes the CRC-16-MODBUS checksum of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	public static string ComputeCrc16Modbus(byte[] data) => ToHex(GetCrc16ModbusBytes(data));
+
+	/// <summary>Computes the CRC-16-USB checksum of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	public static string ComputeCrc16Usb(byte[] data) => ToHex(GetCrc16UsbBytes(data));
 
 	// ========== Non-Crypto Fast Hashes ==========
 
@@ -173,8 +188,59 @@ public static class FileHasher {
 	/// <summary>Computes the HighwayHash64 hash of the specified data.</summary>
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
-	/// <remarks>Currently uses SipHash as fallback implementation.</remarks>
+	/// <remarks>Uses SIMD-accelerated implementation from StreamHash.</remarks>
 	public static string ComputeHighwayHash64(byte[] data) => ToHex(GetHighwayHash64Bytes(data));
+
+	/// <summary>Computes the MetroHash64 hash of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	/// <remarks>MetroHash64 is one of the fastest hash functions available (~15 GB/s).</remarks>
+	public static string ComputeMetroHash64(byte[] data) => ToHex(GetMetroHash64Bytes(data));
+
+	/// <summary>Computes the MetroHash128 hash of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	public static string ComputeMetroHash128(byte[] data) => ToHex(GetMetroHash128Bytes(data));
+
+	/// <summary>Computes the wyhash64 hash of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	/// <remarks>wyhash is among the fastest hash functions available (15-25 GB/s).</remarks>
+	public static string ComputeWyhash64(byte[] data) => ToHex(GetWyhash64Bytes(data));
+
+	/// <summary>Computes the FNV-1a 32-bit hash of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	public static string ComputeFnv1a32(byte[] data) => ToHex(GetFnv1a32Bytes(data));
+
+	/// <summary>Computes the FNV-1a 64-bit hash of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	public static string ComputeFnv1a64(byte[] data) => ToHex(GetFnv1a64Bytes(data));
+
+	/// <summary>Computes the DJB2 hash of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	/// <remarks>Dan Bernstein's hash using multiply-and-add: hash * 33 + byte.</remarks>
+	public static string ComputeDjb2(byte[] data) => ToHex(GetDjb2Bytes(data));
+
+	/// <summary>Computes the DJB2a hash of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	/// <remarks>DJB2 XOR variant: hash * 33 ^ byte.</remarks>
+	public static string ComputeDjb2a(byte[] data) => ToHex(GetDjb2aBytes(data));
+
+	/// <summary>Computes the SDBM hash of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	/// <remarks>Hash from SDBM database: hash * 65599 + byte.</remarks>
+	public static string ComputeSdbm(byte[] data) => ToHex(GetSdbmBytes(data));
+
+	/// <summary>Computes the Lose Lose hash of the specified data.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a lowercase hexadecimal string.</returns>
+	/// <remarks>Simple byte sum hash - poor distribution, educational only.</remarks>
+	public static string ComputeLoseLose(byte[] data) => ToHex(GetLoseLoseBytes(data));
 
 	// ========== Cryptographic Hashes ==========
 
@@ -496,6 +562,54 @@ public static class FileHasher {
 		return BitConverter.GetBytes((sum2 << 16) | sum1);
 	}
 
+	/// <summary>Computes the CRC-16-CCITT checksum and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (2 bytes).</returns>
+	/// <remarks>CRC-16-CCITT uses polynomial 0x1021, used in X.25, HDLC, Bluetooth.</remarks>
+	public static byte[] GetCrc16CcittBytes(byte[] data) {
+		// CRC-16-CCITT: poly=0x1021, init=0xFFFF, refIn=false, refOut=false
+		ushort crc = 0xffff;
+		foreach (byte b in data) {
+			crc ^= (ushort)(b << 8);
+			for (int i = 0; i < 8; i++) {
+				crc = (crc & 0x8000) != 0 ? (ushort)((crc << 1) ^ 0x1021) : (ushort)(crc << 1);
+			}
+		}
+		return BitConverter.GetBytes(crc);
+	}
+
+	/// <summary>Computes the CRC-16-MODBUS checksum and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (2 bytes).</returns>
+	/// <remarks>CRC-16-MODBUS uses polynomial 0x8005 with 0xFFFF init.</remarks>
+	public static byte[] GetCrc16ModbusBytes(byte[] data) {
+		// CRC-16-MODBUS: poly=0x8005, init=0xFFFF, refIn=true, refOut=true
+		ushort crc = 0xffff;
+		foreach (byte b in data) {
+			crc ^= b;
+			for (int i = 0; i < 8; i++) {
+				crc = (crc & 0x0001) != 0 ? (ushort)((crc >> 1) ^ 0xa001) : (ushort)(crc >> 1);
+			}
+		}
+		return BitConverter.GetBytes(crc);
+	}
+
+	/// <summary>Computes the CRC-16-USB checksum and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (2 bytes).</returns>
+	/// <remarks>CRC-16-USB uses polynomial 0x8005 with inversion.</remarks>
+	public static byte[] GetCrc16UsbBytes(byte[] data) {
+		// CRC-16-USB: poly=0x8005, init=0xFFFF, refIn=true, refOut=true, xorOut=0xFFFF
+		ushort crc = 0xffff;
+		foreach (byte b in data) {
+			crc ^= b;
+			for (int i = 0; i < 8; i++) {
+				crc = (crc & 0x0001) != 0 ? (ushort)((crc >> 1) ^ 0xa001) : (ushort)(crc >> 1);
+			}
+		}
+		return BitConverter.GetBytes((ushort)(crc ^ 0xffff));
+	}
+
 	// ========== Non-Crypto Fast Hashes ==========
 
 	/// <summary>Computes the xxHash32 hash and returns raw bytes.</summary>
@@ -612,6 +726,87 @@ public static class FileHasher {
 	/// </remarks>
 	public static byte[] GetHighwayHash64Bytes(byte[] data) {
 		ulong hash = HighwayHash64.Hash(data);
+		return BitConverter.GetBytes(hash);
+	}
+
+	/// <summary>Computes the MetroHash64 hash and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (8 bytes).</returns>
+	/// <remarks>MetroHash64 is one of the fastest hash functions available (~15 GB/s).</remarks>
+	public static byte[] GetMetroHash64Bytes(byte[] data) {
+		ulong hash = MetroHash64.Hash(data);
+		return BitConverter.GetBytes(hash);
+	}
+
+	/// <summary>Computes the MetroHash128 hash and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (16 bytes).</returns>
+	public static byte[] GetMetroHash128Bytes(byte[] data) {
+		UInt128 hash = MetroHash128.Hash(data);
+		var bytes = new byte[16];
+		BitConverter.TryWriteBytes(bytes.AsSpan(0, 8), (ulong)(hash >> 64));
+		BitConverter.TryWriteBytes(bytes.AsSpan(8, 8), (ulong)hash);
+		return bytes;
+	}
+
+	/// <summary>Computes the wyhash64 hash and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (8 bytes).</returns>
+	/// <remarks>wyhash is among the fastest hash functions available (15-25 GB/s).</remarks>
+	public static byte[] GetWyhash64Bytes(byte[] data) {
+		ulong hash = Wyhash64.Hash(data);
+		return BitConverter.GetBytes(hash);
+	}
+
+	/// <summary>Computes the FNV-1a 32-bit hash and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (4 bytes).</returns>
+	public static byte[] GetFnv1a32Bytes(byte[] data) {
+		uint hash = Fnv1a32Streaming.Hash(data);
+		return BitConverter.GetBytes(hash);
+	}
+
+	/// <summary>Computes the FNV-1a 64-bit hash and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (8 bytes).</returns>
+	public static byte[] GetFnv1a64Bytes(byte[] data) {
+		ulong hash = Fnv1a64Streaming.Hash(data);
+		return BitConverter.GetBytes(hash);
+	}
+
+	/// <summary>Computes the DJB2 hash and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (4 bytes).</returns>
+	/// <remarks>Dan Bernstein's hash using multiply-and-add: hash * 33 + byte.</remarks>
+	public static byte[] GetDjb2Bytes(byte[] data) {
+		uint hash = Djb2Streaming.Hash(data, useXor: false);
+		return BitConverter.GetBytes(hash);
+	}
+
+	/// <summary>Computes the DJB2a hash and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (4 bytes).</returns>
+	/// <remarks>DJB2 XOR variant: hash * 33 ^ byte.</remarks>
+	public static byte[] GetDjb2aBytes(byte[] data) {
+		uint hash = Djb2Streaming.Hash(data, useXor: true);
+		return BitConverter.GetBytes(hash);
+	}
+
+	/// <summary>Computes the SDBM hash and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (4 bytes).</returns>
+	/// <remarks>Hash from SDBM database: hash * 65599 + byte.</remarks>
+	public static byte[] GetSdbmBytes(byte[] data) {
+		uint hash = SdbmStreaming.Hash(data);
+		return BitConverter.GetBytes(hash);
+	}
+
+	/// <summary>Computes the Lose Lose hash and returns raw bytes.</summary>
+	/// <param name="data">The byte array to hash.</param>
+	/// <returns>The hash value as a byte array (4 bytes).</returns>
+	/// <remarks>Simple byte sum hash - poor distribution, educational only.</remarks>
+	public static byte[] GetLoseLoseBytes(byte[] data) {
+		uint hash = LoseLoseStreaming.Hash(data);
 		return BitConverter.GetBytes(hash);
 	}
 
@@ -795,7 +990,7 @@ public static class FileHasher {
 	/// <summary>Computes the Whirlpool hash and returns raw bytes.</summary>
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (64 bytes).</returns>
-	public static byte[] GetWhirlpoolBytes(byte[] data) => ComputeBouncyCastleHash(new WhirlpoolDigest(), data);
+	public static byte[] GetWhirlpoolBytes(byte[] data) => ComputeBouncyCastleHash(new Org.BouncyCastle.Crypto.Digests.WhirlpoolDigest(), data);
 
 	/// <summary>Computes the Tiger-192 hash and returns raw bytes.</summary>
 	/// <param name="data">The byte array to hash.</param>
@@ -876,7 +1071,7 @@ public static class FileHasher {
 	#region File Hashing
 
 	/// <summary>
-	/// Computes all 58 hash algorithms for the specified file using parallel execution.
+	/// Computes all 71 hash algorithms for the specified file using parallel execution.
 	/// </summary>
 	/// <param name="filePath">The path to the file to hash.</param>
 	/// <returns>A <see cref="FileHashResult"/> containing all computed hashes and metadata.</returns>
@@ -913,12 +1108,15 @@ public static class FileHasher {
 		// This is faster than multiple sequential reads for multiple algorithms
 		byte[] data = File.ReadAllBytes(filePath);
 
-		// Declare variables for all 58 hash results
+		// Declare variables for all 71 hash results
 		// Using explicit variables allows Parallel.Invoke to capture them efficiently
 		string crc32 = "", crc32c = "", crc64 = "", adler32 = "", fletcher16 = "", fletcher32 = "";
+		string crc16Ccitt = "", crc16Modbus = "", crc16Usb = "";
 		string xxHash32 = "", xxHash64 = "", xxHash3 = "", xxHash128 = "";
 		string murmur3_32 = "", murmur3_128 = "", cityHash64 = "", cityHash128 = "";
 		string farmHash64 = "", spookyV2_128 = "", sipHash24 = "", highwayHash64 = "";
+		string metroHash64 = "", metroHash128 = "", wyhash64 = "";
+		string fnv1a32 = "", fnv1a64 = "", djb2 = "", djb2a = "", sdbm = "", loseLose = "";
 		string md2 = "", md4 = "", md5 = "", sha0 = "", sha1 = "";
 		string sha224 = "", sha256 = "", sha384 = "", sha512 = "";
 		string sha512_224 = "", sha512_256 = "";
@@ -935,15 +1133,18 @@ public static class FileHasher {
 		// Compute all hashes in parallel for maximum performance
 		// Each lambda captures its result variable and computes one hash
 		Parallel.Invoke(
-			// === Checksums & CRCs (6) ===
+			// === Checksums & CRCs (9) ===
 			() => crc32 = ComputeCrc32(data),
 			() => crc32c = ComputeCrc32C(data),
 			() => crc64 = ComputeCrc64(data),
 			() => adler32 = ComputeAdler32(data),
 			() => fletcher16 = ComputeFletcher16(data),
 			() => fletcher32 = ComputeFletcher32(data),
+			() => crc16Ccitt = ComputeCrc16Ccitt(data),
+			() => crc16Modbus = ComputeCrc16Modbus(data),
+			() => crc16Usb = ComputeCrc16Usb(data),
 
-			// === Non-Crypto Fast Hashes (12) ===
+			// === Non-Crypto Fast Hashes (22) ===
 			() => xxHash32 = ComputeXxHash32(data),
 			() => xxHash64 = ComputeXxHash64(data),
 			() => xxHash3 = ComputeXxHash3(data),
@@ -956,6 +1157,15 @@ public static class FileHasher {
 			() => spookyV2_128 = ComputeSpookyV2_128(data),
 			() => sipHash24 = ComputeSipHash24(data),
 			() => highwayHash64 = ComputeHighwayHash64(data),
+			() => metroHash64 = ComputeMetroHash64(data),
+			() => metroHash128 = ComputeMetroHash128(data),
+			() => wyhash64 = ComputeWyhash64(data),
+			() => fnv1a32 = ComputeFnv1a32(data),
+			() => fnv1a64 = ComputeFnv1a64(data),
+			() => djb2 = ComputeDjb2(data),
+			() => djb2a = ComputeDjb2a(data),
+			() => sdbm = ComputeSdbm(data),
+			() => loseLose = ComputeLoseLose(data),
 
 			// === MD Family (3) ===
 			() => md2 = ComputeMd2(data),
@@ -1022,15 +1232,18 @@ public static class FileHasher {
 			CreatedUtc = fileInfo.CreationTimeUtc.ToString("O"),
 			ModifiedUtc = fileInfo.LastWriteTimeUtc.ToString("O"),
 
-			// Checksums & CRCs
+			// Checksums & CRCs (9)
 			Crc32 = crc32,
 			Crc32C = crc32c,
 			Crc64 = crc64,
 			Adler32 = adler32,
 			Fletcher16 = fletcher16,
 			Fletcher32 = fletcher32,
+			Crc16Ccitt = crc16Ccitt,
+			Crc16Modbus = crc16Modbus,
+			Crc16Usb = crc16Usb,
 
-			// Non-Crypto Fast Hashes
+			// Non-Crypto Fast Hashes (22)
 			XxHash32 = xxHash32,
 			XxHash64 = xxHash64,
 			XxHash3 = xxHash3,
@@ -1043,6 +1256,15 @@ public static class FileHasher {
 			SpookyV2_128 = spookyV2_128,
 			SipHash24 = sipHash24,
 			HighwayHash64 = highwayHash64,
+			MetroHash64 = metroHash64,
+			MetroHash128 = metroHash128,
+			Wyhash64 = wyhash64,
+			Fnv1a32 = fnv1a32,
+			Fnv1a64 = fnv1a64,
+			Djb2 = djb2,
+			Djb2a = djb2a,
+			Sdbm = sdbm,
+			LoseLose = loseLose,
 
 			// MD Family
 			Md2 = md2,
@@ -1383,9 +1605,12 @@ public static class FileHasher {
 
 		// Hash results storage
 		string crc32 = "", crc32c = "", crc64 = "", adler32 = "", fletcher16 = "", fletcher32 = "";
+		string crc16Ccitt = "", crc16Modbus = "", crc16Usb = "";
 		string xxHash32 = "", xxHash64 = "", xxHash3 = "", xxHash128 = "";
 		string murmur3_32 = "", murmur3_128 = "", cityHash64 = "", cityHash128 = "";
 		string farmHash64 = "", spookyV2_128 = "", sipHash24 = "", highwayHash64 = "";
+		string metroHash64 = "", metroHash128 = "", wyhash64 = "";
+		string fnv1a32 = "", fnv1a64 = "", djb2 = "", djb2a = "", sdbm = "", loseLose = "";
 		string md2 = "", md4 = "", md5 = "", sha0 = "", sha1 = "";
 		string sha224 = "", sha256 = "", sha384 = "", sha512 = "";
 		string sha512_224 = "", sha512_256 = "";
@@ -1407,6 +1632,9 @@ public static class FileHasher {
 			() => crc32 = ComputeCrc32(data),
 			() => crc32c = ComputeCrc32C(data),
 			() => crc64 = ComputeCrc64(data),
+			() => crc16Ccitt = ComputeCrc16Ccitt(data),
+			() => crc16Modbus = ComputeCrc16Modbus(data),
+			() => crc16Usb = ComputeCrc16Usb(data),
 			() => adler32 = ComputeAdler32(data),
 			() => fletcher16 = ComputeFletcher16(data),
 			() => fletcher32 = ComputeFletcher32(data)
@@ -1428,7 +1656,16 @@ public static class FileHasher {
 			() => farmHash64 = ComputeFarmHash64(data),
 			() => spookyV2_128 = ComputeSpookyV2_128(data),
 			() => sipHash24 = ComputeSipHash24(data),
-			() => highwayHash64 = ComputeHighwayHash64(data)
+			() => highwayHash64 = ComputeHighwayHash64(data),
+			() => metroHash64 = ComputeMetroHash64(data),
+			() => metroHash128 = ComputeMetroHash128(data),
+			() => wyhash64 = ComputeWyhash64(data),
+			() => fnv1a32 = ComputeFnv1a32(data),
+			() => fnv1a64 = ComputeFnv1a64(data),
+			() => djb2 = ComputeDjb2(data),
+			() => djb2a = ComputeDjb2a(data),
+			() => sdbm = ComputeSdbm(data),
+			() => loseLose = ComputeLoseLose(data)
 		);
 		catSw.Stop();
 		diagnostics.FastHashesMs = catSw.ElapsedMilliseconds;
@@ -1532,6 +1769,7 @@ public static class FileHasher {
 			ModifiedUtc = fileInfo.LastWriteTimeUtc.ToString("O"),
 
 			Crc32 = crc32, Crc32C = crc32c, Crc64 = crc64,
+			Crc16Ccitt = crc16Ccitt, Crc16Modbus = crc16Modbus, Crc16Usb = crc16Usb,
 			Adler32 = adler32, Fletcher16 = fletcher16, Fletcher32 = fletcher32,
 
 			XxHash32 = xxHash32, XxHash64 = xxHash64, XxHash3 = xxHash3, XxHash128 = xxHash128,
@@ -1539,6 +1777,9 @@ public static class FileHasher {
 			CityHash64 = cityHash64, CityHash128 = cityHash128,
 			FarmHash64 = farmHash64, SpookyV2_128 = spookyV2_128,
 			SipHash24 = sipHash24, HighwayHash64 = highwayHash64,
+			MetroHash64 = metroHash64, MetroHash128 = metroHash128, Wyhash64 = wyhash64,
+			Fnv1a32 = fnv1a32, Fnv1a64 = fnv1a64,
+			Djb2 = djb2, Djb2a = djb2a, Sdbm = sdbm, LoseLose = loseLose,
 
 			Md2 = md2, Md4 = md4, Md5 = md5,
 			Sha0 = sha0, Sha1 = sha1,

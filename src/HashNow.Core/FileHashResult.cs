@@ -3,15 +3,15 @@ using System.Text.Json.Serialization;
 namespace HashNow.Core;
 
 /// <summary>
-/// Represents the complete result of hashing a file with all 58 supported hash algorithms.
+/// Represents the complete result of hashing a file with all 71 supported hash algorithms.
 /// </summary>
 /// <remarks>
 /// <para>
 /// This class contains all computed hash values organized into four categories:
 /// </para>
 /// <list type="number">
-///   <item><description>Checksums &amp; CRCs (6 algorithms) - Fast error detection</description></item>
-///   <item><description>Non-Crypto Fast Hashes (12 algorithms) - High-speed, non-cryptographic</description></item>
+///   <item><description>Checksums &amp; CRCs (9 algorithms) - Fast error detection</description></item>
+///   <item><description>Non-Crypto Fast Hashes (22 algorithms) - High-speed, non-cryptographic</description></item>
 ///   <item><description>Cryptographic Hashes (26 algorithms) - Security-focused</description></item>
 ///   <item><description>Other Crypto Hashes (14 algorithms) - Specialized cryptographic</description></item>
 /// </list>
@@ -152,9 +152,45 @@ public sealed class FileHashResult {
 	[JsonPropertyName("fletcher32")]
 	public required string Fletcher32 { get; init; }
 
+	/// <summary>
+	/// Gets the CRC-16-CCITT checksum.
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 4 hex characters (16 bits)</para>
+	/// <para>CRC-16-CCITT uses polynomial 0x1021, commonly used in
+	/// X.25, HDLC, and Bluetooth protocols.</para>
+	/// </remarks>
+	/// <example>"29b1"</example>
+	[JsonPropertyName("crc16Ccitt")]
+	public required string Crc16Ccitt { get; init; }
+
+	/// <summary>
+	/// Gets the CRC-16-MODBUS checksum.
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 4 hex characters (16 bits)</para>
+	/// <para>CRC-16-MODBUS uses polynomial 0x8005 with init 0xFFFF,
+	/// used in MODBUS industrial communication protocol.</para>
+	/// </remarks>
+	/// <example>"4b37"</example>
+	[JsonPropertyName("crc16Modbus")]
+	public required string Crc16Modbus { get; init; }
+
+	/// <summary>
+	/// Gets the CRC-16-USB checksum.
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 4 hex characters (16 bits)</para>
+	/// <para>CRC-16-USB uses polynomial 0x8005 with inversion,
+	/// used in USB protocol error detection.</para>
+	/// </remarks>
+	/// <example>"b4c8"</example>
+	[JsonPropertyName("crc16Usb")]
+	public required string Crc16Usb { get; init; }
+
 	#endregion
 
-	#region Non-Crypto Fast Hashes (12 algorithms)
+	#region Non-Crypto Fast Hashes (22 algorithms)
 
 	/// <summary>
 	/// Gets the xxHash32 hash value.
@@ -294,11 +330,117 @@ public sealed class FileHashResult {
 	/// <remarks>
 	/// <para>Output: 16 hex characters (64 bits)</para>
 	/// <para>HighwayHash is designed for SIMD acceleration on modern CPUs.
-	/// Currently uses SipHash as fallback implementation.</para>
+	/// Uses native SIMD implementation from StreamHash.</para>
 	/// </remarks>
 	/// <example>"2c4e6a8b0d2f4a6c"</example>
 	[JsonPropertyName("highwayHash64")]
 	public required string HighwayHash64 { get; init; }
+
+	/// <summary>
+	/// Gets the MetroHash64 hash value.
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 16 hex characters (64 bits)</para>
+	/// <para>MetroHash64 is one of the fastest hash functions available (~15 GB/s).
+	/// Created by J. Andrew Rogers for maximum throughput.</para>
+	/// </remarks>
+	/// <example>"3a1b5c7d9e2f4a6b"</example>
+	[JsonPropertyName("metroHash64")]
+	public required string MetroHash64 { get; init; }
+
+	/// <summary>
+	/// Gets the MetroHash128 hash value.
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 32 hex characters (128 bits)</para>
+	/// <para>MetroHash128 provides 128-bit output for lower collision probability.</para>
+	/// </remarks>
+	/// <example>"3a1b5c7d9e2f4a6b8c0d2e4f6a8b0c2d"</example>
+	[JsonPropertyName("metroHash128")]
+	public required string MetroHash128 { get; init; }
+
+	/// <summary>
+	/// Gets the wyhash64 hash value.
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 16 hex characters (64 bits)</para>
+	/// <para>wyhash is among the fastest hash functions (15-25 GB/s).
+	/// Created by Wang Yi with excellent quality and speed.</para>
+	/// </remarks>
+	/// <example>"7e9f3b1c5a2d8e4f"</example>
+	[JsonPropertyName("wyhash64")]
+	public required string Wyhash64 { get; init; }
+
+	/// <summary>
+	/// Gets the FNV-1a 32-bit hash value.
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 8 hex characters (32 bits)</para>
+	/// <para>FNV-1a (Fowler-Noll-Vo) is a simple, fast hash function using XOR-then-multiply.
+	/// Good distribution for hash tables.</para>
+	/// </remarks>
+	/// <example>"811c9dc5"</example>
+	[JsonPropertyName("fnv1a32")]
+	public required string Fnv1a32 { get; init; }
+
+	/// <summary>
+	/// Gets the FNV-1a 64-bit hash value.
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 16 hex characters (64 bits)</para>
+	/// <para>FNV-1a-64 provides better collision resistance than the 32-bit variant.</para>
+	/// </remarks>
+	/// <example>"cbf29ce484222325"</example>
+	[JsonPropertyName("fnv1a64")]
+	public required string Fnv1a64 { get; init; }
+
+	/// <summary>
+	/// Gets the DJB2 hash value.
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 8 hex characters (32 bits)</para>
+	/// <para>DJB2 by Dan Bernstein uses multiply-and-add: hash * 33 + byte.
+	/// One of the most widely used simple hash functions.</para>
+	/// </remarks>
+	/// <example>"00001505"</example>
+	[JsonPropertyName("djb2")]
+	public required string Djb2 { get; init; }
+
+	/// <summary>
+	/// Gets the DJB2a hash value (XOR variant).
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 8 hex characters (32 bits)</para>
+	/// <para>DJB2a uses XOR instead of addition: hash * 33 ^ byte.
+	/// Often provides better avalanche properties.</para>
+	/// </remarks>
+	/// <example>"00001505"</example>
+	[JsonPropertyName("djb2a")]
+	public required string Djb2a { get; init; }
+
+	/// <summary>
+	/// Gets the SDBM hash value.
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 8 hex characters (32 bits)</para>
+	/// <para>SDBM hash from SDBM database: hash * 65599 + byte.
+	/// Good distribution for short strings.</para>
+	/// </remarks>
+	/// <example>"00000000"</example>
+	[JsonPropertyName("sdbm")]
+	public required string Sdbm { get; init; }
+
+	/// <summary>
+	/// Gets the Lose Lose hash value.
+	/// </summary>
+	/// <remarks>
+	/// <para>Output: 8 hex characters (32 bits)</para>
+	/// <para><strong>⚠️ Poor distribution:</strong> Simple byte sum hash.
+	/// Educational only - do not use for hash tables or data integrity.</para>
+	/// </remarks>
+	/// <example>"00000000"</example>
+	[JsonPropertyName("loseLose")]
+	public required string LoseLose { get; init; }
 
 	#endregion
 
