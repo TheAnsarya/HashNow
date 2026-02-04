@@ -9,8 +9,8 @@
 
 <AssemblyName>HashNow.Core</AssemblyName>
 <RootNamespace>HashNow.Core</RootNamespace>
-<Version>1.2.0</Version>
-<Description>Core library for computing 71 hash algorithms in parallel using StreamHash</Description>
+<Version>1.3.0</Version>
+<Description>Core library for computing 70 hash algorithms in parallel using StreamHash HashFacade</Description>
 <Authors>TheAnsarya</Authors>
 <Company>TheAnsarya</Company>
 <Product>HashNow</Product>
@@ -21,15 +21,9 @@
 </PropertyGroup>
 
 	<ItemGroup>
-	  <!-- StreamHash for all 71 hash algorithms with streaming support -->
+	  <!-- StreamHash provides HashFacade for all 70 hash algorithms with streaming support -->
+	  <!-- Includes BouncyCastle, Blake2/3, and System.IO.Hashing transitively -->
 	  <PackageReference Include="StreamHash" Version="1.6.3" />
-	  <!-- BouncyCastle for cryptographic hashes (MD2/4, SHA-3, Keccak, Skein, etc.) -->
-	  <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
-	  <!-- BLAKE family hashes -->
-	  <PackageReference Include="Blake3" Version="2.2.0" />
-	  <PackageReference Include="SauceControl.Blake2Fast" Version="2.0.0" />
-	  <!-- Built-in hashing for SHA-256, MD5, etc. -->
-	  <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
 	</ItemGroup>
 
 </Project>

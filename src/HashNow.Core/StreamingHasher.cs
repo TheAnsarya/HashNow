@@ -1,16 +1,11 @@
 using System.Buffers;
 using System.Diagnostics;
-using System.IO.Hashing;
-using System.Security.Cryptography;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Digests;
-using Blake2Fast;
 using StreamHash.Core;
 
 namespace HashNow.Core;
 
 /// <summary>
-/// Streaming file hasher that reads files in chunks and computes all 58 algorithms incrementally.
+/// Streaming file hasher that uses StreamHash's HashFacade for all 70 algorithms.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -18,22 +13,13 @@ namespace HashNow.Core;
 /// </para>
 /// <list type="bullet">
 ///   <item><description>Reading the file once in chunks (default 1MB)</description></item>
-///   <item><description>Feeding each chunk to all hash algorithms simultaneously</description></item>
+///   <item><description>Feeding each chunk to all hash algorithms simultaneously via HashFacade</description></item>
 ///   <item><description>Reporting progress based on bytes read</description></item>
 ///   <item><description>Using ArrayPool to minimize GC pressure</description></item>
 /// </list>
 /// <para>
-/// <b>Streaming Algorithms (50 total):</b> Most algorithms support incremental hashing and work
-/// with any file size: MD5, SHA family, BLAKE2/3, xxHash, CRC32/32C/64, Adler-32, Fletcher-16/32,
-/// and all BouncyCastle digests (RIPEMD, Whirlpool, Tiger, GOST, Streebog, Skein, SM3, etc.).
-/// </para>
-/// <para>
-/// <b>Non-Streaming Algorithms (8 total):</b> These require full data and are limited to files ≤1GB:
-/// MurmurHash3 (32/128), CityHash (64/128), SpookyV2, SipHash, FarmHash, HighwayHash.
-/// Files larger than 1GB will show "N/A (file too large)" for these 8 algorithms.
-/// </para>
-/// <para>
-/// For a 4GB file, this uses only ~1MB of buffer memory instead of 4GB.
+/// All 70 algorithms are computed in a single pass through the file using StreamHash's
+/// unified streaming interface.
 /// </para>
 /// </remarks>
 internal sealed class StreamingHasher : IDisposable {
@@ -48,129 +34,29 @@ internal sealed class StreamingHasher : IDisposable {
 
 	#region Hash State Fields
 
-	// .NET built-in incremental hashers
-	private readonly IncrementalHash _md5;
-	private readonly IncrementalHash _sha1;
-	private readonly IncrementalHash _sha256;
-	private readonly IncrementalHash _sha384;
-	private readonly IncrementalHash _sha512;
-
-	// System.IO.Hashing (incremental)
-	private readonly Crc32 _crc32 = new();
-	private readonly Crc64 _crc64 = new();
-	private readonly XxHash32 _xxHash32 = new();
-	private readonly XxHash64 _xxHash64 = new();
-	private readonly XxHash3 _xxHash3 = new();
-	private readonly XxHash128 _xxHash128 = new();
-
-	// BouncyCastle digests (incremental via BlockUpdate)
-	private readonly MD2Digest _md2 = new();
-	private readonly MD4Digest _md4 = new();
-	private readonly Sha224Digest _sha224 = new();
-	private readonly Sha512tDigest _sha512_224 = new(224);
-	private readonly Sha512tDigest _sha512_256 = new(256);
-	private readonly Sha3Digest _sha3_224 = new(224);
-	private readonly Sha3Digest _sha3_256 = new(256);
-	private readonly Sha3Digest _sha3_384 = new(384);
-	private readonly Sha3Digest _sha3_512 = new(512);
-	private readonly KeccakDigest _keccak256 = new(256);
-	private readonly KeccakDigest _keccak512 = new(512);
-	private readonly RipeMD128Digest _ripemd128 = new();
-	private readonly RipeMD160Digest _ripemd160 = new();
-	private readonly RipeMD256Digest _ripemd256 = new();
-	private readonly RipeMD320Digest _ripemd320 = new();
-	private readonly Org.BouncyCastle.Crypto.Digests.WhirlpoolDigest _whirlpool = new();
-	private readonly TigerDigest _tiger192 = new();
-	private readonly Gost3411Digest _gost94 = new();
-	private readonly Gost3411_2012_256Digest _streebog256 = new();
-	private readonly Gost3411_2012_512Digest _streebog512 = new();
-	private readonly SkeinDigest _skein256 = new(256, 256);
-	private readonly SkeinDigest _skein512 = new(512, 512);
-	private readonly SkeinDigest _skein1024 = new(1024, 1024);
-	private readonly SM3Digest _sm3 = new();
-
-	// SHA-0 and BLAKE use BouncyCastle approximations
-	private readonly Sha1Digest _sha0 = new(); // SHA-0 approximated with SHA-1
-	private readonly Sha3Digest _blake256Fallback = new(256); // BLAKE approximated
-	private readonly Sha3Digest _blake512Fallback = new(512);
-	private readonly Sha3Digest _groestl256Fallback = new(256);
-	private readonly Sha3Digest _groestl512Fallback = new(512);
-	private readonly Sha3Digest _jh256Fallback = new(256);
-	private readonly Sha3Digest _jh512Fallback = new(512);
-	private readonly KeccakDigest _k12Fallback = new(256);
-
-	// Blake2Fast uses streaming - IBlake2Incremental interface
-	private IBlake2Incremental _blake2b;
-	private IBlake2Incremental _blake2s;
-
-	// BLAKE3 supports incremental hashing
-	private readonly Blake3.Hasher _blake3 = Blake3.Hasher.New();
-
-	// CRC32C via System.IO.Hashing (streaming)
-	private readonly Crc32 _crc32c = new();
-
-	// StreamHash streaming implementations - CRC16 variants
-	private readonly Crc16Streaming _crc16Ccitt = new(Crc16Variant.Ccitt);
-	private readonly Crc16Streaming _crc16Modbus = new(Crc16Variant.Modbus);
-	private readonly Crc16Streaming _crc16Usb = new(Crc16Variant.Usb);
-
-	// StreamHash streaming implementations - simple hashes
-	private readonly Fnv1a32Streaming _fnv1a32 = new();
-	private readonly Fnv1a64Streaming _fnv1a64 = new();
-	private readonly Djb2Streaming _djb2 = new(useXor: false);
-	private readonly Djb2Streaming _djb2a = new(useXor: true);
-	private readonly SdbmStreaming _sdbm = new();
-	private readonly LoseLoseStreaming _loseLose = new();
-
-	// StreamHash streaming implementations - fast hashes
-	private readonly MetroHash64 _metroHash64 = new();
-	private readonly MetroHash128 _metroHash128Streaming = new();
-	private readonly Wyhash64 _wyhash64Streaming = new();
-
-	// Streaming checksums - maintain state manually
-	private uint _adler32_a = 1;
-	private uint _adler32_b = 0;
-	private ushort _fletcher16_sum1 = 0;
-	private ushort _fletcher16_sum2 = 0;
-	private uint _fletcher32_sum1 = 0;
-	private uint _fletcher32_sum2 = 0;
-
-	// Accumulators for algorithms that TRULY need full data (no streaming API available)
-	// Only 8 algorithms: MurmurHash3 (32/128), CityHash (64/128), SpookyV2, SipHash, FarmHash, HighwayHash
-	// Only used for files <= MaxAccumulateSize (1GB)
-	private readonly MemoryStream _fullDataStream = new();
-	private readonly bool _accumulateFullData;
+	/// <summary>
+	/// Dictionary of all streaming hashers, keyed by algorithm.
+	/// </summary>
+	private readonly Dictionary<HashAlgorithm, IStreamingHashBytes> _hashers;
 
 	/// <summary>
-	/// Maximum file size to accumulate for non-streaming algorithms (200 MB).
-	/// Files larger than this will have "N/A (file too large)" for non-streaming algorithms.
+	/// List of all algorithms for iteration.
 	/// </summary>
-	/// <remarks>
-	/// Only 8 algorithms require full data: MurmurHash3 (32/128), CityHash (64/128),
-	/// SpookyV2, SipHash, FarmHash, HighwayHash. All other 50 algorithms support streaming.
-	/// </remarks>
-	public const long MaxAccumulateSize = 200L * 1024 * 1024;
+	private static readonly HashAlgorithm[] AllAlgorithms = Enum.GetValues<HashAlgorithm>();
 
 	#endregion
 
 	#region Constructor
 
 	/// <summary>
-	/// Initializes all hash algorithm states.
+	/// Initializes all hash algorithm states using HashFacade.
 	/// </summary>
-	/// <param name="fileSize">The size of the file to hash, used to determine if full data should be accumulated.</param>
-	public StreamingHasher(long fileSize = 0) {
-		_md5 = IncrementalHash.CreateHash(HashAlgorithmName.MD5);
-		_sha1 = IncrementalHash.CreateHash(HashAlgorithmName.SHA1);
-		_sha256 = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-		_sha384 = IncrementalHash.CreateHash(HashAlgorithmName.SHA384);
-		_sha512 = IncrementalHash.CreateHash(HashAlgorithmName.SHA512);
+	public StreamingHasher() {
+		_hashers = new Dictionary<HashAlgorithm, IStreamingHashBytes>(AllAlgorithms.Length);
 
-		_blake2b = Blake2b.CreateIncrementalHasher(64);
-		_blake2s = Blake2s.CreateIncrementalHasher(32);
-
-		// Only accumulate full data for files <= 1GB
-		_accumulateFullData = fileSize <= MaxAccumulateSize;
+		foreach (var algorithm in AllAlgorithms) {
+			_hashers[algorithm] = HashFacade.CreateStreaming(algorithm);
+		}
 	}
 
 	#endregion
@@ -182,307 +68,146 @@ internal sealed class StreamingHasher : IDisposable {
 	/// </summary>
 	/// <param name="data">The data chunk to process.</param>
 	public void ProcessChunk(ReadOnlySpan<byte> data) {
-		// .NET built-in
-		_md5.AppendData(data);
-		_sha1.AppendData(data);
-		_sha256.AppendData(data);
-		_sha384.AppendData(data);
-		_sha512.AppendData(data);
-
-		// System.IO.Hashing
-		_crc32.Append(data);
-		_crc64.Append(data);
-		_xxHash32.Append(data);
-		_xxHash64.Append(data);
-		_xxHash3.Append(data);
-		_xxHash128.Append(data);
-
-		// BouncyCastle digests
-		var dataArray = data.ToArray(); // BouncyCastle needs byte[]
-		_md2.BlockUpdate(dataArray, 0, dataArray.Length);
-		_md4.BlockUpdate(dataArray, 0, dataArray.Length);
-		_sha224.BlockUpdate(dataArray, 0, dataArray.Length);
-		_sha512_224.BlockUpdate(dataArray, 0, dataArray.Length);
-		_sha512_256.BlockUpdate(dataArray, 0, dataArray.Length);
-		_sha3_224.BlockUpdate(dataArray, 0, dataArray.Length);
-		_sha3_256.BlockUpdate(dataArray, 0, dataArray.Length);
-		_sha3_384.BlockUpdate(dataArray, 0, dataArray.Length);
-		_sha3_512.BlockUpdate(dataArray, 0, dataArray.Length);
-		_keccak256.BlockUpdate(dataArray, 0, dataArray.Length);
-		_keccak512.BlockUpdate(dataArray, 0, dataArray.Length);
-		_ripemd128.BlockUpdate(dataArray, 0, dataArray.Length);
-		_ripemd160.BlockUpdate(dataArray, 0, dataArray.Length);
-		_ripemd256.BlockUpdate(dataArray, 0, dataArray.Length);
-		_ripemd320.BlockUpdate(dataArray, 0, dataArray.Length);
-		_whirlpool.BlockUpdate(dataArray, 0, dataArray.Length);
-		_tiger192.BlockUpdate(dataArray, 0, dataArray.Length);
-		_gost94.BlockUpdate(dataArray, 0, dataArray.Length);
-		_streebog256.BlockUpdate(dataArray, 0, dataArray.Length);
-		_streebog512.BlockUpdate(dataArray, 0, dataArray.Length);
-		_skein256.BlockUpdate(dataArray, 0, dataArray.Length);
-		_skein512.BlockUpdate(dataArray, 0, dataArray.Length);
-		_skein1024.BlockUpdate(dataArray, 0, dataArray.Length);
-		_sm3.BlockUpdate(dataArray, 0, dataArray.Length);
-		_sha0.BlockUpdate(dataArray, 0, dataArray.Length);
-		_blake256Fallback.BlockUpdate(dataArray, 0, dataArray.Length);
-		_blake512Fallback.BlockUpdate(dataArray, 0, dataArray.Length);
-		_groestl256Fallback.BlockUpdate(dataArray, 0, dataArray.Length);
-		_groestl512Fallback.BlockUpdate(dataArray, 0, dataArray.Length);
-		_jh256Fallback.BlockUpdate(dataArray, 0, dataArray.Length);
-		_jh512Fallback.BlockUpdate(dataArray, 0, dataArray.Length);
-		_k12Fallback.BlockUpdate(dataArray, 0, dataArray.Length);
-
-		// Blake2Fast streaming
-		_blake2b.Update(data);
-		_blake2s.Update(data);
-
-		// BLAKE3 streaming
-		_blake3.Update(data);
-
-		// CRC32C streaming (note: using standard CRC32 polynomial, not Castagnoli)
-		_crc32c.Append(data);
-
-		// StreamHash CRC16 variants
-		_crc16Ccitt.Update(data);
-		_crc16Modbus.Update(data);
-		_crc16Usb.Update(data);
-
-		// StreamHash simple hashes
-		_fnv1a32.Update(data);
-		_fnv1a64.Update(data);
-		_djb2.Update(data);
-		_djb2a.Update(data);
-		_sdbm.Update(data);
-		_loseLose.Update(data);
-
-		// StreamHash fast hashes
-		_metroHash64.Update(data);
-		_metroHash128Streaming.Update(data);
-		_wyhash64Streaming.Update(data);
-
-		// Adler-32 streaming
-		const uint MOD_ADLER = 65521;
-		foreach (byte b in data) {
-			_adler32_a = (_adler32_a + b) % MOD_ADLER;
-			_adler32_b = (_adler32_b + _adler32_a) % MOD_ADLER;
-		}
-
-		// Fletcher-16 streaming
-		foreach (byte b in data) {
-			_fletcher16_sum1 = (ushort)((_fletcher16_sum1 + b) % 255);
-			_fletcher16_sum2 = (ushort)((_fletcher16_sum2 + _fletcher16_sum1) % 255);
-		}
-
-		// Fletcher-32 streaming (processes 16-bit words)
-		int i = 0;
-		for (; i < data.Length - 1; i += 2) {
-			ushort word = (ushort)(data[i] | (data[i + 1] << 8));
-			_fletcher32_sum1 = (_fletcher32_sum1 + word) % 65535;
-			_fletcher32_sum2 = (_fletcher32_sum2 + _fletcher32_sum1) % 65535;
-		}
-		// Handle odd byte at end (will be combined with next chunk's first byte)
-		// For simplicity, treat odd bytes as single-byte words
-		if (i < data.Length) {
-			_fletcher32_sum1 = (_fletcher32_sum1 + data[i]) % 65535;
-			_fletcher32_sum2 = (_fletcher32_sum2 + _fletcher32_sum1) % 65535;
-		}
-
-		// Accumulate ONLY for truly non-streaming algorithms (8 algorithms)
-		// MurmurHash3 (32/128), CityHash (64/128), SpookyV2, SipHash, FarmHash, HighwayHash
-		if (_accumulateFullData) {
-			_fullDataStream.Write(dataArray, 0, dataArray.Length);
+		foreach (var hasher in _hashers.Values) {
+			hasher.Update(data);
 		}
 	}
 
 	/// <summary>
-	/// Finalizes all hash computations and returns the results.
+	/// Finalizes all hashes and returns the results as a dictionary.
 	/// </summary>
-	/// <returns>A dictionary of algorithm names to hex string results.</returns>
-	public Dictionary<string, string> Finalize() {
-		var results = new Dictionary<string, string>(64);
-		const string NotAvailable = "N/A (file too large)";
+	/// <returns>Dictionary mapping algorithm names to hex string results.</returns>
+	public Dictionary<string, string> FinalizeAll() {
+		var results = new Dictionary<string, string>(_hashers.Count);
 
-		// Get full data for non-streaming algorithms (only if accumulated)
-		var fullData = _accumulateFullData ? _fullDataStream.ToArray() : null;
-
-		// .NET built-in
-		results["Md5"] = ToHex(_md5.GetHashAndReset());
-		results["Sha1"] = ToHex(_sha1.GetHashAndReset());
-		results["Sha256"] = ToHex(_sha256.GetHashAndReset());
-		results["Sha384"] = ToHex(_sha384.GetHashAndReset());
-		results["Sha512"] = ToHex(_sha512.GetHashAndReset());
-
-		// System.IO.Hashing
-		results["Crc32"] = ToHex(_crc32.GetCurrentHash());
-		results["Crc64"] = ToHex(_crc64.GetCurrentHash());
-		results["XxHash32"] = ToHex(_xxHash32.GetCurrentHash());
-		results["XxHash64"] = ToHex(_xxHash64.GetCurrentHash());
-		results["XxHash3"] = ToHex(_xxHash3.GetCurrentHash());
-		results["XxHash128"] = ToHex(_xxHash128.GetCurrentHash());
-
-		// BouncyCastle digests
-		results["Md2"] = FinalizeDigest(_md2);
-		results["Md4"] = FinalizeDigest(_md4);
-		results["Sha224"] = FinalizeDigest(_sha224);
-		results["Sha512_224"] = FinalizeDigest(_sha512_224);
-		results["Sha512_256"] = FinalizeDigest(_sha512_256);
-		results["Sha3_224"] = FinalizeDigest(_sha3_224);
-		results["Sha3_256"] = FinalizeDigest(_sha3_256);
-		results["Sha3_384"] = FinalizeDigest(_sha3_384);
-		results["Sha3_512"] = FinalizeDigest(_sha3_512);
-		results["Keccak256"] = FinalizeDigest(_keccak256);
-		results["Keccak512"] = FinalizeDigest(_keccak512);
-		results["Ripemd128"] = FinalizeDigest(_ripemd128);
-		results["Ripemd160"] = FinalizeDigest(_ripemd160);
-		results["Ripemd256"] = FinalizeDigest(_ripemd256);
-		results["Ripemd320"] = FinalizeDigest(_ripemd320);
-		results["Whirlpool"] = FinalizeDigest(_whirlpool);
-		results["Tiger192"] = FinalizeDigest(_tiger192);
-		results["Gost94"] = FinalizeDigest(_gost94);
-		results["Streebog256"] = FinalizeDigest(_streebog256);
-		results["Streebog512"] = FinalizeDigest(_streebog512);
-		results["Skein256"] = FinalizeDigest(_skein256);
-		results["Skein512"] = FinalizeDigest(_skein512);
-		results["Skein1024"] = FinalizeDigest(_skein1024);
-		results["Sm3"] = FinalizeDigest(_sm3);
-		results["Sha0"] = FinalizeDigest(_sha0);
-		results["Blake256"] = FinalizeDigest(_blake256Fallback);
-		results["Blake512"] = FinalizeDigest(_blake512Fallback);
-		results["Groestl256"] = FinalizeDigest(_groestl256Fallback);
-		results["Groestl512"] = FinalizeDigest(_groestl512Fallback);
-		results["Jh256"] = FinalizeDigest(_jh256Fallback);
-		results["Jh512"] = FinalizeDigest(_jh512Fallback);
-		results["KangarooTwelve"] = FinalizeDigest(_k12Fallback);
-
-		// Blake2Fast
-		Span<byte> blake2bHash = stackalloc byte[64];
-		Span<byte> blake2sHash = stackalloc byte[32];
-		_blake2b.Finish(blake2bHash);
-		_blake2s.Finish(blake2sHash);
-		results["Blake2b"] = ToHex(blake2bHash.ToArray());
-		results["Blake2s"] = ToHex(blake2sHash.ToArray());
-
-		// BLAKE3 (streaming) - finalize the incremental hasher
-		var blake3Hash = _blake3.Finalize();
-		results["Blake3"] = ToHex(blake3Hash.AsSpan().ToArray());
-
-		// CRC32C (streaming)
-		results["Crc32C"] = ToHex(_crc32c.GetCurrentHash());
-
-		// StreamHash CRC16 variants
-		results["Crc16Ccitt"] = _crc16Ccitt.Finalize().ToString("x4");
-		results["Crc16Modbus"] = _crc16Modbus.Finalize().ToString("x4");
-		results["Crc16Usb"] = _crc16Usb.Finalize().ToString("x4");
-
-		// StreamHash simple hashes
-		results["Fnv1a32"] = _fnv1a32.Finalize().ToString("x8");
-		results["Fnv1a64"] = _fnv1a64.Finalize().ToString("x16");
-		results["Djb2"] = _djb2.Finalize().ToString("x8");
-		results["Djb2a"] = _djb2a.Finalize().ToString("x8");
-		results["Sdbm"] = _sdbm.Finalize().ToString("x8");
-		results["LoseLose"] = _loseLose.Finalize().ToString("x8");
-
-		// StreamHash fast hashes
-		results["MetroHash64"] = _metroHash64.Finalize().ToString("x16");
-		results["MetroHash128"] = ToHex(((IStreamingHashBytes)_metroHash128Streaming).FinalizeBytes());
-		results["Wyhash64"] = ToHex(_wyhash64Streaming.FinalizeToBytes());
-
-		// Adler-32 (streaming) - combine state into final hash
-		results["Adler32"] = ((_adler32_b << 16) | _adler32_a).ToString("x8");
-
-		// Fletcher-16 (streaming)
-		results["Fletcher16"] = ((_fletcher16_sum2 << 8) | _fletcher16_sum1).ToString("x4");
-
-		// Fletcher-32 (streaming)
-		results["Fletcher32"] = ((_fletcher32_sum2 << 16) | _fletcher32_sum1).ToString("x8");
-
-		// Truly non-streaming algorithms (8 total) - require full data, skip for large files
-		// MurmurHash3 (32/128), CityHash (64/128), SpookyV2, SipHash, FarmHash, HighwayHash
-		if (fullData != null) {
-			results["Murmur3_32"] = FileHasher.ComputeMurmur3_32(fullData);
-			results["Murmur3_128"] = FileHasher.ComputeMurmur3_128(fullData);
-			results["CityHash64"] = FileHasher.ComputeCityHash64(fullData);
-			results["CityHash128"] = FileHasher.ComputeCityHash128(fullData);
-			results["FarmHash64"] = FileHasher.ComputeFarmHash64(fullData);
-			results["SpookyV2_128"] = FileHasher.ComputeSpookyV2_128(fullData);
-			results["SipHash24"] = FileHasher.ComputeSipHash24(fullData);
-			results["HighwayHash64"] = FileHasher.ComputeHighwayHash64(fullData);
-		} else {
-			// File too large for truly non-streaming algorithms (8 algorithms)
-			// These libraries don't support incremental hashing
-			results["Murmur3_32"] = NotAvailable;
-			results["Murmur3_128"] = NotAvailable;
-			results["CityHash64"] = NotAvailable;
-			results["CityHash128"] = NotAvailable;
-			results["FarmHash64"] = NotAvailable;
-			results["SpookyV2_128"] = NotAvailable;
-			results["SipHash24"] = NotAvailable;
-			results["HighwayHash64"] = NotAvailable;
+		foreach (var kvp in _hashers) {
+			string name = GetResultKey(kvp.Key);
+			results[name] = kvp.Value.FinalizeHex();
 		}
 
 		return results;
 	}
 
 	/// <summary>
-	/// Finalizes a BouncyCastle digest and returns hex string.
+	/// Maps HashAlgorithm enum to FileHashResult property name.
 	/// </summary>
-	private static string FinalizeDigest(IDigest digest) {
-		var output = new byte[digest.GetDigestSize()];
-		digest.DoFinal(output, 0);
-		return ToHex(output);
-	}
+	private static string GetResultKey(HashAlgorithm algorithm) {
+		return algorithm switch {
+			// Checksums
+			HashAlgorithm.Crc32 => "Crc32",
+			HashAlgorithm.Crc32C => "Crc32C",
+			HashAlgorithm.Crc64 => "Crc64",
+			HashAlgorithm.Crc16Ccitt => "Crc16Ccitt",
+			HashAlgorithm.Crc16Modbus => "Crc16Modbus",
+			HashAlgorithm.Crc16Usb => "Crc16Usb",
+			HashAlgorithm.Adler32 => "Adler32",
+			HashAlgorithm.Fletcher16 => "Fletcher16",
+			HashAlgorithm.Fletcher32 => "Fletcher32",
 
-	/// <summary>
-	/// Converts bytes to lowercase hex string.
-	/// </summary>
-	private static string ToHex(byte[] bytes) => Convert.ToHexStringLower(bytes);
+			// Non-Crypto Fast
+			HashAlgorithm.XxHash32 => "XxHash32",
+			HashAlgorithm.XxHash64 => "XxHash64",
+			HashAlgorithm.XxHash3 => "XxHash3",
+			HashAlgorithm.XxHash128 => "XxHash128",
+			HashAlgorithm.MurmurHash3_32 => "Murmur3_32",
+			HashAlgorithm.MurmurHash3_128 => "Murmur3_128",
+			HashAlgorithm.CityHash64 => "CityHash64",
+			HashAlgorithm.CityHash128 => "CityHash128",
+			HashAlgorithm.FarmHash64 => "FarmHash64",
+			HashAlgorithm.SpookyHash128 => "SpookyV2_128",
+			HashAlgorithm.SipHash24 => "SipHash24",
+			HashAlgorithm.HighwayHash64 => "HighwayHash64",
+			HashAlgorithm.MetroHash64 => "MetroHash64",
+			HashAlgorithm.MetroHash128 => "MetroHash128",
+			HashAlgorithm.Wyhash64 => "Wyhash64",
+			HashAlgorithm.Fnv1a32 => "Fnv1a32",
+			HashAlgorithm.Fnv1a64 => "Fnv1a64",
+			HashAlgorithm.Djb2 => "Djb2",
+			HashAlgorithm.Djb2a => "Djb2a",
+			HashAlgorithm.Sdbm => "Sdbm",
+			HashAlgorithm.LoseLose => "LoseLose",
+
+			// MD Family
+			HashAlgorithm.Md2 => "Md2",
+			HashAlgorithm.Md4 => "Md4",
+			HashAlgorithm.Md5 => "Md5",
+
+			// SHA-1/2 Family
+			HashAlgorithm.Sha0 => "Sha0",
+			HashAlgorithm.Sha1 => "Sha1",
+			HashAlgorithm.Sha224 => "Sha224",
+			HashAlgorithm.Sha256 => "Sha256",
+			HashAlgorithm.Sha384 => "Sha384",
+			HashAlgorithm.Sha512 => "Sha512",
+			HashAlgorithm.Sha512_224 => "Sha512_224",
+			HashAlgorithm.Sha512_256 => "Sha512_256",
+
+			// SHA-3 & Keccak
+			HashAlgorithm.Sha3_224 => "Sha3_224",
+			HashAlgorithm.Sha3_256 => "Sha3_256",
+			HashAlgorithm.Sha3_384 => "Sha3_384",
+			HashAlgorithm.Sha3_512 => "Sha3_512",
+			HashAlgorithm.Keccak256 => "Keccak256",
+			HashAlgorithm.Keccak512 => "Keccak512",
+
+			// BLAKE Family
+			HashAlgorithm.Blake256 => "Blake256",
+			HashAlgorithm.Blake512 => "Blake512",
+			HashAlgorithm.Blake2b => "Blake2b",
+			HashAlgorithm.Blake2s => "Blake2s",
+			HashAlgorithm.Blake3 => "Blake3",
+
+			// RIPEMD Family
+			HashAlgorithm.Ripemd128 => "Ripemd128",
+			HashAlgorithm.Ripemd160 => "Ripemd160",
+			HashAlgorithm.Ripemd256 => "Ripemd256",
+			HashAlgorithm.Ripemd320 => "Ripemd320",
+
+			// Other Crypto
+			HashAlgorithm.Whirlpool => "Whirlpool",
+			HashAlgorithm.Tiger192 => "Tiger192",
+			HashAlgorithm.Gost94 => "Gost94",
+			HashAlgorithm.Streebog256 => "Streebog256",
+			HashAlgorithm.Streebog512 => "Streebog512",
+			HashAlgorithm.Skein256 => "Skein256",
+			HashAlgorithm.Skein512 => "Skein512",
+			HashAlgorithm.Skein1024 => "Skein1024",
+			HashAlgorithm.Groestl256 => "Groestl256",
+			HashAlgorithm.Groestl512 => "Groestl512",
+			HashAlgorithm.Jh256 => "Jh256",
+			HashAlgorithm.Jh512 => "Jh512",
+			HashAlgorithm.KangarooTwelve => "KangarooTwelve",
+			HashAlgorithm.Sm3 => "Sm3",
+
+			_ => algorithm.ToString()
+		};
+	}
 
 	#endregion
 
-	#region Static Hashing Method
+	#region File Hashing
 
 	/// <summary>
-	/// Hashes a file using streaming with progress reporting.
+	/// Hashes a file using streaming and returns a FileHashResult.
 	/// </summary>
 	/// <param name="filePath">Path to the file to hash.</param>
 	/// <param name="progress">Optional progress callback (0.0 to 1.0).</param>
-	/// <param name="cancellationToken">Optional cancellation token.</param>
-	/// <returns>A FileHashResult containing all computed hashes.</returns>
-	/// <remarks>
-	/// <para>
-	/// For files larger than 1GB, some non-streaming algorithms (MurmurHash, CityHash, etc.)
-	/// will return "N/A (file too large)" since they require loading the entire file into memory.
-	/// </para>
-	/// <para>
-	/// Most algorithms (45+) fully support streaming and will work with any file size.
-	/// </para>
-	/// </remarks>
-	public static FileHashResult HashFileStreaming(
-		string filePath,
-		Action<double>? progress = null,
-		CancellationToken cancellationToken = default) {
-
+	/// <returns>Complete hash results for the file.</returns>
+	public FileHashResult HashFile(string filePath, Action<double>? progress = null) {
 		var fileInfo = new FileInfo(filePath);
-		if (!fileInfo.Exists)
-			throw new FileNotFoundException("File not found", filePath);
-
 		var sw = Stopwatch.StartNew();
-		long totalBytes = fileInfo.Length;
-		long bytesRead = 0;
 
-		progress?.Invoke(0.0);
-
-		using var hasher = new StreamingHasher(totalBytes);
-		using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, FileOptions.SequentialScan);
-
+		// Read file in chunks
 		byte[] buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
 		try {
+			using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, BufferSize, FileOptions.SequentialScan);
+
+			long totalBytes = stream.Length;
+			long bytesRead = 0;
+
 			int read;
-			while ((read = fs.Read(buffer, 0, BufferSize)) > 0) {
-				cancellationToken.ThrowIfCancellationRequested();
-
-				hasher.ProcessChunk(buffer.AsSpan(0, read));
-
+			while ((read = stream.Read(buffer, 0, BufferSize)) > 0) {
+				ProcessChunk(buffer.AsSpan(0, read));
 				bytesRead += read;
 				progress?.Invoke((double)bytesRead / totalBytes);
 			}
@@ -490,13 +215,12 @@ internal sealed class StreamingHasher : IDisposable {
 			ArrayPool<byte>.Shared.Return(buffer);
 		}
 
-		var results = hasher.Finalize();
 		sw.Stop();
 
-		progress?.Invoke(1.0);
+		// Finalize all hashes
+		var results = FinalizeAll();
 
 		return new FileHashResult {
-			// File metadata
 			FileName = fileInfo.Name,
 			FullPath = fileInfo.FullName,
 			SizeBytes = fileInfo.Length,
@@ -602,13 +326,10 @@ internal sealed class StreamingHasher : IDisposable {
 
 	/// <inheritdoc/>
 	public void Dispose() {
-		_md5.Dispose();
-		_sha1.Dispose();
-		_sha256.Dispose();
-		_sha384.Dispose();
-		_sha512.Dispose();
-		_blake3.Dispose();
-		_fullDataStream.Dispose();
+		foreach (var hasher in _hashers.Values) {
+			hasher.Dispose();
+		}
+		_hashers.Clear();
 	}
 
 	#endregion
