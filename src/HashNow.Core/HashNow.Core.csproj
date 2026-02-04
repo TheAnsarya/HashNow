@@ -21,14 +21,14 @@
 </PropertyGroup>
 
 <ItemGroup>
-  <PackageReference Include="Blake3" Version="2.2.0" />
+  <!-- StreamHash for fast non-crypto hashes (xxHash, Murmur, City, Spooky, SipHash, etc.) -->
+  <ProjectReference Include="..\..\..\StreamHash\src\StreamHash.Core\StreamHash.Core.csproj" />
+  <!-- BouncyCastle for cryptographic hashes (MD2/4, SHA-3, Keccak, Skein, etc.) -->
   <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
-  <PackageReference Include="HashDepot" Version="3.2.0" />
-  <PackageReference Include="murmurhash" Version="1.0.3" />
+  <!-- BLAKE family hashes -->
+  <PackageReference Include="Blake3" Version="2.2.0" />
   <PackageReference Include="SauceControl.Blake2Fast" Version="2.0.0" />
-  <PackageReference Include="System.Data.HashFunction.CityHash" Version="2.0.0" />
-  <PackageReference Include="System.Data.HashFunction.MurmurHash" Version="2.0.0" />
-  <PackageReference Include="System.Data.HashFunction.SpookyHash" Version="2.0.0" />
+  <!-- Built-in hashing for SHA-256, MD5, etc. -->
   <PackageReference Include="System.IO.Hashing" Version="10.0.2" />
 </ItemGroup>
 

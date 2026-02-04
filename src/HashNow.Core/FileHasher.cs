@@ -5,10 +5,7 @@ using System.Security.Cryptography;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
 using Blake2Fast;
-using HashDepot;
-using System.Data.HashFunction.CityHash;
-using System.Data.HashFunction.MurmurHash;
-using System.Data.HashFunction.SpookyHash;
+using StreamHash.Core;
 
 namespace HashNow.Core;
 
@@ -541,57 +538,57 @@ public static class FileHasher {
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (4 bytes).</returns>
 	public static byte[] GetMurmur3_32Bytes(byte[] data) {
-		var config = new MurmurHash3Config { HashSizeInBits = 32 };
-		var factory = MurmurHash3Factory.Instance.Create(config);
-		var hash = factory.ComputeHash(data);
-		return hash.Hash;
+		uint hash = MurmurHash3.ComputeHash32(data);
+		return BitConverter.GetBytes(hash);
 	}
 
 	/// <summary>Computes the MurmurHash3 128-bit hash and returns raw bytes.</summary>
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (16 bytes).</returns>
 	public static byte[] GetMurmur3_128Bytes(byte[] data) {
-		var config = new MurmurHash3Config { HashSizeInBits = 128 };
-		var factory = MurmurHash3Factory.Instance.Create(config);
-		var hash = factory.ComputeHash(data);
-		return hash.Hash;
+		UInt128 hash = MurmurHash3.ComputeHash128(data);
+		var bytes = new byte[16];
+		BitConverter.TryWriteBytes(bytes.AsSpan(0, 8), (ulong)(hash >> 64));
+		BitConverter.TryWriteBytes(bytes.AsSpan(8, 8), (ulong)hash);
+		return bytes;
 	}
 
 	/// <summary>Computes the CityHash64 hash and returns raw bytes.</summary>
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (8 bytes).</returns>
 	public static byte[] GetCityHash64Bytes(byte[] data) {
-		var factory = CityHashFactory.Instance.Create();
-		var hash = factory.ComputeHash(data);
-		return hash.Hash;
+		ulong hash = CityHash.ComputeHash64(data);
+		return BitConverter.GetBytes(hash);
 	}
 
 	/// <summary>Computes the CityHash128 hash and returns raw bytes.</summary>
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (16 bytes).</returns>
 	public static byte[] GetCityHash128Bytes(byte[] data) {
-		var config = new CityHashConfig { HashSizeInBits = 128 };
-		var factory = CityHashFactory.Instance.Create(config);
-		var hash = factory.ComputeHash(data);
-		return hash.Hash;
+		UInt128 hash = CityHash.ComputeHash128(data);
+		var bytes = new byte[16];
+		BitConverter.TryWriteBytes(bytes.AsSpan(0, 8), (ulong)(hash >> 64));
+		BitConverter.TryWriteBytes(bytes.AsSpan(8, 8), (ulong)hash);
+		return bytes;
 	}
 
 	/// <summary>Computes the FarmHash64 hash and returns raw bytes.</summary>
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (8 bytes).</returns>
-	/// <remarks>FarmHash is similar to CityHash; using CityHash64 as implementation.</remarks>
 	public static byte[] GetFarmHash64Bytes(byte[] data) {
-		// FarmHash is Google's successor to CityHash with similar characteristics
-		return GetCityHash64Bytes(data);
+		ulong hash = FarmHash.ComputeHash64(data);
+		return BitConverter.GetBytes(hash);
 	}
 
 	/// <summary>Computes the SpookyHash V2 128-bit hash and returns raw bytes.</summary>
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (16 bytes).</returns>
 	public static byte[] GetSpookyV2_128Bytes(byte[] data) {
-		var factory = SpookyHashV2Factory.Instance.Create();
-		var hash = factory.ComputeHash(data);
-		return hash.Hash;
+		UInt128 hash = SpookyHash.ComputeHash(data);
+		var bytes = new byte[16];
+		BitConverter.TryWriteBytes(bytes.AsSpan(0, 8), (ulong)(hash >> 64));
+		BitConverter.TryWriteBytes(bytes.AsSpan(8, 8), (ulong)hash);
+		return bytes;
 	}
 
 	/// <summary>Computes the SipHash-2-4 hash and returns raw bytes.</summary>
@@ -603,8 +600,7 @@ public static class FileHasher {
 	/// </remarks>
 	public static byte[] GetSipHash24Bytes(byte[] data) {
 		// SipHash-2-4 with default (zero) key for deterministic results
-		var key = new byte[16];
-		ulong hash = SipHash24.Hash64(data, key);
+		ulong hash = SipHash.ComputeHash(data, 0, 0);
 		return BitConverter.GetBytes(hash);
 	}
 
@@ -612,12 +608,11 @@ public static class FileHasher {
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (8 bytes).</returns>
 	/// <remarks>
-	/// HighwayHash is designed for SIMD acceleration. Using SipHash as fallback
-	/// since HashDepot doesn't include HighwayHash.
+	/// HighwayHash is designed for SIMD acceleration.
 	/// </remarks>
 	public static byte[] GetHighwayHash64Bytes(byte[] data) {
-		// HighwayHash not available in HashDepot, using SipHash as fallback
-		return GetSipHash24Bytes(data);
+		ulong hash = HighwayHash.ComputeHash64(data);
+		return BitConverter.GetBytes(hash);
 	}
 
 	// ========== Cryptographic Hashes ==========
@@ -864,8 +859,12 @@ public static class FileHasher {
 	/// <summary>Computes the KangarooTwelve hash and returns raw bytes.</summary>
 	/// <param name="data">The byte array to hash.</param>
 	/// <returns>The hash value as a byte array (32 bytes).</returns>
-	/// <remarks>K12 not in BouncyCastle; using Keccak-256 as fallback.</remarks>
-	public static byte[] GetKangarooTwelveBytes(byte[] data) => ComputeBouncyCastleHash(new KeccakDigest(256), data);
+	/// <remarks>Uses StreamHash's KangarooTwelve implementation.</remarks>
+	public static byte[] GetKangarooTwelveBytes(byte[] data) {
+		using var hasher = new KangarooTwelve();
+		hasher.Update(data);
+		return hasher.FinalizeBytes();
+	}
 
 	/// <summary>Computes the SM3 hash and returns raw bytes.</summary>
 	/// <param name="data">The byte array to hash.</param>
