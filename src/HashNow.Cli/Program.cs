@@ -55,6 +55,33 @@ namespace HashNow.Cli;
 /// </example>
 [SupportedOSPlatform("windows")]
 internal static class Program {
+	#region P/Invoke for Console Attachment
+
+	/// <summary>
+	/// Attaches the calling process to the console of the parent process.
+	/// </summary>
+	[DllImport("kernel32.dll", SetLastError = true)]
+	private static extern bool AttachConsole(int dwProcessId);
+
+	/// <summary>
+	/// Allocates a new console for the calling process.
+	/// </summary>
+	[DllImport("kernel32.dll", SetLastError = true)]
+	private static extern bool AllocConsole();
+
+	/// <summary>
+	/// Detaches the calling process from its console.
+	/// </summary>
+	[DllImport("kernel32.dll", SetLastError = true)]
+	private static extern bool FreeConsole();
+
+	/// <summary>
+	/// Special value for AttachConsole to attach to parent process console.
+	/// </summary>
+	private const int ATTACH_PARENT_PROCESS = -1;
+
+	#endregion
+
 	#region Constants
 
 	/// <summary>
@@ -102,6 +129,13 @@ internal static class Program {
 	/// </list>
 	/// </returns>
 	private static async Task<int> Main(string[] args) {
+		// Attach to console if running from command line (WinExe doesn't auto-attach)
+		// This allows console output when invoked from cmd/powershell while suppressing
+		// console window when double-clicked or launched from Explorer
+		if (args.Length > 0 || !DetectDoubleClickLaunch()) {
+			AttachConsole(ATTACH_PARENT_PROCESS);
+		}
+
 		// No arguments provided - auto-install mode
 		// This enables "double-click to install" behavior
 		if (args.Length == 0) {

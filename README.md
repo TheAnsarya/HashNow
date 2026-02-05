@@ -9,7 +9,7 @@
 
 ## 📥 Download
 
-**[Download HashNow v1.3.1](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
+**[Download HashNow v1.3.2](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
 
 ## 🚀 Quick Start
 
@@ -156,7 +156,7 @@ The generated JSON file contains all 70 hashes organized by category:
 
 	"hashedAtUtc": "2025-02-05T10:30:15Z",
 	"durationMs": 1003,
-	"generatedBy": "HashNow 1.3.1",
+	"generatedBy": "HashNow 1.3.2",
 	"algorithmCount": 70
 }
 ```
@@ -338,6 +338,10 @@ Typical throughput: ~200-300 MB/s for all 70 algorithms simultaneously.
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
+
+### v1.3.2 (2026-02-04)
+- Fixed console windows appearing on double-click and context menu
+- GUI-only mode for Explorer integration
 
 ### v1.3.1 (2026-02-04)
 - Documentation improvements
