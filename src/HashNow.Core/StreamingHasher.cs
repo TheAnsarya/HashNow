@@ -192,8 +192,9 @@ internal sealed class StreamingHasher : IDisposable {
 	/// </summary>
 	/// <param name="filePath">Path to the file to hash.</param>
 	/// <param name="progress">Optional progress callback (0.0 to 1.0).</param>
+	/// <param name="cancellationToken">Cancellation token to abort the operation.</param>
 	/// <returns>Complete hash results for the file.</returns>
-	public FileHashResult HashFile(string filePath, Action<double>? progress = null) {
+	public FileHashResult HashFile(string filePath, Action<double>? progress = null, CancellationToken cancellationToken = default) {
 		var fileInfo = new FileInfo(filePath);
 		var sw = Stopwatch.StartNew();
 
@@ -207,6 +208,7 @@ internal sealed class StreamingHasher : IDisposable {
 
 			int read;
 			while ((read = stream.Read(buffer, 0, BufferSize)) > 0) {
+				cancellationToken.ThrowIfCancellationRequested();
 				ProcessChunk(buffer.AsSpan(0, read));
 				bytesRead += read;
 				progress?.Invoke((double)bytesRead / totalBytes);

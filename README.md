@@ -9,7 +9,7 @@
 
 ## 📥 Download
 
-**[Download HashNow v1.3.4](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
+**[Download HashNow v1.3.5](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
 
 ## 🚀 Quick Start
 

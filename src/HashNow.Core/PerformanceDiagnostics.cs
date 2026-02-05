@@ -48,7 +48,7 @@ public sealed class PerformanceDiagnostics {
 	/// Gets or sets the total hash computation time (milliseconds).
 	/// </summary>
 	/// <remarks>
-	/// This is the time for all 58 algorithms computed in parallel.
+	/// This is the time for all 70 algorithms computed in parallel.
 	/// It's typically less than the sum of individual times due to parallelism.
 	/// </remarks>
 	[JsonPropertyName("totalHashMs")]

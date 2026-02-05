@@ -5,6 +5,18 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.5] - 2026-02-05
+
+### Fixed
+- Updated all references from 58 to 70 algorithms throughout codebase
+- Progress dialog now shows immediately (threshold changed from 3000ms to 0ms)
+- Fixed cancellation button - now properly cancels hashing operation
+- Added cancellation token support to StreamingHasher.HashFile()
+
+### Changed
+- Progress bar appears for all files regardless of size for immediate user feedback
+- Cancellation checks occur every buffer read (1MB chunks) for responsive cancellation
+
 ## [1.3.4] - 2026-02-05
 
 ### Fixed

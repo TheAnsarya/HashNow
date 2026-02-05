@@ -11,7 +11,7 @@ namespace HashNow.Benchmarks;
 
 /// <summary>
 /// Benchmarks for comparing individual hash algorithms and overall throughput.
-/// Compares parallel (all 58 algorithms) vs sequential execution.
+/// Compares parallel (all 70 algorithms) vs sequential execution.
 /// </summary>
 [MemoryDiagnoser]
 public class FileHasherBenchmarks {
@@ -54,7 +54,7 @@ public class FileHasherBenchmarks {
 		}
 	}
 
-	#region HashNow Full Hash (All 58 Algorithms - Parallel)
+	#region HashNow Full Hash (All 70 Algorithms - Parallel)
 
 	[Benchmark(Description = "HashNow Parallel 58 (1 KB)")]
 	public async Task<FileHashResult> HashNow_SmallFile() {

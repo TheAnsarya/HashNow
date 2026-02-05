@@ -6,7 +6,7 @@ using HashNow.Core;
 namespace HashNow.Cli;
 
 /// <summary>
-/// HashNow CLI entry point - Computes 58 hash algorithms for files.
+/// HashNow CLI entry point - Computes 70 hash algorithms for files.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -38,7 +38,7 @@ namespace HashNow.Cli;
 /// </list>
 /// <para>
 /// <strong>Output:</strong>
-/// Creates a <c>{filename}.hashes.json</c> file containing all 58 hash values
+/// Creates a <c>{filename}.hashes.json</c> file containing all 70 hash values
 /// and file metadata in a human-readable, tab-indented JSON format.
 /// </para>
 /// </remarks>
@@ -88,10 +88,9 @@ internal static class Program {
 	/// Time threshold in milliseconds before showing progress UI for long operations.
 	/// </summary>
 	/// <remarks>
-	/// If estimated hash time exceeds this value, we show progress feedback to the user.
-	/// Set to 3000ms (3 seconds) as a reasonable threshold for user patience.
+	/// Set to 0 to always show progress feedback to the user for immediate visual confirmation.
 	/// </remarks>
-	private const long ProgressUiThresholdMs = 3000;
+	private const long ProgressUiThresholdMs = 0;
 
 	/// <summary>
 	/// Environment variable name used to detect Explorer-launched instances.
@@ -420,7 +419,7 @@ internal static class Program {
 		Console.ForegroundColor = ConsoleColor.Cyan;
 		Console.WriteLine($"╔══════════════════════════════════════════════════╗");
 		Console.WriteLine($"║          HashNow v{FileHasher.Version,-10}                    ║");
-		Console.WriteLine($"║       Instant File Hashing (58 algorithms)       ║");
+		Console.WriteLine($"║       Instant File Hashing (70 algorithms)       ║");
 		Console.WriteLine($"╚══════════════════════════════════════════════════╝");
 		Console.ResetColor();
 		Console.WriteLine();
@@ -748,7 +747,7 @@ internal static class Program {
 			Console.ResetColor();
 			Console.WriteLine();
 			Console.WriteLine("Right-click any file in Windows Explorer and select");
-			Console.WriteLine("\"Hash this file now\" to compute all 58 hashes.");
+			Console.WriteLine("\"Hash this file now\" to compute all 70 hashes.");
 			Console.WriteLine();
 			Console.WriteLine("A .hashes.json file will be created next to the original.");
 

@@ -959,7 +959,7 @@ public sealed class FileHashResult {
 	/// Gets the total duration of the hashing operation in milliseconds.
 	/// </summary>
 	/// <remarks>
-	/// This includes time for reading the file and computing all 58 hash algorithms
+	/// This includes time for reading the file and computing all 70 hash algorithms
 	/// in parallel. Actual throughput depends on storage speed and CPU cores.
 	/// </remarks>
 	[JsonPropertyName("durationMs")]

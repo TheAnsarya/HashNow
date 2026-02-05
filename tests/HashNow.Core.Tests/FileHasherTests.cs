@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 namespace HashNow.Core.Tests;
 
 /// <summary>
-/// Comprehensive test coverage for FileHasher - all 58 algorithms.
+/// Comprehensive test coverage for FileHasher - all 70 algorithms.
 /// </summary>
 public class FileHasherTests : IDisposable {
 private readonly string _testDir;
@@ -169,7 +169,7 @@ Assert.Throws<FileNotFoundException>(
 
 #endregion
 
-#region All 58 Algorithm Hash Length Tests
+#region All 70 Algorithm Hash Length Tests
 
 [Fact]
 public async Task HashFileAsync_ReturnsAllChecksumTypes() {

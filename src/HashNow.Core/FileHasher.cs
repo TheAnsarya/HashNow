@@ -30,7 +30,7 @@ public static class FileHasher {
 	/// <summary>
 	/// The current version of the HashNow library.
 	/// </summary>
-	public const string Version = "1.3.4";
+	public const string Version = "1.3.5";
 
 	/// <summary>
 	/// The total number of hash algorithms supported.
@@ -389,9 +389,8 @@ public static class FileHasher {
 		Action<double>? progress = null,
 		CancellationToken cancellationToken = default) {
 		return Task.Run(() => {
-			cancellationToken.ThrowIfCancellationRequested();
 			using var hasher = new StreamingHasher();
-			return hasher.HashFile(filePath, progress);
+			return hasher.HashFile(filePath, progress, cancellationToken);
 		}, cancellationToken);
 	}
 
@@ -413,6 +412,8 @@ public static class FileHasher {
 		string json = JsonSerializer.Serialize(result, options);
 		// Replace 2-space indent with tab indent
 		json = json.Replace("  ", "\t");
+		// Add blank lines between sections for readability
+		json = AddBlankLinesBetweenSections(json);
 		// Ensure trailing newline
 		if (!json.EndsWith('\n')) {
 			json += Environment.NewLine;
@@ -438,6 +439,7 @@ public static class FileHasher {
 
 		string json = JsonSerializer.Serialize(result, options);
 		json = json.Replace("  ", "\t");
+		json = AddBlankLinesBetweenSections(json);
 		if (!json.EndsWith('\n')) {
 			json += Environment.NewLine;
 		}
@@ -448,6 +450,39 @@ public static class FileHasher {
 	#endregion
 
 	#region Utility Methods
+
+	/// <summary>
+	/// Adds blank lines between JSON sections for improved readability.
+	/// </summary>
+	/// <param name="json">The JSON string to format.</param>
+	/// <returns>Formatted JSON with blank lines between sections.</returns>
+	private static string AddBlankLinesBetweenSections(string json) {
+		// Add blank line after file metadata (before checksums section)
+		json = System.Text.RegularExpressions.Regex.Replace(
+			json,
+			@"(""modifiedUtc"": ""[^""]+"")",
+			$"$1,{Environment.NewLine}");
+
+		// Add blank line after checksums (before non-crypto hashes)
+		json = System.Text.RegularExpressions.Regex.Replace(
+			json,
+			@"(""crc16Usb"": ""[^""]+"")",
+			$"$1,{Environment.NewLine}");
+
+		// Add blank line after non-crypto hashes (before crypto hashes)
+		json = System.Text.RegularExpressions.Regex.Replace(
+			json,
+			@"(""loseLose"": ""[^""]+"")",
+			$"$1,{Environment.NewLine}");
+
+		// Add blank line after crypto hashes (before other crypto)
+		json = System.Text.RegularExpressions.Regex.Replace(
+			json,
+			@"(""ripemd320"": ""[^""]+"")",
+			$"$1,{Environment.NewLine}");
+
+		return json;
+	}
 
 	/// <summary>
 	/// Formats a file size in bytes to a human-readable string.

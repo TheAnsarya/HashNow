@@ -157,7 +157,7 @@ internal static class GuiDialogs {
 			ShowSuccess(
 				"Context menu installed successfully!\n\n" +
 				"Right-click any file in Windows Explorer and select\n" +
-				"\"Hash this file now\" to compute all 58 hashes.\n\n" +
+				"\"Hash this file now\" to compute all 70 hashes.\n\n" +
 				"A .hashes.json file will be created next to the original.",
 				"HashNow - Installation Complete");
 		} else if (errorMessage?.Contains("Administrator") == true) {
