@@ -23,8 +23,8 @@
 	<ItemGroup>
 	  <!-- StreamHash provides HashFacade for all 70 hash algorithms with streaming support -->
 	  <!-- v1.7.0 adds batch API for parallel multi-algorithm processing -->
-	  <!-- Includes BouncyCastle, Blake2/3, and System.IO.Hashing transitively -->
-	  <PackageReference Include="StreamHash" Version="1.7.0" />
+	  <!-- Using project reference for development - switch back to PackageReference for release -->
+	  <ProjectReference Include="..\..\..\StreamHash\src\StreamHash.Core\StreamHash.Core.csproj" />
 	</ItemGroup>
 
 </Project>

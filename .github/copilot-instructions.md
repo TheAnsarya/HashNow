@@ -106,6 +106,66 @@ if (condition) {
 - XML documentation on all public APIs
 - Use `Convert.ToHexStringLower()` for hex output
 
+## Code Documentation Standards
+
+### XML Documentation (xmldoc)
+**Every type, method, property, and field must have XML documentation:**
+
+```csharp
+/// <summary>
+/// Brief description of what this does.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Additional details, usage notes, or implementation notes.
+/// Use &lt;para&gt; tags for multiple paragraphs.
+/// </para>
+/// </remarks>
+/// <param name="data">Description of the parameter.</param>
+/// <returns>Description of return value.</returns>
+/// <exception cref="ArgumentNullException">When data is null.</exception>
+public string MyMethod(byte[] data) {
+	// Implementation
+}
+```
+
+**Indentation rules for xmldoc:**
+- Use TABS for indentation inside xmldoc comments (not spaces)
+- Align continuation lines with the content above
+- Keep `<para>` content indented with tabs
+
+### Inline Comments
+**Add inline comments when:**
+- Explaining a non-obvious algorithm or calculation
+- Documenting magic numbers or constants
+- Describing why code exists (not just what it does)
+- Warning about edge cases or gotchas
+
+## StreamHash Dependency
+
+### Development Workflow
+For local development and testing, you can reference StreamHash via ProjectReference:
+```xml
+<ProjectReference Include="..\..\..\StreamHash\src\StreamHash.Core\StreamHash.Core.csproj" />
+```
+
+### Release Workflow
+**For publishing releases, ALWAYS use the published NuGet package:**
+```xml
+<PackageReference Include="StreamHash" Version="1.7.0" />
+```
+
+### Local NuGet Package (Alternative)
+You can build a local NuGet package without publishing:
+```bash
+cd C:\Users\me\source\repos\StreamHash
+dotnet pack src/StreamHash.Core -c Release -o ./nupkgs
+```
+Then add the local folder as a NuGet source:
+```bash
+dotnet nuget add source C:\Users\me\source\repos\StreamHash\nupkgs --name LocalStreamHash
+```
+
 ## Licensing
 
 ### ⚠️ IMPORTANT: Use The Unlicense
@@ -195,3 +255,19 @@ The CLI supports Windows Explorer integration:
 - 1MB buffer with ArrayPool memory management
 - Stream large files efficiently
 - Progress reporting for files taking >3 seconds
+
+## ⚠️ CRITICAL: Don't Half-Ass It
+
+**Always do the whole thing. Don't quit at 80%.**
+
+- If you can't complete something now, create a GitHub issue for later
+- Never leave work partially done without tracking
+- If a label doesn't exist, CREATE IT, then add it to the issue
+- If you encounter blockers, document them and create issues
+- Complete all follow-up tasks (docs, tests, issues, labels)
+
+**GitHub Issue Management:**
+- **ALWAYS create missing labels** - Never skip labels because they don't exist
+- Use `gh label create` to create missing labels first
+- Then create/update the issue with proper labels
+- Labels should include: `performance`, `bug`, `enhancement`, `documentation`, `investigation`, `high-priority`, `medium-priority`, `low-priority`

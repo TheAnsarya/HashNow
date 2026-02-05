@@ -77,10 +77,10 @@ internal sealed class StreamingHasher : IDisposable {
 			int bytesThisRead;
 			while ((bytesThisRead = stream.Read(buffer, 0, BufferSize)) > 0) {
 				cancellationToken.ThrowIfCancellationRequested();
-				
+
 				// Process chunk through all 70 algorithms
 				ProcessChunk(buffer.AsSpan(0, bytesThisRead));
-				
+
 				bytesRead += bytesThisRead;
 				if (progress != null && totalBytes > 0) {
 					double percent = (bytesRead * 100.0) / totalBytes;
