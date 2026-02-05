@@ -5,6 +5,14 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.4] - 2026-02-05
+
+### Fixed
+- Fixed installation not proceeding when restarting as administrator
+- Added `--gui-install` argument to properly handle UAC elevation
+- RestartAsAdmin() now passes argument so elevated process uses GUI dialogs
+- Changed error messages to use GUI dialogs instead of console output
+
 ## [1.3.3] - 2026-02-05
 
 ### Fixed

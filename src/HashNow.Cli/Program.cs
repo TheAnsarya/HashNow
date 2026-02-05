@@ -162,6 +162,11 @@ internal static class Program {
 			return InstallContextMenu();
 		}
 
+		// GUI install command (used when restarting as admin from double-click)
+		if (firstArg.Equals("--gui-install", StringComparison.OrdinalIgnoreCase)) {
+			return InstallContextMenuGui();
+		}
+
 		// Uninstall context menu command
 		if (firstArg.Equals("--uninstall", StringComparison.OrdinalIgnoreCase)) {
 			return UninstallContextMenu();
@@ -452,12 +457,13 @@ internal static class Program {
 		try {
 			var exePath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName;
 			if (string.IsNullOrEmpty(exePath)) {
-				Console.Error.WriteLine("Error: Could not determine executable path.");
+				GuiDialogs.ShowError("Could not determine executable path.");
 				return 1;
 			}
 
 			var startInfo = new ProcessStartInfo {
 				FileName = exePath,
+				Arguments = "--gui-install", // Tell elevated process to use GUI mode
 				UseShellExecute = true,
 				Verb = "runas" // This triggers UAC elevation prompt
 			};
@@ -469,10 +475,10 @@ internal static class Program {
 			return 0;
 		} catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223) {
 			// ERROR_CANCELLED - User declined UAC prompt
-			Console.WriteLine("Elevation cancelled by user.");
+			// User cancelled, just return without showing error
 			return 2;
 		} catch (Exception ex) {
-			Console.Error.WriteLine($"Error requesting elevation: {ex.Message}");
+			GuiDialogs.ShowError($"Error requesting elevation: {ex.Message}");
 			return 1;
 		}
 	}
