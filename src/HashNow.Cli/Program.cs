@@ -354,12 +354,7 @@ internal static class Program {
 	/// </remarks>
 	private static bool DetectDoubleClickLaunch() {
 		try {
-			// If input is redirected, we're likely in a script/pipe
-			if (Console.IsInputRedirected) {
-				return false;
-			}
-
-			// Check parent process
+			// Check parent process first (doesn't require console access)
 			using var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
 			using var parentProcess = GetParentProcess(currentProcess);
 
@@ -376,12 +371,22 @@ internal static class Program {
 				}
 			}
 
-			// Fallback: check if console window was created for us
-			// (Double-click creates a new console, CLI reuses existing)
-			return false;
+			// Try console check only if we have a console attached
+			// (Console.IsInputRedirected throws IOException with WinExe if no console)
+			try {
+				if (Console.IsInputRedirected) {
+					return false;
+				}
+			} catch (IOException) {
+				// No console attached - likely double-clicked
+				return true;
+			}
+
+			// Default to double-click mode if parent is unknown
+			return true;
 		} catch {
-			// If detection fails, default to console mode
-			return false;
+			// If detection fails, assume double-click (safer for GUI mode)
+			return true;
 		}
 	}
 

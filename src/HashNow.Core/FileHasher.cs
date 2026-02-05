@@ -30,7 +30,7 @@ public static class FileHasher {
 	/// <summary>
 	/// The current version of the HashNow library.
 	/// </summary>
-	public const string Version = "1.3.2";
+	public const string Version = "1.3.3";
 
 	/// <summary>
 	/// The total number of hash algorithms supported.
