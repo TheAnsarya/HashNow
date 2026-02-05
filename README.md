@@ -30,9 +30,10 @@
 	- **Other Crypto** (14): Whirlpool, Tiger, SM3, GOST variants, Streebog, Skein, KangarooTwelve
 - **Parallel Processing** - All 70 algorithms run concurrently for maximum speed
 - **Single Pass** - Computes all hashes in one efficient file read
-- **JSON Output** - Creates `{filename}.hashes.json` with tab indentation
+- **JSON Output** - Creates `{filename}.hashes.json` with tab indentation and blank lines between sections
 - **Fast** - Streams large files with 1MB buffer and ArrayPool memory management
-- **Progress Reporting** - Shows progress for large files (>3 seconds estimated)
+- **Progress Dialog** - Auto-displays for all files, closes automatically when complete
+- **Cancellation Support** - Cancel button stops hashing immediately
 - **Reusable Library** - HashNow.Core can be used in any .NET project
 - **Powered by StreamHash** - Uses [StreamHash](https://www.nuget.org/packages/StreamHash) for all 70 algorithms
 - **Public Domain** - The Unlicense, free for any use
@@ -156,7 +157,7 @@ The generated JSON file contains all 70 hashes organized by category:
 
 	"hashedAtUtc": "2025-02-05T10:30:15Z",
 	"durationMs": 1003,
-	"generatedBy": "HashNow 1.3.2",
+	"generatedBy": "HashNow 1.3.6",
 	"algorithmCount": 70
 }
 ```
@@ -338,6 +339,26 @@ Typical throughput: ~200-300 MB/s for all 70 algorithms simultaneously.
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
+
+### v1.3.6 (2026-02-05)
+- **Fixed progress dialog** - Now closes automatically after hashing completes
+- **Fixed JSON creation** - JSON file now saves correctly
+- **Fixed cancellation** - Cancel button stops hashing immediately and closes dialog
+- **Improved threading** - Restructured dialog to run on correct UI thread
+
+### v1.3.5 (2026-02-05)
+- **Updated algorithm count** - All references now correctly show 70 algorithms
+- **Instant progress feedback** - Progress dialog appears immediately (0ms threshold)
+- **Working cancellation** - Cancellation token properly propagated through pipeline
+- **JSON formatting** - Added blank lines between hash sections for readability
+
+### v1.3.4 (2026-02-05)
+- Fixed installation when restarting as administrator
+- Added `--gui-install` argument for UAC elevation
+
+### v1.3.3 (2026-02-05)
+- Fixed silent failure when double-clicking exe
+- Improved parent process detection
 
 ### v1.3.2 (2026-02-04)
 - Fixed console windows appearing on double-click and context menu
