@@ -11,8 +11,8 @@
 
 <AssemblyName>HashNow</AssemblyName>
 <RootNamespace>HashNow.Cli</RootNamespace>
-	<Version>1.3.7</Version>
-<Description>Hash files instantly from Windows Explorer context menu - 71 algorithms powered by StreamHash</Description>
+	<Version>1.4.0</Version>
+<Description>Hash files instantly from Windows Explorer context menu - 70 algorithms with parallel processing powered by StreamHash v1.7.0</Description>
 <Authors>TheAnsarya</Authors>
 <Company>TheAnsarya</Company>
 <Product>HashNow</Product>
