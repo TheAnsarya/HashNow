@@ -30,7 +30,7 @@ public static class FileHasher {
 	/// <summary>
 	/// The current version of the HashNow library.
 	/// </summary>
-	public const string Version = "1.3.6";
+	public const string Version = "1.3.7";
 
 	/// <summary>
 	/// The total number of hash algorithms supported.
@@ -460,26 +460,26 @@ public static class FileHasher {
 		// Add blank line after file metadata (before checksums section)
 		json = System.Text.RegularExpressions.Regex.Replace(
 			json,
-			@"(""modifiedUtc"": ""[^""]+"")",
-			$"$1,{Environment.NewLine}");
+			@"(""modifiedUtc"": ""[^""]+""),",
+			$"$1,{Environment.NewLine}{Environment.NewLine}");
 
 		// Add blank line after checksums (before non-crypto hashes)
 		json = System.Text.RegularExpressions.Regex.Replace(
 			json,
-			@"(""crc16Usb"": ""[^""]+"")",
-			$"$1,{Environment.NewLine}");
+			@"(""crc16Usb"": ""[^""]+""),",
+			$"$1,{Environment.NewLine}{Environment.NewLine}");
 
 		// Add blank line after non-crypto hashes (before crypto hashes)
 		json = System.Text.RegularExpressions.Regex.Replace(
 			json,
-			@"(""loseLose"": ""[^""]+"")",
-			$"$1,{Environment.NewLine}");
+			@"(""loseLose"": ""[^""]+""),",
+			$"$1,{Environment.NewLine}{Environment.NewLine}");
 
 		// Add blank line after crypto hashes (before other crypto)
 		json = System.Text.RegularExpressions.Regex.Replace(
 			json,
-			@"(""ripemd320"": ""[^""]+"")",
-			$"$1,{Environment.NewLine}");
+			@"(""ripemd320"": ""[^""]+""),",
+			$"$1,{Environment.NewLine}{Environment.NewLine}");
 
 		return json;
 	}

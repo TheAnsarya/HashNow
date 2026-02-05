@@ -5,6 +5,16 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.7] - 2026-02-05
+
+### Fixed
+- **JSON blank lines fixed** - Blank lines between sections no longer have commas, JSON is now valid
+- Regex replacement now includes comma in pattern to avoid malformed JSON
+
+### Known Issues
+- **Performance issue** - 50MB files take ~55 seconds (~0.91 MB/s instead of claimed 200-300 MB/s)
+- Created [Issue #11](https://github.com/TheAnsarya/HashNow/issues/11) to track performance investigation
+
 ## [1.3.6] - 2026-02-05
 
 ### Fixed

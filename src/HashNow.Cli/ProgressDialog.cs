@@ -163,7 +163,7 @@ internal sealed class ProgressDialog : Form {
 				await hashAction(
 					progress => dialog.UpdateProgress(progress),
 					cts.Token);
-				
+
 				// Hash completed successfully - close dialog from hash thread
 				if (!cts.IsCancellationRequested) {
 					dialog.BeginInvoke(() => {

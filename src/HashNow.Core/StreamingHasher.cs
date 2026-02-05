@@ -67,7 +67,13 @@ internal sealed class StreamingHasher : IDisposable {
 	/// Processes a chunk of data, updating all hash states.
 	/// </summary>
 	/// <param name="data">The data chunk to process.</param>
+	/// <remarks>
+	/// Note: This currently calls Update() 70 times per chunk, which creates significant overhead.
+	/// See GitHub issue #12 for optimization work.
+	/// </remarks>
 	public void ProcessChunk(ReadOnlySpan<byte> data) {
+		// TODO: Optimize with parallel batching or StreamHash.HashFacade.UpdateAll()
+		// Current approach: Sequential updates to all 70 hashers
 		foreach (var hasher in _hashers.Values) {
 			hasher.Update(data);
 		}
