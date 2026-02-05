@@ -5,6 +5,14 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.6] - 2026-02-05
+
+### Fixed
+- Progress dialog now properly closes when hashing completes (removed auto-close delay, user must click "Done")
+- Cancellation now properly prevents JSON file creation (was saving incomplete hashes on cancel)
+- Cancelled operations now close progress dialog immediately instead of leaving it open
+- Added explicit cancellation tracking to prevent saving results when user cancels
+
 ## [1.3.5] - 2026-02-05
 
 ### Fixed

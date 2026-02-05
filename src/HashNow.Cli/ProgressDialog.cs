@@ -134,11 +134,9 @@ internal sealed class ProgressDialog : Form {
 		}
 
 		_progressBar.Value = 100;
-		_percentLabel.Text = "100% - Complete!";
-		_cancelButton.Text = "Done";
-		_cancelButton.Enabled = true;
-		_cancelButton.Click -= null!; // Clear cancel handler
-		_cancelButton.Click += (_, _) => Close();
+		_percentLabel.Text = "100%";
+		// Close immediately - don't wait for button click
+		Close();
 	}
 
 	#endregion
@@ -165,31 +163,25 @@ internal sealed class ProgressDialog : Form {
 				await hashAction(
 					progress => dialog.UpdateProgress(progress),
 					cts.Token);
+				
+				// Hash completed successfully - close dialog from hash thread
+				if (!cts.IsCancellationRequested) {
+					dialog.BeginInvoke(() => {
+						dialog.Complete(); // This will close the dialog immediately
+					});
+				}
 			} catch (OperationCanceledException) {
 				cancelled = true;
+				// Close dialog immediately on cancellation
+				dialog.BeginInvoke(dialog.Close);
 			}
 		});
 
 		// Show dialog (blocking until closed)
-		var dialogTask = Task.Run(() => {
-			Application.Run(dialog);
-		});
+		Application.Run(dialog);
 
-		// Wait for hash to complete
+		// Wait for hash task to complete
 		await hashTask;
-
-		// Close dialog if still open
-		if (!cancelled) {
-			dialog.BeginInvoke(() => {
-				dialog.Complete();
-				// Auto-close after brief display
-				Task.Delay(500).ContinueWith(_ => dialog.BeginInvoke(dialog.Close));
-			});
-		} else {
-			dialog.BeginInvoke(dialog.Close);
-		}
-
-		await dialogTask;
 
 		return !cancelled;
 	}

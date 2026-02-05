@@ -599,19 +599,27 @@ internal static class Program {
 	private static async Task<int> ProcessWithProgressDialogAsync(string filePath, FileInfo fileInfo) {
 		FileHashResult? result = null;
 		var outputPath = filePath + ".hashes.json";
+		var wasCancelled = false;
 
 		var success = await ProgressDialog.ShowDialogAsync(
 			filePath,
 			async (progressCallback, cancellationToken) => {
-				result = await FileHasher.HashFileAsync(filePath, progressCallback, cancellationToken);
+				try {
+					result = await FileHasher.HashFileAsync(filePath, progressCallback, cancellationToken);
+				} catch (OperationCanceledException) {
+					wasCancelled = true;
+					throw;
+				}
 			});
 
-		if (success && result != null) {
+		// Only save JSON if completed successfully (not cancelled)
+		if (success && result != null && !wasCancelled) {
+			// Save JSON before dialog closes
 			await FileHasher.SaveResultAsync(result, outputPath);
 			return 0;
 		}
 
-		return 2; // Cancelled
+		return 2; // Cancelled or failed
 	}
 
 	/// <summary>
