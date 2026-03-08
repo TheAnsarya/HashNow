@@ -90,6 +90,27 @@ HashNow/
 - All markdown files must have proper heading hierarchy
 - Include blank line at end of file
 
+### ⚠️ MANDATORY: Fix Markdownlint Warnings
+
+Always fix markdownlint warnings when creating or editing markdown files.
+
+Minimum required rules to enforce:
+
+- **MD022** - Blank lines above and below headings
+- **MD031** - Blank lines around fenced code blocks
+- **MD032** - Blank lines around lists
+- **MD047** - File ends with a single newline
+
+Generate markdown with correct spacing by default so additional cleanup is not needed.
+
+### ⚠️ MANDATORY: Documentation Link-Tree
+
+Every markdown file must be reachable from the main `README.md` through a maintained link-tree.
+
+- Update `README.md` when adding new documentation
+- Update intermediate index pages when reorganizing docs
+- Do not leave orphan markdown files
+
 **When creating or editing files:**
 1. Always use tabs for indentation
 2. Always add a blank line at the end

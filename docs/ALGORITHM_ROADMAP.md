@@ -28,15 +28,18 @@
 ## Algorithm List
 
 ### 1. Checksums & CRCs (6)
+
 - CRC32, CRC32C, CRC64, Adler-32, Fletcher-16, Fletcher-32
 
 ### 2. Non-Crypto Fast Hashes (12)
+
 - XXHash32, XXHash64, XXHash3, XXHash128
 - MurmurHash3-32, MurmurHash3-128
 - CityHash64, CityHash128, FarmHash64
 - SpookyHash V2, SipHash-2-4, HighwayHash64
 
 ### 3. Cryptographic Hashes (26)
+
 - MD2, MD4, MD5
 - SHA-0, SHA-1
 - SHA-224, SHA-256, SHA-384, SHA-512, SHA-512/224, SHA-512/256
@@ -46,6 +49,7 @@
 - RIPEMD-128, RIPEMD-160, RIPEMD-256, RIPEMD-320
 
 ### 4. Other Crypto Hashes (14)
+
 - Whirlpool, Tiger-192
 - GOST R 34.11-94, Streebog-256, Streebog-512
 - Skein-256, Skein-512, Skein-1024

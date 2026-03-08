@@ -24,10 +24,10 @@
 
 - **Instant Hashing** - Right-click any file and select "Hash this file now"
 - **70 Algorithms** - Comprehensive coverage across 4 categories:
-	- **Checksums** (9): CRC32, CRC32C, CRC64, CRC16 (3 variants), Adler32, Fletcher16, Fletcher32
-	- **Fast Non-Crypto** (22): xxHash family, MurmurHash3, CityHash, FarmHash, SpookyHash, SipHash, HighwayHash, MetroHash, Wyhash, FNV-1a, DJB2, SDBM, LoseLose
-	- **Cryptographic** (26): MD family, SHA family (0/1/2/3), BLAKE family, RIPEMD family
-	- **Other Crypto** (14): Whirlpool, Tiger, SM3, GOST variants, Streebog, Skein, KangarooTwelve
+ 	- **Checksums** (9): CRC32, CRC32C, CRC64, CRC16 (3 variants), Adler32, Fletcher16, Fletcher32
+ 	- **Fast Non-Crypto** (22): xxHash family, MurmurHash3, CityHash, FarmHash, SpookyHash, SipHash, HighwayHash, MetroHash, Wyhash, FNV-1a, DJB2, SDBM, LoseLose
+ 	- **Cryptographic** (26): MD family, SHA family (0/1/2/3), BLAKE family, RIPEMD family
+ 	- **Other Crypto** (14): Whirlpool, Tiger, SM3, GOST variants, Streebog, Skein, KangarooTwelve
 - **Parallel Processing** - All 70 algorithms run concurrently for maximum speed
 - **Single Pass** - Computes all hashes in one efficient file read
 - **JSON Output** - Creates `{filename}.hashes.json` with tab indentation and blank lines between sections
@@ -165,6 +165,7 @@ The generated JSON file contains all 70 hashes organized by category:
 ## Hash Algorithms
 
 ### Checksums (9)
+
 | Algorithm | Output | Notes |
 |-----------|--------|-------|
 | CRC32 | 4 bytes | Standard CRC-32 |
@@ -178,6 +179,7 @@ The generated JSON file contains all 70 hashes organized by category:
 | Fletcher32 | 4 bytes | Simple checksum |
 
 ### Fast Non-Cryptographic (22)
+
 | Algorithm | Output | Notes |
 |-----------|--------|-------|
 | xxHash32 | 4 bytes | Fast 32-bit |
@@ -203,6 +205,7 @@ The generated JSON file contains all 70 hashes organized by category:
 | LoseLose | 4 bytes | Simple byte sum |
 
 ### Cryptographic (28)
+
 | Algorithm | Output | Notes |
 |-----------|--------|-------|
 | MD5 | 16 bytes | Legacy, fast |
@@ -232,6 +235,7 @@ The generated JSON file contains all 70 hashes organized by category:
 | HAVAL-256-5 | 32 bytes | 5-pass variant |
 
 ### Other Crypto (11)
+
 | Algorithm | Output | Notes |
 |-----------|--------|-------|
 | SHAKE128 | variable | XOF, 256-bit output |
@@ -341,51 +345,61 @@ Typical throughput: ~200-300 MB/s for all 70 algorithms simultaneously.
 See [CHANGELOG.md](CHANGELOG.md) for full history.
 
 ### v1.3.6 (2026-02-05)
+
 - **Fixed progress dialog** - Now closes automatically after hashing completes
 - **Fixed JSON creation** - JSON file now saves correctly
 - **Fixed cancellation** - Cancel button stops hashing immediately and closes dialog
 - **Improved threading** - Restructured dialog to run on correct UI thread
 
 ### v1.3.5 (2026-02-05)
+
 - **Updated algorithm count** - All references now correctly show 70 algorithms
 - **Instant progress feedback** - Progress dialog appears immediately (0ms threshold)
 - **Working cancellation** - Cancellation token properly propagated through pipeline
 - **JSON formatting** - Added blank lines between hash sections for readability
 
 ### v1.3.4 (2026-02-05)
+
 - Fixed installation when restarting as administrator
 - Added `--gui-install` argument for UAC elevation
 
 ### v1.3.3 (2026-02-05)
+
 - Fixed silent failure when double-clicking exe
 - Improved parent process detection
 
 ### v1.3.2 (2026-02-04)
+
 - Fixed console windows appearing on double-click and context menu
 - GUI-only mode for Explorer integration
 
 ### v1.3.1 (2026-02-04)
+
 - Documentation improvements
 - Session and chat logs added
 
 ### v1.3.0 (2026-02-05)
+
 - **HashFacade refactoring** - All 70 algorithms now use StreamHash's unified HashFacade API
 - **Simplified dependencies** - Single dependency on StreamHash 1.6.3
 - **Cleaner codebase** - FileHasher and StreamingHasher completely rewritten
 - **Removed** - Direct BouncyCastle, Blake3, Blake2Fast dependencies
 
 ### v1.2.0 (2026-02-05)
+
 - **70 hash algorithms** - Up from 58, powered by StreamHash 1.6.3
 - **New fast hashes** - MetroHash64/128, Wyhash64, FNV-1a 32/64, DJB2, DJB2a, SDBM, LoseLose
 - **New CRC16 variants** - CRC16-CCITT, CRC16-MODBUS, CRC16-USB
 - **StreamHash integration** - Streaming implementations for all non-crypto hashes
 
 ### v1.0.2 (2026-02-03)
+
 - **Custom application icon** - Blue button with white hash symbol (#)
 - **Blank lines between JSON sections** - Improved readability
 - **Trailing newline** - JSON files end with blank line
 
 ### v1.0.1 (2026-02-03)
+
 - **Auto-install on double-click** - Just double-click to install context menu (prompts for UAC)
 - **`--status` command** - Check if context menu is installed correctly
 - **Performance diagnostics** - New `PerformanceDiagnostics` class for timing analysis
@@ -394,6 +408,7 @@ See [CHANGELOG.md](CHANGELOG.md) for full history.
 - **108 unit tests** (up from 92)
 
 ### v1.0.0 (2026-02-02)
+
 - Initial release with 58 hash algorithms
 - Windows Explorer context menu integration
 - Parallel hash computation

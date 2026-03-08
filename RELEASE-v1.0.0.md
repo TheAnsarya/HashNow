@@ -13,8 +13,8 @@ HashNow v1.0.0 has been successfully built, tested, and committed!
 ## ✅ Quality Metrics
 
 - **Tests**: 108/108 passing ✅
-	- 92 test vector tests (known input/output validation)
-	- 16 integration tests (edge cases, file scenarios)
+ 	- 92 test vector tests (known input/output validation)
+ 	- 16 integration tests (edge cases, file scenarios)
 - **Code Coverage**: All 58 hash algorithms verified
 - **Benchmarks**: 25 performance benchmarks configured
 - **Memory**: ArrayPool for reduced GC pressure
@@ -23,6 +23,7 @@ HashNow v1.0.0 has been successfully built, tested, and committed!
 ## 🚀 Features
 
 ### Core Features
+
 - **58 Hash Algorithms** across 4 categories
 - **Parallel Processing** - All algorithms run concurrently
 - **Single-Pass File Reading** - 1MB buffer, efficient streaming
@@ -32,6 +33,7 @@ HashNow v1.0.0 has been successfully built, tested, and committed!
 - **Cross-Verification** - Tested against System.Security.Cryptography
 
 ### Algorithm Categories
+
 1. **Checksums** (6): CRC32, CRC32C, CRC64, Adler32, Fletcher16/32
 2. **Fast Non-Crypto** (12): xxHash family, MurmurHash3, CityHash, FarmHash, SpookyHash, SipHash, HighwayHash
 3. **Cryptographic** (26): MD family, SHA family (0/1/2/3), BLAKE family, RIPEMD family
@@ -48,16 +50,17 @@ HashNow v1.0.0 has been successfully built, tested, and committed!
 
 - **.NET 10** with C# 14
 - **Modern Patterns**:
-	- File-scoped namespaces
-	- Collection expressions
-	- Pattern matching
-	- Nullable reference types
-	- Spans and Memory<T>
-	- ArrayPool memory management
+ 	- File-scoped namespaces
+ 	- Collection expressions
+ 	- Pattern matching
+ 	- Nullable reference types
+ 	- Spans and Memory<T>
+ 	- ArrayPool memory management
 
 ## 📊 Benchmarks
 
 Configured benchmarks for:
+
 - Full parallel hash (1 KB, 1 MB, 10 MB)
 - Category-specific (Checksums, Fast, Crypto, SHA3, BLAKE)
 - Individual algorithms (CRC32, MD5, SHA*, BLAKE*, xxHash, etc.)
@@ -65,7 +68,7 @@ Configured benchmarks for:
 
 ## 🎯 Next Steps for GitHub Release
 
-1. Go to https://github.com/TheAnsarya/HashNow/releases/new
+1. Go to <https://github.com/TheAnsarya/HashNow/releases/new>
 2. Tag: `v1.0.0`
 3. Title: `HashNow v1.0.0`
 4. Description: Use content from `CHANGELOG.md`
@@ -75,8 +78,8 @@ Configured benchmarks for:
 
 ## 🔗 Important Links
 
-- **Repository**: https://github.com/TheAnsarya/HashNow
-- **Issues**: https://github.com/TheAnsarya/HashNow/issues
+- **Repository**: <https://github.com/TheAnsarya/HashNow>
+- **Issues**: <https://github.com/TheAnsarya/HashNow/issues>
 - **License**: The Unlicense (public domain)
 
 ## 🎊 Achievements

@@ -15,6 +15,7 @@
 | 50 MB     | 52.58s    | ~0.95 MB/s | 1.18 GB          | 24x |
 
 **Problems:**
+
 - ❌ **Memory overhead:** 24x file size (1.18 GB for 50 MB file)
 - ❌ **Throughput:** ~0.95 MB/s vs documented 200-300 MB/s (200-300x slower)
 - ❌ **GC pressure:** Gen0=201,000, Gen1=7,000, Gen2=1,000 collections for 50MB file
@@ -35,6 +36,7 @@ public void ProcessChunk(ReadOnlySpan<byte> data) {
 ```
 
 **Why This Is Slow:**
+
 1. **70x Function Call Overhead:** Each `Update()` has stack frame setup/teardown
 2. **70x Memory Copies:** Each hasher may copy the span internally
 3. **70x State Updates:** Sequential state mutations prevent CPU optimizations
@@ -99,6 +101,7 @@ internal class MultiStreamingHashBytes : IMultiStreamingHashBytes {
 ```
 
 **Benefits:**
+
 - ✅ Single function call overhead instead of 70
 - ✅ Parallel processing on multi-core CPUs
 - ✅ Shared buffer reduces memory copies
@@ -131,6 +134,7 @@ public class StreamingHasher : IDisposable {
 ```
 
 **Benefits:**
+
 - ✅ Minimal code changes in HashNow
 - ✅ Automatic performance improvements
 - ✅ Future StreamHash optimizations benefit HashNow for free
@@ -172,6 +176,7 @@ using var accessor = mmf.CreateViewAccessor();
 ## 📋 Implementation Roadmap
 
 ### Week 1: StreamHash Batch API (Issue #17)
+
 - [ ] Design `IMultiStreamingHashBytes` interface
 - [ ] Implement `MultiStreamingHashBytes` with parallel processing
 - [ ] Add `HashFacade.CreateAllStreaming()` method
@@ -180,6 +185,7 @@ using var accessor = mmf.CreateViewAccessor();
 - [ ] Document new API in README
 
 ### Week 2: HashNow Integration (Issue #12)
+
 - [ ] Update `StreamingHasher` to use batch API
 - [ ] Remove old sequential loop in `ProcessChunk()`
 - [ ] Update NuGet dependency on StreamHash
@@ -187,6 +193,7 @@ using var accessor = mmf.CreateViewAccessor();
 - [ ] Update README with accurate performance numbers
 
 ### Week 3: Testing & Release
+
 - [ ] Full regression testing (108+ tests)
 - [ ] Performance validation on different hardware
 - [ ] Update CHANGELOG.md with performance improvements
@@ -196,18 +203,21 @@ using var accessor = mmf.CreateViewAccessor();
 ## 🧪 Testing Strategy
 
 ### Unit Tests
+
 - All 71 algorithms produce correct hashes (compare to v1.6.3 baseline)
 - Batch API matches individual hasher results
 - Parallel processing doesn't corrupt state
 - Memory cleanup (no leaks, proper Dispose)
 
 ### Performance Tests
+
 - 100KB file: < 0.005s (50% faster)
 - 1MB file: < 0.1s (10x faster)
 - 50MB file: < 5s (10x faster)
 - Memory: < 200MB for 50MB file (6x reduction)
 
 ### Hardware Validation
+
 - Test on: Modern PC (12+ cores), older PC (4 cores), laptop (2 cores)
 - Verify scaling: More cores = faster hashing
 - Verify no regression on single-core systems

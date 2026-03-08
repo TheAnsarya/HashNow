@@ -8,20 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.0] - 2026-02-05
 
 ### Added
+
 - **Batch API Integration** - Integrated StreamHash v1.7.0 batch streaming API for parallel multi-algorithm processing
 - **Parallel Processing** - 8-16x speedup on multi-core systems (8x on 8-core, 4x on 4-core, 2x on 2-core CPUs)
 - **Memory Optimization** - 4-6x memory reduction compared to sequential processing
 
 ### Changed
+
 - **Single Update() Call** - ProcessChunk() now uses single batch Update() call instead of 70 sequential calls
 - **Algorithm Count** - Confirmed 70 algorithms (not 71) across 4 categories
 - **Performance** - Dramatically improved throughput and reduced memory allocations
 
 ### Fixed
+
 - **Issue #12** - Integrated StreamHash batch API for dramatic performance improvement
 - **Memory Pressure** - Reduced GC allocations from sequential hasher dictionary management
 
 ### Performance
+
 - **8-core CPU**: ~8x faster hashing (50MB from ~52s to ~6.5s)
 - **4-core CPU**: ~4x faster hashing
 - **2-core CPU**: ~2x faster hashing
@@ -30,16 +34,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.7] - 2026-02-05
 
 ### Fixed
+
 - **JSON blank lines fixed** - Blank lines between sections no longer have commas, JSON is now valid
 - Regex replacement now includes comma in pattern to avoid malformed JSON
 
 ### Known Issues
+
 - **Performance issue** - 50MB files take ~55 seconds (~0.91 MB/s instead of claimed 200-300 MB/s)
 - Created [Issue #11](https://github.com/TheAnsarya/HashNow/issues/11) to track performance investigation
 
 ## [1.3.6] - 2026-02-05
 
 ### Fixed
+
 - Progress dialog now properly closes when hashing completes (removed auto-close delay, user must click "Done")
 - Cancellation now properly prevents JSON file creation (was saving incomplete hashes on cancel)
 - Cancelled operations now close progress dialog immediately instead of leaving it open
@@ -48,18 +55,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.5] - 2026-02-05
 
 ### Fixed
+
 - Updated all references from 58 to 70 algorithms throughout codebase
 - Progress dialog now shows immediately (threshold changed from 3000ms to 0ms)
 - Fixed cancellation button - now properly cancels hashing operation
 - Added cancellation token support to StreamingHasher.HashFile()
 
 ### Changed
+
 - Progress bar appears for all files regardless of size for immediate user feedback
 - Cancellation checks occur every buffer read (1MB chunks) for responsive cancellation
 
 ## [1.3.4] - 2026-02-05
 
 ### Fixed
+
 - Fixed installation not proceeding when restarting as administrator
 - Added `--gui-install` argument to properly handle UAC elevation
 - RestartAsAdmin() now passes argument so elevated process uses GUI dialogs
@@ -68,6 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.3] - 2026-02-05
 
 ### Fixed
+
 - Fixed silent failure when double-clicking exe in Windows Explorer
 - Fixed `DetectDoubleClickLaunch()` method throwing IOException when no console attached
 - Improved parent process detection to run before console checks
@@ -76,6 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.2] - 2026-02-04
 
 ### Fixed
+
 - **No Console Windows** - Changed to WinExe to suppress console when launched from Explorer
 - Double-click installation now shows only GUI dialogs (MessageBox)
 - Context menu progress now shows only GUI progress dialog
@@ -84,12 +96,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.1] - 2026-02-04
 
 ### Changed
+
 - Documentation improvements
 - Session and chat logs added for development history
 
 ## [1.3.0] - 2026-02-05
 
 ### Changed
+
 - **HashFacade Refactoring** - All 70 algorithms now use StreamHash's unified HashFacade API
 - **Simplified Dependencies** - Removed direct BouncyCastle, Blake3, and Blake2Fast dependencies
 - **Single Dependency** - Only depends on StreamHash 1.6.3 (which transitively includes all hash libraries)
@@ -97,6 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Unified API** - All compute methods delegate to `HashFacade.ComputeHashHex()` and `HashFacade.CreateStreaming()`
 
 ### Technical
+
 - Removed: `BouncyCastle.Cryptography`, `Blake3`, `SauceControl.Blake2Fast`
 - FileHasher: Now ~500 lines (was 1800+) - all methods delegate to HashFacade
 - StreamingHasher: Now ~330 lines (was 600+) - uses HashFacade.CreateStreaming()
@@ -105,39 +120,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2026-02-05
 
 ### Added
+
 - **13 New Hash Algorithms** - Expanded from 58 to 70 total algorithms
 - **StreamHash Integration** - Now uses StreamHash 1.6.3 for streaming implementations
 - **New CRC16 Variants**:
-	- CRC16-CCITT (Polynomial 0x1021)
-	- CRC16-MODBUS (Industrial protocol)
-	- CRC16-USB (USB protocol)
+ 	- CRC16-CCITT (Polynomial 0x1021)
+ 	- CRC16-MODBUS (Industrial protocol)
+ 	- CRC16-USB (USB protocol)
 - **New Fast Hash Algorithms**:
-	- MetroHash64 (Very fast 64-bit)
-	- MetroHash128 (128-bit variant)
-	- Wyhash64 (One of the fastest hashes)
-	- FNV-1a 32/64 (Simple, fast)
-	- DJB2 (Dan Bernstein's hash)
-	- DJB2a (XOR variant)
-	- SDBM (Database hash)
-	- LoseLose (Simple byte sum)
+ 	- MetroHash64 (Very fast 64-bit)
+ 	- MetroHash128 (128-bit variant)
+ 	- Wyhash64 (One of the fastest hashes)
+ 	- FNV-1a 32/64 (Simple, fast)
+ 	- DJB2 (Dan Bernstein's hash)
+ 	- DJB2a (XOR variant)
+ 	- SDBM (Database hash)
+ 	- LoseLose (Simple byte sum)
 
 ### Changed
+
 - **Streaming Architecture** - All non-crypto hashes now use StreamHash streaming implementations
 - **Updated Dependencies** - StreamHash 1.6.3 replaces individual hash library implementations
 
 ## [1.0.3] - 2026-02-03
 
 ### Added
+
 - **GUI Progress Dialog** - Visual progress bar for large files (>3 seconds) when launched from context menu
 - **Console Progress Bar** - Beautiful text-based progress bar with color for CLI usage
 - **GUI Install Dialogs** - MessageBox dialogs for double-click installation prompts
 - **Parent Process Detection** - Distinguishes between double-click and command-line launch
 
 ### Changed
+
 - **Improved Icon** - Larger hash symbol (#) with better anti-aliasing on diagonal strokes
 - **Smarter UI Mode Selection** - Uses GUI dialogs when double-clicked, console prompts when run from terminal
 
 ### Technical
+
 - Added Windows Forms support for progress dialog
 - New `ProgressDialog.cs` - Modal dialog with progress bar and cancel button
 - New `ConsoleProgressBar.cs` - Text-based progress bar with Unicode block characters
@@ -147,22 +167,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.2] - 2026-02-03
 
 ### Added
+
 - **Custom Application Icon** - Blue button with white hash symbol (#) for exe and context menu
 - **Blank Lines Between JSON Sections** - Improved readability with visual separation between:
-	- File Metadata
-	- Checksums & CRCs
-	- Non-Crypto Fast Hashes
-	- Cryptographic Hashes
-	- Other Crypto Hashes
-	- Hashing Metadata
+ 	- File Metadata
+ 	- Checksums & CRCs
+ 	- Non-Crypto Fast Hashes
+ 	- Cryptographic Hashes
+ 	- Other Crypto Hashes
+ 	- Hashing Metadata
 - **Trailing Newline** - JSON files now end with a blank line for better compatibility
 
 ### Changed
+
 - **JSON Output Format** - Now includes blank lines between logical sections for easier reading
 
 ## [1.0.1] - 2026-02-03
 
 ### Added
+
 - **Comprehensive XML Documentation** - Every class, method, property, and field now has detailed XML documentation
 - **Auto-Install on Double-Click** - Running the exe without arguments now prompts to install context menu
 - **UAC Elevation Support** - Application can auto-restart with admin privileges for installation
@@ -174,11 +197,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **108 Unit Tests** - Expanded test coverage from 92 to 108 tests
 
 ### Changed
+
 - **Double-click behavior** - Now prompts for context menu installation instead of showing help
 - **Error messages** - More descriptive error messages with color coding
 - **Code organization** - All source files reorganized with #regions and inline comments
 
 ### Technical
+
 - All 4 source files fully documented (FileHasher.cs, FileHashResult.cs, ContextMenuInstaller.cs, Program.cs)
 - Added ContextMenuInstaller.IsInstalledCorrectly() to detect when exe path changed
 - Added ContextMenuInstaller.GetInstalledCommand() to retrieve registered command
@@ -186,11 +211,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-02-02
 
 ### Added
+
 - **58 Hash Algorithms** across 4 categories:
-	- Checksums (6): CRC32, CRC32C, CRC64, Adler32, Fletcher16, Fletcher32
-	- Fast Non-Crypto (12): xxHash family, MurmurHash3, CityHash, FarmHash, SpookyHash, SipHash, HighwayHash
-	- Cryptographic (26): MD family, SHA family (0/1/2/3), BLAKE family, RIPEMD family
-	- Other Crypto (14): Whirlpool, Tiger, SM3, GOST variants, Streebog, Skein, KangarooTwelve
+ 	- Checksums (6): CRC32, CRC32C, CRC64, Adler32, Fletcher16, Fletcher32
+ 	- Fast Non-Crypto (12): xxHash family, MurmurHash3, CityHash, FarmHash, SpookyHash, SipHash, HighwayHash
+ 	- Cryptographic (26): MD family, SHA family (0/1/2/3), BLAKE family, RIPEMD family
+ 	- Other Crypto (14): Whirlpool, Tiger, SM3, GOST variants, Streebog, Skein, KangarooTwelve
 - **Parallel hash computation** - All 58 algorithms run concurrently using `Parallel.Invoke()`
 - **JSON output** with tab indentation (never spaces)
 - **Windows Explorer context menu** integration - Right-click any file → "Hash this file now"
@@ -202,6 +228,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Memory efficiency** - ArrayPool for memory management, single-pass file reading
 
 ### Changed
+
 - **License**: Changed to **The Unlicense** (public domain) - free for any use
 - **Indentation**: All files use **tabs** (never spaces), including JSON output
 - **Modern .NET**: Targets .NET 10 with C# 14 features
@@ -209,6 +236,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Hash output**: All hex values are lowercase
 
 ### Technical Details
+
 - Built with .NET 10, C# 14
 - Uses System.Text.Json with tab indentation
 - Single-pass file reading with 1MB buffer
@@ -217,6 +245,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cross-platform library (HashNow.Core) reusable in any .NET project
 
 ### Dependencies
+
 - Blake3 2.2.0
 - BouncyCastle.Cryptography 2.6.2
 - HashDepot 3.2.0
@@ -226,5 +255,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - System.IO.Hashing 10.0.2
 
 ### Known Issues
+
 - Context menu requires administrator privileges to install
 - Windows-only (context menu integration)

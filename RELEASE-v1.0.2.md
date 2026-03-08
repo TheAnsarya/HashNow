@@ -12,12 +12,15 @@ This release improves **visual appearance** and **JSON readability**:
 ## ✨ New Features
 
 ### Custom Application Icon
+
 HashNow now has a distinctive icon - a bright blue rounded button with a white hash symbol (#). This icon appears:
+
 - On the executable file
 - In the Windows Explorer context menu
 - In the taskbar when running
 
 ### Improved JSON Output Format
+
 The generated `.hashes.json` files now include blank lines between logical sections:
 
 ```json
@@ -52,6 +55,7 @@ The generated `.hashes.json` files now include blank lines between logical secti
 ```
 
 ### Trailing Newline
+
 JSON files now end with a blank line for better compatibility with text editors and version control systems.
 
 ## 📦 Download
