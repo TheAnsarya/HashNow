@@ -21,6 +21,10 @@
 </PropertyGroup>
 
 	<ItemGroup>
+		<InternalsVisibleTo Include="HashNow.Core.Tests" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <!-- StreamHash provides HashFacade for all 70 hash algorithms with streaming support -->
 	  <!-- v1.7.0 adds batch API for parallel multi-algorithm processing -->
 	  <PackageReference Include="StreamHash" Version="1.8.0" />
