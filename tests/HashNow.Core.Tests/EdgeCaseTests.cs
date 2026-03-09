@@ -4,7 +4,25 @@ namespace HashNow.Core.Tests;
 /// Edge case and boundary condition tests for hash algorithms.
 /// Tests unusual inputs, large data patterns, and boundary sizes.
 /// </summary>
-public class EdgeCaseTests {
+public class EdgeCaseTests : IDisposable {
+	private readonly string _tempDir = Path.Combine(Path.GetTempPath(), $"HashNow_EdgeCase_{Guid.NewGuid():N}");
+
+	public EdgeCaseTests() {
+		Directory.CreateDirectory(_tempDir);
+	}
+
+	public void Dispose() {
+		if (Directory.Exists(_tempDir)) {
+			Directory.Delete(_tempDir, recursive: true);
+		}
+		GC.SuppressFinalize(this);
+	}
+
+	private string CreateTempFile(string name, byte[] content) {
+		var path = Path.Combine(_tempDir, name);
+		File.WriteAllBytes(path, content);
+		return path;
+	}
 	#region Single Byte Variations
 
 	[Fact]
@@ -222,6 +240,111 @@ public class EdgeCaseTests {
 		FileHasher.ComputeSm3(empty);
 		FileHasher.ComputeAdler32(empty);
 		FileHasher.ComputeMurmur3_32(empty);
+	}
+
+	#endregion
+
+	#region 1MB Buffer Boundary Tests
+
+	[Theory]
+	[InlineData(1024 * 1024 - 1)] // 1MB - 1
+	[InlineData(1024 * 1024)]     // 1MB exact
+	[InlineData(1024 * 1024 + 1)] // 1MB + 1
+	public void Sha256_1MB_Boundaries_ProduceValidHashes(int size) {
+		var data = new byte[size];
+		Random.Shared.NextBytes(data);
+		var hash = FileHasher.ComputeSha256(data);
+		Assert.Equal(64, hash.Length);
+		Assert.Matches("^[0-9a-f]{64}$", hash);
+	}
+
+	[Theory]
+	[InlineData(1024 * 1024 - 1)]
+	[InlineData(1024 * 1024)]
+	[InlineData(1024 * 1024 + 1)]
+	public async Task HashFileAsync_1MB_Boundaries_ProduceValidResults(int size) {
+		var data = new byte[size];
+		Random.Shared.NextBytes(data);
+		var path = CreateTempFile($"boundary_{size}.bin", data);
+
+		var result = await FileHasher.HashFileAsync(path);
+
+		Assert.Equal(size, result.SizeBytes);
+		Assert.NotNull(result.Sha256);
+		Assert.Equal(64, result.Sha256.Length);
+		Assert.NotNull(result.Blake3);
+		Assert.NotNull(result.Md5);
+	}
+
+	#endregion
+
+	#region Read-Only File Tests
+
+	[Fact]
+	public async Task HashFileAsync_ReadOnlyFile_Succeeds() {
+		var data = "read-only file content"u8.ToArray();
+		var path = CreateTempFile("readonly.bin", data);
+		File.SetAttributes(path, FileAttributes.ReadOnly);
+
+		try {
+			var result = await FileHasher.HashFileAsync(path);
+			Assert.Equal(data.Length, result.SizeBytes);
+			Assert.NotNull(result.Sha256);
+		} finally {
+			File.SetAttributes(path, FileAttributes.Normal);
+		}
+	}
+
+	#endregion
+
+	#region Unicode and Special Filename Tests
+
+	[Fact]
+	public async Task HashFileAsync_UnicodeFilename_Succeeds() {
+		var data = "unicode filename test"u8.ToArray();
+		var path = CreateTempFile("tëst_ünïcödé_файл.bin", data);
+
+		var result = await FileHasher.HashFileAsync(path);
+		Assert.Equal(data.Length, result.SizeBytes);
+		Assert.NotNull(result.Sha256);
+	}
+
+	[Fact]
+	public async Task HashFileAsync_EmojiFilename_Succeeds() {
+		var data = "emoji filename test"u8.ToArray();
+		var path = CreateTempFile("test_🔒_hash_✅.bin", data);
+
+		var result = await FileHasher.HashFileAsync(path);
+		Assert.Equal(data.Length, result.SizeBytes);
+		Assert.NotNull(result.Sha256);
+	}
+
+	[Fact]
+	public async Task HashFileAsync_SpacesInFilename_Succeeds() {
+		var data = "spaces in name"u8.ToArray();
+		var path = CreateTempFile("file with spaces and (parens).bin", data);
+
+		var result = await FileHasher.HashFileAsync(path);
+		Assert.Equal(data.Length, result.SizeBytes);
+		Assert.NotNull(result.Sha256);
+	}
+
+	#endregion
+
+	#region All-Zeros and All-0xFF File Tests
+
+	[Theory]
+	[InlineData(0, 4096)]
+	[InlineData(0xff, 4096)]
+	public async Task HashFileAsync_RepeatedByte_ProduceValidResults(byte fillByte, int size) {
+		var data = new byte[size];
+		Array.Fill(data, fillByte);
+		var path = CreateTempFile($"fill_{fillByte:x2}_{size}.bin", data);
+
+		var result = await FileHasher.HashFileAsync(path);
+		Assert.Equal(size, result.SizeBytes);
+		Assert.NotNull(result.Sha256);
+		Assert.NotNull(result.Blake3);
 	}
 
 	#endregion
