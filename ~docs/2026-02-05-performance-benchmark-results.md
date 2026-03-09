@@ -174,3 +174,23 @@ Skewness = 0.03, Kurtosis = 2.43, MValue = 2
 **Benchmark Report Generated:** February 5, 2026  
 **Tool:** BenchmarkDotNet v0.15.8  
 **Full Results:** `BenchmarkDotNet.Artifacts/results/HashNow.Benchmarks.PerformanceProfiler-report.html`
+
+## Addendum - StreamingHasher Finalize Path (2026-03-09)
+
+### Change Summary
+
+- Removed intermediate finalize materialization mapping path overhead by reading StreamHash keys directly in `StreamingHasher`.
+- Reduced per-read-loop progress math overhead by emitting integer-percent thresholds.
+
+### Validation Commands
+
+```powershell
+dotnet test tests/HashNow.Core.Tests/HashNow.Core.Tests.csproj -c Release --filter "HashFileAsync_ProgressValues_AreMonotonicAndBounded|HashFileAsync_FinalizeMapping_MapsRepresentativeAliases"
+dotnet run --project benchmarks/HashNow.Benchmarks/HashNow.Benchmarks.csproj -c Release -- --filter "*FileHasherBenchmarks*HashNow_EmptyFile*" --job short
+```
+
+### Benchmark Snapshot
+
+| Method | Mean | Allocated |
+|---|---:|---:|
+| HashNow Parallel 58 (empty file, finalize-heavy) | 273.9 us | 62.58 KB |

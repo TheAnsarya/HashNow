@@ -369,6 +369,13 @@ The CLI supports Windows Explorer integration:
 4. No new warnings in build output
 5. Test vectors still match reference implementations
 
+#### Focused Validation Commands (StreamingHasher)
+
+- Finalize/progress correctness checks:
+	- `dotnet test tests/HashNow.Core.Tests/HashNow.Core.Tests.csproj -c Release --filter "HashFileAsync_ProgressValues_AreMonotonicAndBounded|HashFileAsync_FinalizeMapping_MapsRepresentativeAliases"`
+- Finalize-heavy microbenchmark:
+	- `dotnet run --project benchmarks/HashNow.Benchmarks/HashNow.Benchmarks.csproj -c Release -- --filter "*FileHasherBenchmarks*HashNow_EmptyFile*" --job short`
+
 #### Types of Safe Performance Changes:
 
 - **Buffer size tuning** — different ArrayPool sizes for different file ranges
