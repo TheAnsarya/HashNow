@@ -336,6 +336,20 @@ All 70 hashes are computed in a **single file read** for maximum efficiency:
 Typical throughput: ~200-300 MB/s for all 70 algorithms simultaneously.
 70 algorithms on a 5KB file: ~1000ms (most time in algorithm initialization).
 
+## Markdown Quality Automation
+
+Use these scripts to validate and measure the markdown structure policy checks (`MD022`, `MD031`, `MD032`, `MD047`):
+
+- `scripts/test-markdown-policy.ps1`
+- `scripts/benchmark-markdown-policy.ps1`
+
+Example:
+
+```powershell
+pwsh -File scripts/test-markdown-policy.ps1
+pwsh -File scripts/benchmark-markdown-policy.ps1 -Runs 5
+```
+
 ## License
 
 [The Unlicense](LICENSE) - Public domain, free for any use.
