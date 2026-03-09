@@ -130,6 +130,25 @@ Assert.True(progressValues.Count > 0, "Progress should be reported");
 Assert.True(progressValues[^1] >= 0.99, "Final progress should be ~1.0");
 }
 
+[Fact]
+public async Task HashFileAsync_ProgressValues_AreMonotonicAndBounded() {
+var data = new byte[3 * 1024 * 1024];
+Random.Shared.NextBytes(data);
+var path = CreateTestFile("progress.bin", data);
+
+var progressValues = new List<double>();
+await FileHasher.HashFileAsync(path, progress => progressValues.Add(progress));
+
+Assert.NotEmpty(progressValues);
+Assert.All(progressValues, value => Assert.InRange(value, 0, 100));
+
+for (var i = 1; i < progressValues.Count; i++) {
+	Assert.True(progressValues[i] >= progressValues[i - 1], "Progress must be monotonic.");
+}
+
+Assert.True(progressValues[^1] >= 99.99, "Final progress should approach 100%. ");
+}
+
 #endregion
 
 #region Cancellation Tests

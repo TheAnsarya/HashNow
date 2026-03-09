@@ -71,6 +71,12 @@ public class FileHasherBenchmarks {
 		return await FileHasher.HashFileAsync(_largeFilePath);
 	}
 
+	[Benchmark(Description = "HashNow Parallel 58 (10 MB, with progress callback)")]
+	public async Task<FileHashResult> HashNow_LargeFile_WithProgressCallback() {
+		double lastProgress = 0;
+		return await FileHasher.HashFileAsync(_largeFilePath, progress => lastProgress = progress);
+	}
+
 	#endregion
 
 	#region Category Benchmarks (10 MB)
