@@ -18,6 +18,7 @@ public class FileHasherBenchmarks {
 	private string _smallFilePath = null!;
 	private string _mediumFilePath = null!;
 	private string _largeFilePath = null!;
+	private string _emptyFilePath = null!;
 	private byte[] _smallData = null!;
 	private byte[] _mediumData = null!;
 	private byte[] _largeData = null!;
@@ -41,10 +42,12 @@ public class FileHasherBenchmarks {
 		_smallFilePath = Path.Combine(_tempDir, "small.bin");
 		_mediumFilePath = Path.Combine(_tempDir, "medium.bin");
 		_largeFilePath = Path.Combine(_tempDir, "large.bin");
+		_emptyFilePath = Path.Combine(_tempDir, "empty.bin");
 
 		File.WriteAllBytes(_smallFilePath, _smallData);
 		File.WriteAllBytes(_mediumFilePath, _mediumData);
 		File.WriteAllBytes(_largeFilePath, _largeData);
+		File.WriteAllBytes(_emptyFilePath, []);
 	}
 
 	[GlobalCleanup]
@@ -59,6 +62,11 @@ public class FileHasherBenchmarks {
 	[Benchmark(Description = "HashNow Parallel 58 (1 KB)")]
 	public async Task<FileHashResult> HashNow_SmallFile() {
 		return await FileHasher.HashFileAsync(_smallFilePath);
+	}
+
+	[Benchmark(Description = "HashNow Parallel 58 (empty file, finalize-heavy)")]
+	public async Task<FileHashResult> HashNow_EmptyFile() {
+		return await FileHasher.HashFileAsync(_emptyFilePath);
 	}
 
 	[Benchmark(Description = "HashNow Parallel 58 (1 MB)")]

@@ -312,6 +312,18 @@ Assert.Equal(64, result.KangarooTwelve.Length); // 32 bytes (using Keccak)
 Assert.Equal(64, result.Sm3.Length);         // 32 bytes
 }
 
+[Fact]
+public async Task HashFileAsync_FinalizeMapping_MapsRepresentativeAliases() {
+var path = CreateTestFile("alias-map.bin", [0x01, 0x02, 0x03, 0x04]);
+var result = await FileHasher.HashFileAsync(path);
+
+Assert.Equal(32, result.SpookyV2_128.Length);   // SpookyHash128 alias
+Assert.Equal(16, result.SipHash24.Length);      // SipHash-2-4 alias
+Assert.Equal(64, result.Groestl256.Length);     // Groestl-256 alias
+Assert.Equal(128, result.Groestl512.Length);    // Groestl-512 alias
+Assert.Equal(64, result.Sm3.Length);            // SM3 alias
+}
+
 #endregion
 
 #region Consistency Tests

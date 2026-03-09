@@ -1,4 +1,3 @@
-using System.Buffers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using StreamHash.Core;
@@ -41,6 +40,16 @@ public static class FileHasher {
 	/// Default buffer size for file reading operations (1 MB).
 	/// </summary>
 	private const int DefaultBufferSize = 1024 * 1024;
+
+	/// <summary>
+	/// Shared JSON serializer options configured for tab-indented output.
+	/// </summary>
+	private static readonly JsonSerializerOptions JsonOptions = new() {
+		WriteIndented = true,
+		IndentCharacter = '\t',
+		IndentSize = 1,
+		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+	};
 
 	#endregion
 
@@ -404,14 +413,7 @@ public static class FileHasher {
 	/// <param name="result">The hash results to save.</param>
 	/// <param name="outputPath">Path to the output JSON file.</param>
 	public static void SaveResult(FileHashResult result, string outputPath) {
-		var options = new JsonSerializerOptions {
-			WriteIndented = true,
-			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-		};
-
-		string json = JsonSerializer.Serialize(result, options);
-		// Replace 2-space indent with tab indent
-		json = json.Replace("  ", "\t");
+		string json = JsonSerializer.Serialize(result, JsonOptions);
 		// Add blank lines between sections for readability
 		json = AddBlankLinesBetweenSections(json);
 		// Ensure trailing newline
@@ -432,13 +434,7 @@ public static class FileHasher {
 		FileHashResult result,
 		string outputPath,
 		CancellationToken cancellationToken = default) {
-		var options = new JsonSerializerOptions {
-			WriteIndented = true,
-			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-		};
-
-		string json = JsonSerializer.Serialize(result, options);
-		json = json.Replace("  ", "\t");
+		string json = JsonSerializer.Serialize(result, JsonOptions);
 		json = AddBlankLinesBetweenSections(json);
 		if (!json.EndsWith('\n')) {
 			json += Environment.NewLine;
@@ -457,29 +453,23 @@ public static class FileHasher {
 	/// <param name="json">The JSON string to format.</param>
 	/// <returns>Formatted JSON with blank lines between sections.</returns>
 	private static string AddBlankLinesBetweenSections(string json) {
-		// Add blank line after file metadata (before checksums section)
-		json = System.Text.RegularExpressions.Regex.Replace(
-			json,
-			@"(""modifiedUtc"": ""[^""]+""),",
-			$"$1,{Environment.NewLine}{Environment.NewLine}");
+		// Section break markers: the last property in each section
+		// After metadata → checksums, after checksums → non-crypto, after non-crypto → crypto, after crypto → other crypto
+		ReadOnlySpan<string> sectionBreakProperties = ["modifiedUtc", "crc16Usb", "loseLose", "ripemd320"];
 
-		// Add blank line after checksums (before non-crypto hashes)
-		json = System.Text.RegularExpressions.Regex.Replace(
-			json,
-			@"(""crc16Usb"": ""[^""]+""),",
-			$"$1,{Environment.NewLine}{Environment.NewLine}");
+		foreach (string prop in sectionBreakProperties) {
+			// Find the property line and insert a blank line after it
+			string search = $"\"{prop}\":";
+			int idx = json.IndexOf(search, StringComparison.Ordinal);
+			if (idx < 0) continue;
 
-		// Add blank line after non-crypto hashes (before crypto hashes)
-		json = System.Text.RegularExpressions.Regex.Replace(
-			json,
-			@"(""loseLose"": ""[^""]+""),",
-			$"$1,{Environment.NewLine}{Environment.NewLine}");
+			// Find the end of this line (after the comma and newline)
+			int lineEnd = json.IndexOf('\n', idx);
+			if (lineEnd < 0) continue;
 
-		// Add blank line after crypto hashes (before other crypto)
-		json = System.Text.RegularExpressions.Regex.Replace(
-			json,
-			@"(""ripemd320"": ""[^""]+""),",
-			$"$1,{Environment.NewLine}{Environment.NewLine}");
+			// Insert an extra newline to create a blank line
+			json = string.Concat(json.AsSpan(0, lineEnd + 1), Environment.NewLine, json.AsSpan(lineEnd + 1));
+		}
 
 		return json;
 	}

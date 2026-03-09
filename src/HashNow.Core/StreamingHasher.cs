@@ -82,20 +82,28 @@ internal sealed class StreamingHasher : IDisposable {
 					bytesRead += bytesThisRead;
 				}
 			} else {
+				// Throttle progress callbacks to fire only when progress changes by >= 1%
 				var progressScale = 100.0 / totalBytes;
+				double lastReportedProgress = -1.0;
 				int bytesThisRead;
 				while ((bytesThisRead = stream.Read(buffer, 0, BufferSize)) > 0) {
 					cancellationToken.ThrowIfCancellationRequested();
 					ProcessChunk(buffer.AsSpan(0, bytesThisRead));
 					bytesRead += bytesThisRead;
-					progress(bytesRead * progressScale);
+					double currentProgress = bytesRead * progressScale;
+					if (currentProgress - lastReportedProgress >= 1.0) {
+						progress(currentProgress);
+						lastReportedProgress = currentProgress;
+					}
 				}
+				// Always report 100% at the end
+				progress(100.0);
 			}
 
 			sw.Stop();
 
-			// Finalize all hashes
-			var results = FinalizeAll();
+			// Finalize all hashes with a zero-allocation property-name view.
+			var results = new HashResultsView(_batchHasher.FinalizeAll());
 
 			return new FileHashResult {
 				FileName = fileInfo.Name,
@@ -212,117 +220,94 @@ internal sealed class StreamingHasher : IDisposable {
 	}
 
 	/// <summary>
-	/// Finalizes all hashes and returns the results as a dictionary.
+	/// Provides lazy property-name lookups over StreamHash batch results.
 	/// </summary>
-	/// <returns>Dictionary mapping FileHashResult property names to hex string results.</returns>
-	private Dictionary<string, string> FinalizeAll() {
-		var batchResults = _batchHasher.FinalizeAll();
-		var results = new Dictionary<string, string>(70);
+	private readonly struct HashResultsView(IReadOnlyDictionary<string, string> batchResults) {
+		private readonly IReadOnlyDictionary<string, string> _batchResults = batchResults;
 
-		// Map StreamHash algorithm names to FileHashResult property names
-		// StreamHash returns keys like "MurmurHash3-32", we need "Murmur3_32"
-		foreach (var kvp in batchResults) {
-			string propertyName = MapStreamHashNameToPropertyName(kvp.Key);
-			results[propertyName] = kvp.Value;
+		public string this[string propertyName] {
+			get {
+				var streamHashName = propertyName switch {
+					"Crc32" => "CRC32",
+					"Crc32C" => "CRC32C",
+					"Crc64" => "CRC64",
+					"Crc16Ccitt" => "CRC16-CCITT",
+					"Crc16Modbus" => "CRC16-MODBUS",
+					"Crc16Usb" => "CRC16-USB",
+					"Adler32" => "Adler-32",
+					"Fletcher16" => "Fletcher-16",
+					"Fletcher32" => "Fletcher-32",
+					"XxHash32" => "xxHash32",
+					"XxHash64" => "xxHash64",
+					"XxHash3" => "xxHash3",
+					"XxHash128" => "xxHash128",
+					"Murmur3_32" => "MurmurHash3-32",
+					"Murmur3_128" => "MurmurHash3-128",
+					"CityHash64" => "CityHash64",
+					"CityHash128" => "CityHash128",
+					"FarmHash64" => "FarmHash64",
+					"SpookyV2_128" => "SpookyHash128",
+					"SipHash24" => "SipHash-2-4",
+					"HighwayHash64" => "HighwayHash64",
+					"MetroHash64" => "MetroHash64",
+					"MetroHash128" => "MetroHash128",
+					"Wyhash64" => "wyhash64",
+					"Fnv1a32" => "FNV-1a-32",
+					"Fnv1a64" => "FNV-1a-64",
+					"Djb2" => "DJB2",
+					"Djb2a" => "DJB2a",
+					"Sdbm" => "SDBM",
+					"LoseLose" => "lose-lose",
+					"Md2" => "MD2",
+					"Md4" => "MD4",
+					"Md5" => "MD5",
+					"Sha0" => "SHA-0",
+					"Sha1" => "SHA-1",
+					"Sha224" => "SHA-224",
+					"Sha256" => "SHA-256",
+					"Sha384" => "SHA-384",
+					"Sha512" => "SHA-512",
+					"Sha512_224" => "SHA-512/224",
+					"Sha512_256" => "SHA-512/256",
+					"Sha3_224" => "SHA3-224",
+					"Sha3_256" => "SHA3-256",
+					"Sha3_384" => "SHA3-384",
+					"Sha3_512" => "SHA3-512",
+					"Keccak256" => "Keccak-256",
+					"Keccak512" => "Keccak-512",
+					"Blake256" => "BLAKE-256",
+					"Blake512" => "BLAKE-512",
+					"Blake2b" => "BLAKE2b",
+					"Blake2s" => "BLAKE2s",
+					"Blake3" => "BLAKE3",
+					"Ripemd128" => "RIPEMD-128",
+					"Ripemd160" => "RIPEMD-160",
+					"Ripemd256" => "RIPEMD-256",
+					"Ripemd320" => "RIPEMD-320",
+					"Whirlpool" => "Whirlpool",
+					"Tiger192" => "Tiger-192",
+					"Gost94" => "GOST-94",
+					"Streebog256" => "Streebog-256",
+					"Streebog512" => "Streebog-512",
+					"Skein256" => "Skein-256",
+					"Skein512" => "Skein-512",
+					"Skein1024" => "Skein-1024",
+					"Groestl256" => "Grøstl-256",
+					"Groestl512" => "Grøstl-512",
+					"Jh256" => "JH-256",
+					"Jh512" => "JH-512",
+					"KangarooTwelve" => "KangarooTwelve",
+					"Sm3" => "SM3",
+					_ => throw new InvalidOperationException($"Unsupported hash property mapping: {propertyName}.")
+				};
+
+				if (_batchResults.TryGetValue(streamHashName, out var value)) {
+					return value;
+				}
+
+				throw new InvalidOperationException($"Missing hash result for '{streamHashName}' while populating '{propertyName}'.");
+			}
 		}
-
-		return results;
-	}
-
-	/// <summary>
-	/// Maps StreamHash algorithm names to FileHashResult property names.
-	/// </summary>
-	private static string MapStreamHashNameToPropertyName(string streamHashName) {
-		return streamHashName switch {
-			// Checksums (exact matches)
-			"CRC32" => "Crc32",
-			"CRC32C" => "Crc32C",
-			"CRC64" => "Crc64",
-			"CRC16-CCITT" => "Crc16Ccitt",
-			"CRC16-MODBUS" => "Crc16Modbus",
-			"CRC16-USB" => "Crc16Usb",
-			"Adler-32" => "Adler32",
-			"Fletcher-16" => "Fletcher16",
-			"Fletcher-32" => "Fletcher32",
-
-			// Non-Crypto Fast (exact matches mostly)
-			"xxHash32" => "XxHash32",
-			"xxHash64" => "XxHash64",
-			"xxHash3" => "XxHash3",
-			"xxHash128" => "XxHash128",
-			"MurmurHash3-32" => "Murmur3_32",
-			"MurmurHash3-128" => "Murmur3_128",
-			"CityHash64" => "CityHash64",
-			"CityHash128" => "CityHash128",
-			"FarmHash64" => "FarmHash64",
-			"SpookyHash128" => "SpookyV2_128",
-			"SipHash-2-4" => "SipHash24",
-			"HighwayHash64" => "HighwayHash64",
-			"MetroHash64" => "MetroHash64",
-			"MetroHash128" => "MetroHash128",
-			"wyhash64" => "Wyhash64",
-			"FNV-1a-32" => "Fnv1a32",
-			"FNV-1a-64" => "Fnv1a64",
-			"DJB2" => "Djb2",
-			"DJB2a" => "Djb2a",
-			"SDBM" => "Sdbm",
-			"lose-lose" => "LoseLose",
-
-			// MD Family
-			"MD2" => "Md2",
-			"MD4" => "Md4",
-			"MD5" => "Md5",
-
-			// SHA-1/2 Family
-			"SHA-0" => "Sha0",
-			"SHA-1" => "Sha1",
-			"SHA-224" => "Sha224",
-			"SHA-256" => "Sha256",
-			"SHA-384" => "Sha384",
-			"SHA-512" => "Sha512",
-			"SHA-512/224" => "Sha512_224",
-			"SHA-512/256" => "Sha512_256",
-
-			// SHA-3 & Keccak
-			"SHA3-224" => "Sha3_224",
-			"SHA3-256" => "Sha3_256",
-			"SHA3-384" => "Sha3_384",
-			"SHA3-512" => "Sha3_512",
-			"Keccak-256" => "Keccak256",
-			"Keccak-512" => "Keccak512",
-
-			// BLAKE Family
-			"BLAKE-256" => "Blake256",
-			"BLAKE-512" => "Blake512",
-			"BLAKE2b" => "Blake2b",
-			"BLAKE2s" => "Blake2s",
-			"BLAKE3" => "Blake3",
-
-			// RIPEMD Family
-			"RIPEMD-128" => "Ripemd128",
-			"RIPEMD-160" => "Ripemd160",
-			"RIPEMD-256" => "Ripemd256",
-			"RIPEMD-320" => "Ripemd320",
-
-			// Other Crypto
-			"Whirlpool" => "Whirlpool",
-			"Tiger-192" => "Tiger192",
-			"GOST-94" => "Gost94",
-			"Streebog-256" => "Streebog256",
-			"Streebog-512" => "Streebog512",
-			"Skein-256" => "Skein256",
-			"Skein-512" => "Skein512",
-			"Skein-1024" => "Skein1024",
-			"Grøstl-256" => "Groestl256",
-			"Grøstl-512" => "Groestl512",
-			"JH-256" => "Jh256",
-			"JH-512" => "Jh512",
-			"KangarooTwelve" => "KangarooTwelve",
-			"SM3" => "Sm3",
-
-			// If unmapped, return as-is (should not happen)
-			_ => streamHashName
-		};
 	}
 
 	#endregion

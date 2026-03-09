@@ -1,6 +1,7 @@
 
 copy editorconfig and copilot-instructions and markdownlinter config file from the Nexen project (adapt copilot-instructions to this project); and then make issues and plans and docs and such for performance and accuracy improvements and make tests and benchmarks, etc; continue;
 
+implement all the performance and memory improvements, and update/create docs issues benchmarks tests etc; continue;
 
 
 
