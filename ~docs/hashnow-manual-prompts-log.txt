@@ -3,6 +3,7 @@ copy editorconfig and copilot-instructions and markdownlinter config file from t
 
 implement all the performance and memory improvements, and update/create docs issues benchmarks tests etc; continue;
 
+[HashNow/StreamHash] work through all the issues (and make new ones) and close issues that are done; continue;
 
 
 
