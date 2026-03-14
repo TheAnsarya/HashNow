@@ -1,6 +1,4 @@
 using System.Buffers;
-using System.Diagnostics;
-using StreamHash.Core;
 using StreamHash.Core.Abstractions;
 
 namespace HashNow.Core;

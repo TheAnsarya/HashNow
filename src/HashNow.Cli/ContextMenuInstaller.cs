@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Runtime.Versioning;
 using Microsoft.Win32;
 
 namespace HashNow.Cli;
