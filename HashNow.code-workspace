@@ -7,5 +7,7 @@
 			"path": "../StreamHash"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"powershell.cwd": "StreamHash"
+	}
 }

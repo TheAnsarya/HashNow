@@ -5,19 +5,31 @@ implement all the performance and memory improvements, and update/create docs is
 
 [HashNow/StreamHash] work through all the issues (and make new ones) and close issues that are done; continue;
 
+[StreamHash] work through all the issues (and make new ones) and close issues that are done; continue;
 
+[StreamHash] work through all the issues (and make new ones) and close issues that are done; Make sure all algorithms are implement in-house, not using a library; continue;
 
+[StreamHash] continue making issues and plans and tests and benchmarks and docs after finding more performance improvements, especially focusing on the newly added algorithm implementations; do that alot; and also add benchmark comparisons (speed and memory and allocations) for our current algorithm implementations and the library versions (bouncy castle, etc) and make documentation about how much better our versions are (unless they aren't) so we add the whole list to our readme file to show why our nuget package should be used instead; continue;
 
+[StreamHash] continue making issues and plans and tests and benchmarks and docs after finding more performance improvements, especially focusing on the newly added algorithm implementations; do that alot; and also add more benchmark comparisons (speed and memory and allocations) for our current algorithm implementations and the library versions (for the algorithms we haven't tested, we used other versions of code for almost all of them in the past, add the reference hash versions and such) and make documentation about how much better our versions are (unless they aren't) so we add the whole list to our readme file to show why our nuget package should be used instead; continue;
 
+[StreamHash] continue making issues and plans and tests and benchmarks and docs after finding more performance improvements, especially focusing on the newly added algorithm implementations; do that alot; and also add more benchmark comparisons (speed and memory and allocations) for our current algorithm implementations and the library versions (for the algorithms we haven't tested, we used other versions of code for almost all of them in the past, add the reference hash versions and such) and make documentation about how much better our versions are (unless they aren't) so we add the whole list to our readme file to show why our nuget package should be used instead; continue;
 
+stop unusing `unsafe` and remove all currently just-added unsafe code; find a different way to get performance improvemnets; continue;
 
+what is bouncy castle doing that makes their algorithm so much more efficient?
 
+[StreamHash] Make more performance benchmarks and tests and improve performance until every single algorithm is faster and better memory managed (allocations!) than their reference implementations, if it is slower than bouncy castle then look at bouncy castle's code to see how they're better and fix our native algorithms, etc.; continue; continue;
 
+go?
 
+This repos is called `StreamHash` so it should use streaming for all hashing; continue;
 
+Why is HashNow a `*.slnx` file but StreamHash is `*.sln` file?
 
+Yes update to the modern format; I've always said: always use the modern standards and practices and code and library version; add to copilot instructions if it's not there, it should already be; make sure both repos are modernized and updated as well as performant and correct, coiplot instructions should include the three primary principles: 1) Correctness (testing of as much code as possible, big testing suite), 2) Performance (benchmark testing to ensure code changes meet or exceed current performance and minimize memory usage and allocations when possible, and 3) Modern (always update the latest versions of everything, use the most modern standards and practices, and libraries, and code patterns and features, so like today use dotnet 10/11 and c#14 and vs2026); look for any other legacy nonsense that should be modernized in both repositories, and fix it, and modernize the frameworks and language versions to the most recent and update nuget packages and libraries, and update code styles (like adding more pattern switch stuff, etc) adding issues (epics and subissues) and docs for tracking, and then implement; continue;
 
-
+gitcommit, and update issues, epics, subissues, plans, docs, chat/session logs; continue working issues and make new ones; modern everything; improve performance; continue;
 
 
 

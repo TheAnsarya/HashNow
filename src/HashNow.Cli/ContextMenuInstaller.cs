@@ -153,7 +153,7 @@ internal static class ContextMenuInstaller {
 		// Create the context menu entry under HKEY_CLASSES_ROOT\*\shell\HashNow
 		// CreateSubKey will create if missing or open if exists
 		using var key = Registry.ClassesRoot.CreateSubKey(RegistryKeyPath);
-		if (key == null) {
+		if (key is null) {
 			throw new InvalidOperationException(
 				"Failed to create registry key. Ensure the application is running with administrator privileges.");
 		}
@@ -167,7 +167,7 @@ internal static class ContextMenuInstaller {
 
 		// Create the command subkey that tells Windows what to run when clicked
 		using var commandKey = key.CreateSubKey("command");
-		if (commandKey == null) {
+		if (commandKey is null) {
 			throw new InvalidOperationException(
 				"Failed to create command registry key. Ensure the application is running with administrator privileges.");
 		}
@@ -245,7 +245,7 @@ internal static class ContextMenuInstaller {
 		// OpenSubKey returns null if the key doesn't exist
 		// Using 'using' ensures the key is properly disposed if found
 		using var key = Registry.ClassesRoot.OpenSubKey(RegistryKeyPath);
-		return key != null;
+		return key is not null;
 	}
 
 	/// <summary>
@@ -293,7 +293,7 @@ internal static class ContextMenuInstaller {
 	/// </example>
 	public static bool IsInstalledCorrectly() {
 		var command = GetInstalledCommand();
-		if (command == null) return false;
+		if (command is null) return false;
 
 		// Check if the command contains the current executable path
 		var currentExe = GetExecutablePath();

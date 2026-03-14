@@ -362,7 +362,7 @@ internal static class Program {
 			using var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
 			using var parentProcess = GetParentProcess(currentProcess);
 
-			if (parentProcess != null) {
+			if (parentProcess is not null) {
 				var parentName = parentProcess.ProcessName.ToLowerInvariant();
 				// If launched from explorer, it's a double-click
 				if (parentName == "explorer") {
@@ -613,7 +613,7 @@ internal static class Program {
 			});
 
 		// Only save JSON if completed successfully (not cancelled)
-		if (success && result != null && !wasCancelled) {
+		if (success && result is not null && !wasCancelled) {
 			// Save JSON before dialog closes
 			await FileHasher.SaveResultAsync(result, outputPath);
 			return 0;
@@ -840,7 +840,7 @@ internal static class Program {
 		Console.WriteLine($"Algorithms: {FileHasher.AlgorithmCount}");
 
 		var command = ContextMenuInstaller.GetInstalledCommand();
-		if (command != null) {
+		if (command is not null) {
 			Console.WriteLine($"Registered: {command}");
 		}
 

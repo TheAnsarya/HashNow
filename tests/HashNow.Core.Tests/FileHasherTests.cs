@@ -358,12 +358,12 @@ Assert.NotEqual(result1.Sha256, result2.Sha256);
 }
 
 [Fact]
-public void HashFile_Sync_MatchesAsync() {
+public async Task HashFile_Sync_MatchesAsync() {
 var content = "Test content"u8.ToArray();
 var path = CreateTestFile("sync.bin", content);
 
 var syncResult = FileHasher.HashFile(path);
-var asyncResult = FileHasher.HashFileAsync(path).GetAwaiter().GetResult();
+var asyncResult = await FileHasher.HashFileAsync(path);
 
 Assert.Equal(syncResult.Md5, asyncResult.Md5);
 Assert.Equal(syncResult.Sha256, asyncResult.Sha256);
