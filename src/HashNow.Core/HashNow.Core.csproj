@@ -20,7 +20,7 @@
 
 	<ItemGroup>
 	  <!-- StreamHash provides HashFacade for all 70 hash algorithms with streaming support -->
-	  <PackageReference Include="StreamHash" Version="1.10.0" />
+	  <PackageReference Include="StreamHash" />
 	</ItemGroup>
 
 </Project>
