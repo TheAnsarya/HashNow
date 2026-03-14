@@ -14,7 +14,7 @@ namespace HashNow.Benchmarks;
 /// Compares parallel (all 70 algorithms) vs sequential execution.
 /// </summary>
 [MemoryDiagnoser]
-public class FileHasherBenchmarks {
+public sealed class FileHasherBenchmarks {
 	private string _smallFilePath = null!;
 	private string _mediumFilePath = null!;
 	private string _largeFilePath = null!;

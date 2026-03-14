@@ -2,7 +2,7 @@ using BenchmarkDotNet.Running;
 
 namespace HashNow.Benchmarks;
 
-public class Program {
+public sealed class Program {
 public static void Main(string[] args) {
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 }

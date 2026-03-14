@@ -10,7 +10,7 @@ namespace HashNow.Benchmarks;
 /// </summary>
 [MemoryDiagnoser]
 [SimpleJob(warmupCount: 3, iterationCount: 5)]
-public class JsonAndIoBenchmarks {
+public sealed class JsonAndIoBenchmarks {
 	private FileHashResult _result = null!;
 	private string _tempJsonPath = null!;
 
@@ -50,7 +50,7 @@ public class JsonAndIoBenchmarks {
 /// </summary>
 [MemoryDiagnoser]
 [SimpleJob(warmupCount: 2, iterationCount: 3)]
-public class ProgressOverheadBenchmarks {
+public sealed class ProgressOverheadBenchmarks {
 	private string _tempFile = null!;
 
 	[Params(1024 * 1024)] // 1MB

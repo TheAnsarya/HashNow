@@ -8,7 +8,7 @@ namespace HashNow.Benchmarks;
 /// Benchmarks for profiling actual file hashing performance.
 /// </summary>
 [MemoryDiagnoser]
-public class PerformanceProfiler {
+public sealed class PerformanceProfiler {
 	private string _tempFile50MB = string.Empty;
 	private string _tempFile1MB = string.Empty;
 	private string _tempFile100KB = string.Empty;

@@ -4,12 +4,12 @@
 
 [![License: Unlicense](https://img.shields.io/badge/License-Unlicense-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
-[![Tests](https://img.shields.io/badge/tests-108%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-296%20passing-brightgreen)](tests/)
 [![Release](https://img.shields.io/github/v/release/TheAnsarya/HashNow)](https://github.com/TheAnsarya/HashNow/releases/latest)
 
 ## 📥 Download
 
-**[Download HashNow v1.3.6](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
+**[Download HashNow v1.4.0](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
 
 ## 🚀 Quick Start
 
@@ -157,7 +157,7 @@ The generated JSON file contains all 70 hashes organized by category:
 
 	"hashedAtUtc": "2025-02-05T10:30:15Z",
 	"durationMs": 1003,
-	"generatedBy": "HashNow 1.3.6",
+	"generatedBy": "HashNow v1.4.0",
 	"algorithmCount": 70
 }
 ```
@@ -357,6 +357,16 @@ pwsh -File scripts/benchmark-markdown-policy.ps1 -Runs 5
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for full history.
+
+### v1.4.0 (2026-02-05)
+
+- **Batch API Integration** - Integrated StreamHash v1.7.0 batch streaming API
+- **Parallel Processing** - 8-16x speedup on multi-core systems
+- **Memory Optimization** - 4-6x memory reduction vs sequential processing
+
+### v1.3.7 (2026-02-05)
+
+- **Fixed JSON blank lines** - Blank lines between sections no longer have commas
 
 ### v1.3.6 (2026-02-05)
 
