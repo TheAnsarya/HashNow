@@ -330,11 +330,22 @@ All 70 hashes are computed in a **single file read** for maximum efficiency:
 - **ArrayPool** minimizes GC pressure
 - **Streaming** handles files of any size
 - **Single pass** - no multiple file reads
-- **HashFacade API** - Unified interface from StreamHash 1.6.3
-- **Modular architecture** - Clean separation of concerns
+- **Powered by [StreamHash](https://www.nuget.org/packages/StreamHash)** - All 70 algorithms run natively in pure C#
 
 Typical throughput: ~200-300 MB/s for all 70 algorithms simultaneously.
-70 algorithms on a 5KB file: ~1000ms (most time in algorithm initialization).
+
+### StreamHash Performance (2026-03-15)
+
+HashNow's performance comes from StreamHash's highly optimized native C# implementations. Key results at 1MB data size:
+
+| Category | Summary |
+|----------|---------|
+| **Crypto vs BouncyCastle** | 18 algorithms faster, 8 at parity, 7 slower |
+| **Non-Crypto vs System.IO.Hashing** | All within 1-9% of hardware-accelerated wrappers |
+| **Biggest Wins** | Whirlpool 5x, SHA-1 2.5x, MD5 1.6x, Streebog 1.6x, Skein 1.5x |
+| **Zero True Unsafe Code** | All algorithms in pure safe managed C# |
+
+See [StreamHash Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md) for detailed comparisons.
 
 ## Markdown Quality Automation
 
