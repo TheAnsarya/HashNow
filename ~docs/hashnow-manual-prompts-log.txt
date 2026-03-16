@@ -45,6 +45,19 @@ you're removing the `unsafe` code that is actually safe because it is managed. A
 
 and also fix the one true unsafe example, `HighwayHash64.cs`; continue;
 
+git-commit every file in every repos; update `readme.md` especially the performance improvements and stats and update/create sub-pages of the `md` documentation showing detailed performance and correctness and how the algorithms work, each one as a document in a folder structure; make issues (epics and sub-issues)  and plans and docs, and logs, etc; and then continue working on the algorithms that are still not as fast as their reference implementations and also work on all the algorithms with performance improvements, if you can find them, but focus on the ones that are slower than other libraries; continue;
+
+If that one algorithm (8x, blake3) can't be reproduced at that speed (1x) in c# then use the reference library and wrap it in streaming code as efficiently as you can to get to parity (1.2 is better than 8.3); continue;
+
+make performance issues and fix them; update all the documentation and tests and benchmarks and add the readme a table with the algorithms that are alower than their reference libraries; continue;
+
+Create performance benchmarks for the algorithms for 10mb and 100mb and 1gb; These benchmarks are not to be run for the main benchmark testing, only if specifically requested and run them as a background process since 1gb will take a long time, don't block our work; implement, run in different process; continue working issues and making new ones; continue;
+
+for the `VeryLarge Benchmarks` what results do we have so far, what are we waiting on?
+
+open the file you're recording these benchmarks in, run the missing benchmarks, continue working;
+
+[StreamHash/HashNow] git commit everything, add to copilot instructions that we always fix markdownlinter warnings like MD022, MD032, etc and fix them in all `*.md` files now and generate markdown files with the appropriate extra newlines in the future; continue working and making issues for all work, find improvements and performance issues and implement fixes; add to copilot instructions: every markdown file or documentation should be accessible from the main readme file through the link-tree; continue; create a big plan with issue epics and subissues and documents to update the `readme.md` and all the other documentation spreading from there, instead of describing the ways we increased performance for each feature, relegate that to a sub page and instead describe how each feature works and how we should use it, gui instructions and descriptions of how the features work ; The user-only manual prompt file `~docs\hashnow-manual-prompts-log.txt`, thank you for respecting it and not updating it ever, but it should still be git-commited, add that to copilot instructions, never touch or change it, but commit it to source control since it probably has the prompt that kicked off your current work; continue; continue completing github issues; continue;
 
 
 
@@ -56,6 +69,19 @@ and also fix the one true unsafe example, `HighwayHash64.cs`; continue;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+which one of these is faster? you should have benchmark tests: `ulong m3 = Unsafe.ReadUnaligned<ulong>(ref Unsafe.Add(ref blockRef, 24));` or `ulong m3 = BinaryPrimitives.ReadUInt64LittleEndian(block.Slice(24));`
 
 
 
