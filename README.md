@@ -199,6 +199,10 @@ For detailed benchmark results, see [Performance](docs/PERFORMANCE.md). For per-
 - [🧪 Manual Testing Guide](docs/MANUAL_TESTING.md) — step-by-step testing procedures
 - [📈 StreamHash Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md) — per-algorithm performance data
 
+### Release Notes
+
+- [v1.0.0](RELEASE-v1.0.0.md) | [v1.0.1](RELEASE-v1.0.1.md) | [v1.0.2](RELEASE-v1.0.2.md)
+
 ## 📄 License
 
 [The Unlicense](LICENSE) — Public domain, free for any use.
