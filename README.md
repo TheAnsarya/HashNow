@@ -189,14 +189,15 @@ All 70 hashes are computed in a **single file read** with parallel processing:
 - **Single pass** — file is read once, all algorithms fed concurrently
 - **Powered by [StreamHash](https://www.nuget.org/packages/StreamHash)** — native C# with zero unsafe code
 
-For detailed benchmark results and performance comparisons, see [StreamHash Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md).
+For detailed benchmark results, see [Performance](docs/PERFORMANCE.md). For per-algorithm data, see [StreamHash Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md).
 
 ## 📖 Documentation
 
 - [📝 Changelog](CHANGELOG.md) — version history and release notes
 - [📊 Algorithm Roadmap](docs/ALGORITHM_ROADMAP.md) — all 70 algorithms with implementation status
+- [⚡ Performance](docs/PERFORMANCE.md) — benchmarks, architecture, and optimization details
 - [🧪 Manual Testing Guide](docs/MANUAL_TESTING.md) — step-by-step testing procedures
-- [📈 StreamHash Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md) — detailed performance data
+- [📈 StreamHash Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md) — per-algorithm performance data
 
 ## 📄 License
 
