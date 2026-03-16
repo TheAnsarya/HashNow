@@ -9,7 +9,7 @@
 
 ## 📥 Download
 
-**[Download HashNow v1.4.0](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
+**[Download HashNow v1.4.1](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
 
 ## 🚀 Quick Start
 
@@ -120,7 +120,7 @@ HashNow creates `{filename}.hashes.json` next to the original file. The JSON use
 
 	"hashedAtUtc": "2025-02-05T10:30:15Z",
 	"durationMs": 1003,
-	"generatedBy": "HashNow v1.4.0",
+	"generatedBy": "HashNow v1.4.1",
 	"algorithmCount": 70
 }
 ```
