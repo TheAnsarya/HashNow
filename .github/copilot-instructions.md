@@ -364,6 +364,8 @@ Tag releases as `vX.Y.Z` (e.g., `v2.0.0`)
 ### `~docs/` (Development)
 - Session logs
 - Plans and notes
+- **NEVER edit** `~docs/hashnow-manual-prompts-log.txt` — this is the user's manual prompt history
+- **ALWAYS commit** `~docs/hashnow-manual-prompts-log.txt` to source control when it has changes
 
 ## Context Menu Integration
 
