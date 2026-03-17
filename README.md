@@ -20,39 +20,48 @@ Download `HashNow.exe` from the [Releases page](https://github.com/TheAnsarya/Ha
 
 Your browser may warn that the file "isn't commonly downloaded." This is normal for new executables — click the keep/download option:
 
-![Browser warning that HashNow.exe isn't commonly downloaded](docs/images/hashnow-isnt-commonly-downloaded.png)
+| ![Browser warning that HashNow.exe isn't commonly downloaded](docs/images/hashnow-isnt-commonly-downloaded.png) |
+|---|
 
 Click **Keep** or **Keep anyway** to save the file:
 
-![Click Keep to save the download](docs/images/hashnow-isnt-commonly-downloaded-keep.png)
+| ![Click Keep to save the download](docs/images/hashnow-isnt-commonly-downloaded-keep.png) |
+|---|
 
-![Confirm keeping the download](docs/images/hashnow-isnt-commonly-downloaded-keep-anyways.png)
+| ![Confirm keeping the download](docs/images/hashnow-isnt-commonly-downloaded-keep-anyways.png) |
+|---|
 
 ### Step 2: Unblock the File
 
 Windows marks downloaded files as blocked. Before running, right-click `HashNow.exe` and select **Properties**:
 
-![Right-click HashNow.exe and select Properties](docs/images/properties-window-contextmenu.png)
+| ![Right-click HashNow.exe and select Properties](docs/images/properties-window-contextmenu.png) |
+|---|
 
 At the bottom of the **General** tab, check the **Unblock** checkbox and click **OK**:
 
-![Properties dialog showing the Unblock checkbox](docs/images/properties-window-unblock-before.png)
+| ![Properties dialog showing the Unblock checkbox](docs/images/properties-window-unblock-before.png) |
+|---|
 
-![Unblock checkbox checked](docs/images/properties-window-unblock.png)
+| ![Unblock checkbox checked](docs/images/properties-window-unblock.png) |
+|---|
 
 ### Step 3: Install Context Menu
 
 Double-click `HashNow.exe`. On first launch (with no arguments), HashNow detects it was launched directly and offers to install the Explorer context menu:
 
-![HashNow auto-install prompt](docs/images/auto-install-prompt.png)
+| ![HashNow auto-install prompt](docs/images/auto-install-prompt.png) |
+|---|
 
 Click **Yes** to install. A Windows UAC prompt will appear requesting administrator privileges (required to write to the Windows registry):
 
-![UAC elevation prompt](docs/images/uac-prompt.png)
+| ![UAC elevation prompt](docs/images/uac-prompt.png) |
+|---|
 
 Click **Yes** to grant admin access. A confirmation dialog confirms the installation:
 
-![Context menu installed successfully](docs/images/install-success.png)
+| ![Context menu installed successfully](docs/images/install-success.png) |
+|---|
 
 You're done! The context menu is now available on all file types in Explorer.
 
@@ -60,11 +69,13 @@ You're done! The context menu is now available on all file types in Explorer.
 
 Right-click any file in Windows Explorer and select **"Hash this file now"**:
 
-![Explorer right-click context menu showing Hash this file now](docs/images/context-menu.png)
+| ![Explorer right-click context menu showing Hash this file now](docs/images/context-menu.png) |
+|---|
 
 A progress dialog appears while hashing:
 
-![Progress dialog showing hashing progress with percentage and cancel button](docs/images/progress-dialog.png)
+| ![Progress dialog showing hashing progress with percentage and cancel button](docs/images/progress-dialog.png) |
+|---|
 
 The dialog shows the file name, a progress bar (0–100%), percentage complete, and a **Cancel** button to abort at any time. It closes automatically when done.
 
@@ -72,11 +83,13 @@ The dialog shows the file name, a progress bar (0–100%), percentage complete, 
 
 Find `{filename}.hashes.json` in the same folder as the original file:
 
-![Explorer showing the generated .hashes.json file next to the original](docs/images/output-file-explorer.png)
+| ![Explorer showing the generated .hashes.json file next to the original](docs/images/output-file-explorer.png) |
+|---|
 
 Open the JSON file to see all 70 hashes organized by category:
 
-![JSON output file contents showing hash values](docs/images/json-output.png)
+| ![JSON output file contents showing hash values](docs/images/json-output.png) |
+|---|
 
 ## ✨ Features
 
@@ -102,7 +115,8 @@ HashNow.exe myfile.zip
 HashNow.exe file1.iso file2.zip file3.bin
 ```
 
-![CLI output showing hashing progress and completion](docs/images/cli-hash-output.png)
+| ![CLI output showing hashing progress and completion](docs/images/cli-hash-output.png) |
+|---|
 
 ### Management Commands
 
@@ -123,7 +137,8 @@ HashNow.exe --help
 HashNow.exe --version
 ```
 
-![CLI help output](docs/images/cli-help.png)
+| ![CLI help output](docs/images/cli-help.png) |
+|---|
 
 | Command | Description | Requires Admin |
 |---------|-------------|:--------------:|
