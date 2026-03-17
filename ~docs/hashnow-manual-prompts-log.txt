@@ -61,6 +61,7 @@ open the file you're recording these benchmarks in, run the missing benchmarks, 
 
 [SteamHash/HashNow] make sure all the docs are up to date, especially readme, then do the following, and then update readme again with the new situation: [StreamHash] create a new release and then update and make a new nuget package release and publish it, and open the nuget package web page; [HashNow] wait until StreamHash has a new nuget package and then install it and make a new build and then make a new release and continue working ;
 
+Update StreamHash #9 with current status and tackle remaining distribution tasks
 
 
 
