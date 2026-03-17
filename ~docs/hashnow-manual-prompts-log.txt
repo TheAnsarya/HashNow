@@ -67,7 +67,9 @@ Did you do the remaining issue? " Coverage badge for README — needs a CI run w
 
 [StreamHash] Well, if there's a problem with release 1.11.0, then make a new release 1.11.1 and also finish StreamHash issue #9 and then update nuget and then after publishing StreamHash to nuget (wait if needed):[HashNow] update HashNow to use the new version and republish/release HashNow updating to version 1.4.2 and update the readme and other documentation for HashNow with current state and instructions and descriptions of how to install and use the utility, add inline screenshots to the markdown instructions and documentation and add a document that tells me what screenshots to take and save as specific file names so they fill the documentation; continue;
 
+how do i uninstall hashnow so I can start from scratch? make it easy for me; continue;
 
+The older version is blocking the install from the fresh 1.4.2 version, so I had to uninstall it, add uninstall instructions to the readme, but running the hashnow exe afterwards doesn't do anbything. Why is it not installing? and why is it not bother me with a a UAC prompt? I need screen shots!
 
 
 

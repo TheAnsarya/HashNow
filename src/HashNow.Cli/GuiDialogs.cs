@@ -20,6 +20,32 @@ internal static class GuiDialogs {
 
 	#endregion
 
+	#region Foreground Helper
+
+	/// <summary>
+	/// Shows a MessageBox using a topmost hidden owner form so the dialog always
+	/// appears in front of other windows, even without a visible parent window.
+	/// </summary>
+	private static DialogResult ShowForeground(
+		string message,
+		string title,
+		MessageBoxButtons buttons,
+		MessageBoxIcon icon) {
+		using var owner = new Form {
+			TopMost = true,
+			ShowInTaskbar = false,
+			FormBorderStyle = FormBorderStyle.None,
+			StartPosition = FormStartPosition.CenterScreen,
+			Size = Size.Empty,
+		};
+
+		// Create the handle so it can serve as an owner, but never show the form
+		owner.Handle.ToString(); // Force handle creation
+		return MessageBox.Show(owner, message, title, buttons, icon);
+	}
+
+	#endregion
+
 	#region Public Methods
 
 	/// <summary>
@@ -29,7 +55,7 @@ internal static class GuiDialogs {
 	/// <param name="title">Optional title (defaults to "HashNow").</param>
 	/// <returns><see langword="true"/> if user clicked Yes; otherwise, <see langword="false"/>.</returns>
 	public static bool AskYesNo(string message, string? title = null) {
-		var result = MessageBox.Show(
+		var result = ShowForeground(
 			message,
 			title ?? AppTitle,
 			MessageBoxButtons.YesNo,
@@ -44,7 +70,7 @@ internal static class GuiDialogs {
 	/// <param name="message">The message to display.</param>
 	/// <param name="title">Optional title (defaults to "HashNow").</param>
 	public static void ShowInfo(string message, string? title = null) {
-		MessageBox.Show(
+		ShowForeground(
 			message,
 			title ?? AppTitle,
 			MessageBoxButtons.OK,
@@ -57,7 +83,7 @@ internal static class GuiDialogs {
 	/// <param name="message">The message to display.</param>
 	/// <param name="title">Optional title (defaults to "HashNow").</param>
 	public static void ShowSuccess(string message, string? title = null) {
-		MessageBox.Show(
+		ShowForeground(
 			message,
 			title ?? AppTitle,
 			MessageBoxButtons.OK,
@@ -70,7 +96,7 @@ internal static class GuiDialogs {
 	/// <param name="message">The error message to display.</param>
 	/// <param name="title">Optional title (defaults to "HashNow").</param>
 	public static void ShowError(string message, string? title = null) {
-		MessageBox.Show(
+		ShowForeground(
 			message,
 			title ?? AppTitle,
 			MessageBoxButtons.OK,
@@ -83,7 +109,7 @@ internal static class GuiDialogs {
 	/// <param name="message">The warning message to display.</param>
 	/// <param name="title">Optional title (defaults to "HashNow").</param>
 	public static void ShowWarning(string message, string? title = null) {
-		MessageBox.Show(
+		ShowForeground(
 			message,
 			title ?? AppTitle,
 			MessageBoxButtons.OK,

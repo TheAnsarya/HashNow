@@ -11,7 +11,7 @@
 
 ### Step 1: Download
 
-**[Download HashNow v1.4.2](https://github.com/TheAnsarya/HashNow/releases/latest)** — single self-contained `.exe`, no installer needed.
+**[Download HashNow v1.4.3](https://github.com/TheAnsarya/HashNow/releases/latest)** — single self-contained `.exe`, no installer needed.
 
 Download `HashNow.exe` from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest) and save it somewhere permanent (e.g. `C:\Tools\HashNow.exe`). The context menu entry points to wherever you put the file, so don't move it after installing.
 
@@ -121,6 +121,17 @@ HashNow.exe --version
 
 The context menu entry is stored in the Windows registry under `HKEY_CLASSES_ROOT\*\shell\HashNow` and applies to all file types.
 
+### Uninstalling
+
+To remove the context menu and start fresh:
+
+```powershell
+# From an admin PowerShell prompt:
+.\HashNow.exe --uninstall
+```
+
+After uninstalling, double-click `HashNow.exe` again to re-trigger the install flow. If you're upgrading from an older version, **uninstall first** — the old registry entry points to the old exe path and will block the new install.
+
 ## 📊 Output Format
 
 HashNow creates `{filename}.hashes.json` next to the original file. The JSON uses **tab indentation** with **blank lines between sections** for readability:
@@ -146,7 +157,7 @@ HashNow creates `{filename}.hashes.json` next to the original file. The JSON use
 
 	"hashedAtUtc": "2025-02-05T10:30:15Z",
 	"durationMs": 1003,
-	"generatedBy": "HashNow v1.4.2",
+	"generatedBy": "HashNow v1.4.3",
 	"algorithmCount": 70
 }
 ```

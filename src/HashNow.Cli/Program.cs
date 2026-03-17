@@ -126,11 +126,18 @@ internal static class Program {
 	/// </list>
 	/// </returns>
 	private static async Task<int> Main(string[] args) {
+		// Initialize WinForms for proper MessageBox rendering, DPI scaling,
+		// and ensuring dialogs appear in front of other windows
+		Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+		Application.EnableVisualStyles();
+		Application.SetCompatibleTextRenderingDefault(false);
+
 		// Attach to console if running from command line (WinExe doesn't auto-attach)
 		// This allows console output when invoked from cmd/powershell while suppressing
 		// console window when double-clicked or launched from Explorer
 		if (args.Length > 0 || !DetectDoubleClickLaunch()) {
 			AttachConsole(ATTACH_PARENT_PROCESS);
+			RedirectConsoleStreams();
 		}
 
 		// No arguments provided - auto-install mode
@@ -407,6 +414,26 @@ internal static class Program {
 			// Ignore errors in parent process detection
 		}
 		return null;
+	}
+
+	/// <summary>
+	/// Redirects .NET Console streams to the attached console.
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// For WinExe applications, <c>AttachConsole</c> attaches the native console
+	/// but does NOT redirect the .NET <see cref="Console"/> streams. Without this,
+	/// all <c>Console.Write</c> and <c>Console.ReadKey</c> calls go to invalid handles.
+	/// </para>
+	/// </remarks>
+	private static void RedirectConsoleStreams() {
+		try {
+			Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
+			Console.SetError(new StreamWriter(Console.OpenStandardError()) { AutoFlush = true });
+			Console.SetIn(new StreamReader(Console.OpenStandardInput()));
+		} catch {
+			// If stream redirection fails, console output won't work but GUI still will
+		}
 	}
 
 	/// <summary>
