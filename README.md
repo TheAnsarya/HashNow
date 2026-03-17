@@ -15,7 +15,8 @@
 
 Download `HashNow.exe` from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest) and save it somewhere permanent (e.g. `C:\Tools\HashNow.exe`). The context menu entry points to wherever you put the file, so don't move it after installing.
 
-![Download HashNow from GitHub Releases](docs/images/download-release.png)
+| ![Download HashNow from GitHub Releases](docs/images/download-release.png) |
+|---|
 
 Your browser may warn that the file "isn't commonly downloaded." This is normal for new executables — click the keep/download option:
 
