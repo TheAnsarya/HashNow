@@ -73,6 +73,7 @@ The older version is blocking the install from the fresh 1.4.2 version, so I had
 
 OK, I took all the screen shots, I think, let me know if I missed one; Also, HashNow's progress bar is setup incorrectly, it hits 100% immediately and then goes to like 68000%, and higher when I canceled it. Also, it took like 28 seconds to fully hash (all 70 algorithms) a ~50mb file, is that the speed we are expecting?
 
+[HashNow] A lot of documentation is inaccurate, update the documentation, for instance `/docs/ALGORITHM_ROADMAP.md` still says we're using bouncycastle and other nuget packages, but were should only be using streamhash, although, show more clearly that we are using streamhash and clean up the documentation; use the other unused screen shots to add instructions at the begining for when the browser blocks the download ("keep" download) and after downloading how to open properties and set the "unblock" flag so the exe will run, remove this ol;d smart screen stuff, I am not seeing any smart screen, and also the screen shot for smart screen is a dupe of another one and doesn't actually show it; continue;
 
 
 

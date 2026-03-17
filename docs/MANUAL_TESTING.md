@@ -1,6 +1,6 @@
 # HashNow Manual Testing Guide
 
-This guide provides step-by-step manual testing procedures for HashNow v1.0.0 release verification.
+This guide provides step-by-step manual testing procedures for HashNow release verification.
 
 ## Prerequisites
 
@@ -54,13 +54,13 @@ $rand = New-Object byte[] (10*1024*1024); (New-Object Random).NextBytes($rand)
 #### 1.1 Version Check
 
 - [ ] Run: `HashNow --version`
-- [ ] Expected: `HashNow v2.0.0` (or current version)
+- [ ] Expected: Version string matching current release (e.g. `HashNow v1.4.4`)
 - [ ] Status: ___
 
 #### 1.2 Help Display
 
 - [ ] Run: `HashNow --help`
-- [ ] Expected: Shows usage with all 58 algorithms listed
+- [ ] Expected: Shows usage with all 70 algorithms listed
 - [ ] Status: ___
 
 #### 1.3 No Arguments
@@ -93,7 +93,7 @@ $rand = New-Object byte[] (10*1024*1024); (New-Object Random).NextBytes($rand)
 #### 2.3 Single Byte (0x42)
 
 - [ ] Run: `HashNow 0x42.bin`
-- [ ] Verify: All 58 hashes present in JSON
+- [ ] Verify: All 70 hashes present in JSON
 - [ ] Verify: `sizeBytes` = 1
 - [ ] Status: ___
 
@@ -132,21 +132,26 @@ $rand = New-Object byte[] (10*1024*1024); (New-Object Random).NextBytes($rand)
 - [ ] `hashedAtUtc` - ISO 8601 timestamp
 - [ ] `durationMs` - Processing time in milliseconds
 - [ ] `generatedBy` - "HashNow vX.Y.Z"
-- [ ] `algorithmCount` - 58
+- [ ] `algorithmCount` - 70
 - [ ] Status: ___
 
-#### 3.3 All Hash Algorithms Present (58 total)
+#### 3.3 All Hash Algorithms Present (70 total)
 
-Checksums (6):
+Checksums & CRCs (9):
 
-- [ ] `crc32`, `crc32c`, `crc64`, `adler32`, `fletcher16`, `fletcher32`
+- [ ] `crc32`, `crc32c`, `crc64`
+- [ ] `crc16Ccitt`, `crc16Modbus`, `crc16Usb`
+- [ ] `adler32`, `fletcher16`, `fletcher32`
 
-Fast Non-Crypto (12):
+Fast Non-Crypto (21):
 
 - [ ] `xxHash32`, `xxHash64`, `xxHash3`, `xxHash128`
 - [ ] `murmur3_32`, `murmur3_128`
-- [ ] `cityHash64`, `cityHash128`
-- [ ] `farmHash64`, `spookyV2_128`, `sipHash24`, `highwayHash64`
+- [ ] `cityHash64`, `cityHash128`, `farmHash64`
+- [ ] `spookyV2_128`, `sipHash24`, `highwayHash64`
+- [ ] `metroHash64`, `metroHash128`, `wyhash64`
+- [ ] `fnv1a32`, `fnv1a64`
+- [ ] `djb2`, `djb2a`, `sdbm`, `loseLose`
 
 Cryptographic (26):
 

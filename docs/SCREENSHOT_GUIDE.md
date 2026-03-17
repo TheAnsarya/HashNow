@@ -25,24 +25,86 @@ All screenshots should be:
 
 ---
 
-### 2. `smartscreen-warning.png` — Windows SmartScreen
+### 2. `hashnow-isnt-commonly-downloaded.png` — Browser Download Warning
 
-**Where:** First launch of a freshly downloaded `HashNow.exe`
+**Where:** Browser download bar/notification after downloading `HashNow.exe`
 
-**What to capture:** The SmartScreen dialog showing **"More info"** link and then the **"Run anyway"** button. Ideally capture both states (before and after clicking "More info") or just the state with **"Run anyway"** visible.
+**What to capture:** The browser warning that the file "isn't commonly downloaded" or similar security prompt.
 
 **How:**
 
-1. Download a fresh copy of `HashNow.exe` (or clear the SmartScreen cache)
-2. Double-click `HashNow.exe`
-3. When SmartScreen appears, click "More info" to reveal the "Run anyway" button
-4. Screenshot the dialog with "Run anyway" visible
-
-> **Note:** SmartScreen may not appear if the file has been run before or is signed. To force it, download a fresh copy or reset the SmartScreen data.
+1. Download `HashNow.exe` from the GitHub Releases page
+2. Screenshot the browser's warning/notification about the download
 
 ---
 
-### 3. `auto-install-prompt.png` — Install Context Menu Prompt
+### 3. `hashnow-isnt-commonly-downloaded-keep.png` — Keep Download
+
+**Where:** Browser download bar/notification
+
+**What to capture:** Clicking the **Keep** option on the browser's download warning.
+
+**How:**
+
+1. When the download warning appears, click the keep/menu option
+2. Screenshot showing the "Keep" button or option
+
+---
+
+### 4. `hashnow-isnt-commonly-downloaded-keep-anyways.png` — Confirm Keep
+
+**Where:** Browser download bar/notification
+
+**What to capture:** The final confirmation to keep the downloaded file.
+
+**How:**
+
+1. After clicking Keep, if a second confirmation appears, screenshot it
+2. This shows the "Keep anyway" option
+
+---
+
+### 5. `properties-window-contextmenu.png` — Open File Properties
+
+**Where:** Windows Explorer, right-clicking `HashNow.exe`
+
+**What to capture:** The right-click context menu with **Properties** highlighted, showing how to access the file properties.
+
+**How:**
+
+1. Right-click `HashNow.exe` in Explorer
+2. Screenshot the context menu with "Properties" visible
+
+---
+
+### 6. `properties-window-unblock-before.png` — Unblock Checkbox (Before)
+
+**Where:** `HashNow.exe` Properties dialog, General tab
+
+**What to capture:** The Properties dialog showing the **Unblock** checkbox at the bottom of the General tab, before it's been checked.
+
+**How:**
+
+1. Right-click `HashNow.exe` → Properties
+2. Look at the bottom of the General tab for the "Unblock" checkbox
+3. Screenshot with the checkbox unchecked
+
+---
+
+### 7. `properties-window-unblock.png` — Unblock Checkbox (Checked)
+
+**Where:** `HashNow.exe` Properties dialog, General tab
+
+**What to capture:** The Properties dialog with the **Unblock** checkbox checked, showing the file is now unblocked.
+
+**How:**
+
+1. Check the Unblock checkbox
+2. Screenshot showing it checked (before clicking OK)
+
+---
+
+### 8. `auto-install-prompt.png` — Install Context Menu Prompt
 
 **Where:** First launch with no arguments (double-click `HashNow.exe`)
 
@@ -56,7 +118,7 @@ All screenshots should be:
 
 ---
 
-### 4. `uac-prompt.png` — UAC Elevation Dialog
+### 9. `uac-prompt.png` — UAC Elevation Dialog
 
 **Where:** After clicking Yes on the install prompt
 
@@ -73,7 +135,7 @@ All screenshots should be:
 
 ---
 
-### 5. `install-success.png` — Installation Complete
+### 10. `install-success.png` — Installation Complete
 
 **Where:** After UAC is approved and the context menu is registered
 
@@ -86,7 +148,7 @@ All screenshots should be:
 
 ---
 
-### 6. `context-menu.png` — Explorer Right-Click Menu
+### 11. `context-menu.png` — Explorer Right-Click Menu
 
 **Where:** Windows Explorer, right-clicking any file
 
@@ -104,7 +166,7 @@ All screenshots should be:
 
 ---
 
-### 7. `progress-dialog.png` — Hashing Progress
+### 12. `progress-dialog.png` — Hashing Progress
 
 **Where:** While hashing a file via context menu or CLI
 
@@ -121,7 +183,7 @@ All screenshots should be:
 
 ---
 
-### 8. `output-file-explorer.png` — Output File in Explorer
+### 13. `output-file-explorer.png` — Output File in Explorer
 
 **Where:** Windows Explorer, same folder as the hashed file
 
@@ -136,7 +198,7 @@ All screenshots should be:
 
 ---
 
-### 9. `json-output.png` — JSON File Contents
+### 14. `json-output.png` — JSON File Contents
 
 **Where:** A text editor (VS Code, Notepad++, or even Notepad) showing the `.hashes.json` file
 
@@ -151,7 +213,7 @@ All screenshots should be:
 
 ---
 
-### 10. `cli-hash-output.png` — CLI Hashing Output
+### 15. `cli-hash-output.png` — CLI Hashing Output
 
 **Where:** Terminal/PowerShell running `HashNow.exe` on a file
 
@@ -165,7 +227,7 @@ All screenshots should be:
 
 ---
 
-### 11. `cli-help.png` — CLI Help Output
+### 16. `cli-help.png` — CLI Help Output
 
 **Where:** Terminal/PowerShell running `HashNow.exe --help`
 
@@ -186,13 +248,18 @@ Save all screenshots to `docs/images/` with these exact filenames:
 | # | Filename | Description |
 |:-:|----------|-------------|
 | 1 | `download-release.png` | GitHub Releases page with Assets |
-| 2 | `smartscreen-warning.png` | SmartScreen with "Run anyway" visible |
-| 3 | `auto-install-prompt.png` | Context menu install Yes/No prompt |
-| 4 | `uac-prompt.png` | UAC elevation dialog |
-| 5 | `install-success.png` | Installation success confirmation |
-| 6 | `context-menu.png` | Explorer right-click showing "Hash this file now" |
-| 7 | `progress-dialog.png` | Progress bar mid-hash (20–80%) |
-| 8 | `output-file-explorer.png` | Explorer showing original + .hashes.json |
-| 9 | `json-output.png` | JSON file contents in a text editor |
-| 10 | `cli-hash-output.png` | Terminal output of hashing a file |
-| 11 | `cli-help.png` | Terminal output of --help command |
+| 2 | `hashnow-isnt-commonly-downloaded.png` | Browser download warning |
+| 3 | `hashnow-isnt-commonly-downloaded-keep.png` | Clicking Keep on download warning |
+| 4 | `hashnow-isnt-commonly-downloaded-keep-anyways.png` | Confirming keep download |
+| 5 | `properties-window-contextmenu.png` | Right-click → Properties on exe |
+| 6 | `properties-window-unblock-before.png` | Properties dialog with Unblock unchecked |
+| 7 | `properties-window-unblock.png` | Properties dialog with Unblock checked |
+| 8 | `auto-install-prompt.png` | Context menu install Yes/No prompt |
+| 9 | `uac-prompt.png` | UAC elevation dialog |
+| 10 | `install-success.png` | Installation success confirmation |
+| 11 | `context-menu.png` | Explorer right-click showing "Hash this file now" |
+| 12 | `progress-dialog.png` | Progress bar mid-hash (20–80%) |
+| 13 | `output-file-explorer.png` | Explorer showing original + .hashes.json |
+| 14 | `json-output.png` | JSON file contents in a text editor |
+| 15 | `cli-hash-output.png` | Terminal output of hashing a file |
+| 16 | `cli-help.png` | Terminal output of --help command |

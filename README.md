@@ -17,18 +17,31 @@ Download `HashNow.exe` from the [Releases page](https://github.com/TheAnsarya/Ha
 
 ![Download HashNow from GitHub Releases](docs/images/download-release.png)
 
-### Step 2: First Launch & SmartScreen
+Your browser may warn that the file "isn't commonly downloaded." This is normal for new executables — click the keep/download option:
 
-Double-click `HashNow.exe`. Since this is a new download, Windows SmartScreen may appear:
+![Browser warning that HashNow.exe isn't commonly downloaded](docs/images/hashnow-isnt-commonly-downloaded.png)
 
-1. Click **"More info"**
-2. Click **"Run anyway"**
+Click **Keep** or **Keep anyway** to save the file:
 
-![Windows SmartScreen warning — click More info then Run anyway](docs/images/smartscreen-warning.png)
+![Click Keep to save the download](docs/images/hashnow-isnt-commonly-downloaded-keep.png)
+
+![Confirm keeping the download](docs/images/hashnow-isnt-commonly-downloaded-keep-anyways.png)
+
+### Step 2: Unblock the File
+
+Windows marks downloaded files as blocked. Before running, right-click `HashNow.exe` and select **Properties**:
+
+![Right-click HashNow.exe and select Properties](docs/images/properties-window-contextmenu.png)
+
+At the bottom of the **General** tab, check the **Unblock** checkbox and click **OK**:
+
+![Properties dialog showing the Unblock checkbox](docs/images/properties-window-unblock-before.png)
+
+![Unblock checkbox checked](docs/images/properties-window-unblock.png)
 
 ### Step 3: Install Context Menu
 
-On first launch (double-click with no arguments), HashNow detects it was launched directly and offers to install the Explorer context menu:
+Double-click `HashNow.exe`. On first launch (with no arguments), HashNow detects it was launched directly and offers to install the Explorer context menu:
 
 ![HashNow auto-install prompt](docs/images/auto-install-prompt.png)
 
@@ -174,9 +187,9 @@ HashNow creates `{filename}.hashes.json` next to the original file. The JSON use
 | Category | Count | Algorithms |
 |----------|:-----:|------------|
 | **Checksums** | 9 | CRC32, CRC32C, CRC64, CRC16 (CCITT/MODBUS/USB), Adler32, Fletcher16, Fletcher32 |
-| **Fast Non-Crypto** | 22 | xxHash (32/64/3/128), MurmurHash3 (32/128), CityHash (64/128), FarmHash64, SpookyV2, SipHash, HighwayHash64, MetroHash (64/128), Wyhash64, FNV-1a (32/64), DJB2, DJB2a, SDBM, LoseLose |
-| **Cryptographic** | 28 | MD5, SHA-1/256/384/512, SHA-512/256, SHA3 (256/384/512), BLAKE2b/2s, BLAKE3, RIPEMD (128/160/256/320), Whirlpool, Tiger, SM3, GOST, Streebog, HAVAL |
-| **Other Crypto** | 11 | SHAKE128/256, Keccak (224/256/384/512), Skein (256/512/1024), Groestl-256, JH-256 |
+| **Fast Non-Crypto** | 21 | xxHash (32/64/3/128), MurmurHash3 (32/128), CityHash (64/128), FarmHash64, SpookyV2, SipHash, HighwayHash64, MetroHash (64/128), Wyhash64, FNV-1a (32/64), DJB2, DJB2a, SDBM, LoseLose |
+| **Cryptographic** | 26 | MD2, MD4, MD5, SHA-0/1/224/256/384/512, SHA-512/224, SHA-512/256, SHA3 (224/256/384/512), Keccak (256/512), BLAKE (256/512), BLAKE2b/2s, BLAKE3, RIPEMD (128/160/256/320) |
+| **Other Crypto** | 14 | Whirlpool, Tiger, GOST, Streebog (256/512), Skein (256/512/1024), Groestl (256/512), JH (256/512), KangarooTwelve, SM3 |
 
 For the full algorithm list with output sizes and notes, see [Algorithm Roadmap](docs/ALGORITHM_ROADMAP.md).
 

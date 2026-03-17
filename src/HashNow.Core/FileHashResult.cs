@@ -9,7 +9,7 @@ namespace HashNow.Core;
 /// </para>
 /// <list type="number">
 ///   <item><description>Checksums &amp; CRCs (9 algorithms) - Fast error detection</description></item>
-///   <item><description>Non-Crypto Fast Hashes (22 algorithms) - High-speed, non-cryptographic</description></item>
+///   <item><description>Non-Crypto Fast Hashes (21 algorithms) - High-speed, non-cryptographic</description></item>
 ///   <item><description>Cryptographic Hashes (26 algorithms) - Security-focused</description></item>
 ///   <item><description>Other Crypto Hashes (14 algorithms) - Specialized cryptographic</description></item>
 /// </list>
@@ -76,7 +76,7 @@ public sealed class FileHashResult {
 
 	#endregion
 
-	#region Checksums & CRCs (6 algorithms)
+	#region Checksums & CRCs (9 algorithms)
 
 	/// <summary>
 	/// Gets the CRC-32 checksum (IEEE 802.3 polynomial).
@@ -188,7 +188,7 @@ public sealed class FileHashResult {
 
 	#endregion
 
-	#region Non-Crypto Fast Hashes (22 algorithms)
+	#region Non-Crypto Fast Hashes (21 algorithms)
 
 	/// <summary>
 	/// Gets the xxHash32 hash value.
@@ -483,7 +483,7 @@ public sealed class FileHashResult {
 
 	#endregion
 
-	#region Cryptographic Hashes - SHA Family (11 algorithms)
+	#region Cryptographic Hashes - SHA Family (8 algorithms)
 
 	/// <summary>
 	/// Gets the SHA-0 hash value.
