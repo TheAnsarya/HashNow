@@ -20,7 +20,6 @@ namespace HashNow.Cli;
 /// </code>
 /// </para>
 /// </remarks>
-[SupportedOSPlatform("windows")]
 internal sealed class ConsoleProgressBar : IDisposable {
 	#region Constants
 

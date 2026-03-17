@@ -1,36 +1,51 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-<PropertyGroup>
-<OutputType>WinExe</OutputType>
-<TargetFramework>net10.0-windows</TargetFramework>
-<UseWindowsForms>true</UseWindowsForms>
+	<PropertyGroup>
+		<TargetFrameworks>net10.0-windows;net10.0</TargetFrameworks>
+		<OutputType Condition="'$(TargetFramework)' == 'net10.0-windows'">WinExe</OutputType>
+		<OutputType Condition="'$(TargetFramework)' != 'net10.0-windows'">Exe</OutputType>
+		<UseWindowsForms Condition="'$(TargetFramework)' == 'net10.0-windows'">true</UseWindowsForms>
 
-<AssemblyName>HashNow</AssemblyName>
-<RootNamespace>HashNow.Cli</RootNamespace>
-	<Version>1.4.4</Version>
-<Description>Hash files instantly from Windows Explorer context menu - 70 algorithms with parallel processing powered by StreamHash</Description>
-<Authors>TheAnsarya</Authors>
-<Company>TheAnsarya</Company>
-<Product>HashNow</Product>
-<Copyright>Copyright (c) 2026 TheAnsarya</Copyright>
+		<AssemblyName>HashNow</AssemblyName>
+		<RootNamespace>HashNow.Cli</RootNamespace>
+		<Version>1.5.0</Version>
+		<Description>Hash files instantly from context menu - 70 algorithms with parallel processing powered by StreamHash. Windows, Linux, and macOS.</Description>
+		<Authors>TheAnsarya</Authors>
+		<Company>TheAnsarya</Company>
+		<Product>HashNow</Product>
+		<Copyright>Copyright (c) 2026 TheAnsarya</Copyright>
 
-<!-- Application Icon -->
-<ApplicationIcon>HashNow.ico</ApplicationIcon>
+		<!-- Application Icon (Windows only) -->
+		<ApplicationIcon Condition="'$(TargetFramework)' == 'net10.0-windows'">HashNow.ico</ApplicationIcon>
 
-<!-- Single-file deployment for easy distribution -->
-<PublishSingleFile>true</PublishSingleFile>
-<SelfContained>true</SelfContained>
-<RuntimeIdentifier>win-x64</RuntimeIdentifier>
-<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-</PropertyGroup>
+		<!-- Single-file deployment for easy distribution -->
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>true</SelfContained>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+	</PropertyGroup>
 
-<ItemGroup>
-<ProjectReference Include="..\HashNow.Core\HashNow.Core.csproj" />
-</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\HashNow.Core\HashNow.Core.csproj" />
+	</ItemGroup>
 
-<ItemGroup>
-<PackageReference Include="System.Management" />
-</ItemGroup>
+	<!-- Windows-only dependencies -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
+		<PackageReference Include="System.Management" />
+	</ItemGroup>
+
+	<!-- Exclude Windows-only files from non-Windows builds -->
+	<ItemGroup Condition="'$(TargetFramework)' != 'net10.0-windows'">
+		<Compile Remove="ContextMenuInstaller.cs" />
+		<Compile Remove="GuiDialogs.cs" />
+		<Compile Remove="ProgressDialog.cs" />
+		<Compile Remove="Platform\Windows\**\*.cs" />
+	</ItemGroup>
+
+	<!-- Exclude Linux-only files from non-Linux builds -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
+		<Compile Remove="Platform\Linux\**\*.cs" />
+		<Compile Remove="Platform\MacOS\**\*.cs" />
+	</ItemGroup>
 
 </Project>

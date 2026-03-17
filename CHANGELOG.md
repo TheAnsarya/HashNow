@@ -5,6 +5,22 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-03-18
+
+### Added
+
+- **Cross-Platform Support** — HashNow now runs on Windows, Linux, and macOS
+- **Platform Abstraction Layer** — `IPlatformIntegration` interface with platform-specific implementations
+- **Linux File Manager Integration** — Nautilus scripts, Nemo actions, Dolphin service menus, Thunar custom actions (all user-level, no root required)
+- **macOS Finder Integration** — Automator Quick Action workflow for right-click hashing
+- **Multi-TFM Build** — `net10.0-windows` for Windows (WinForms GUI), `net10.0` for Linux/macOS (console)
+- **CI/CD Pipeline** — GitHub Actions workflow building for Windows x64, Linux x64/ARM64, macOS ARM64 with automatic releases
+
+### Changed
+
+- **Program.cs** completely rewritten — platform-agnostic entry point using `IPlatformIntegration`
+- **ConsoleProgressBar** — now cross-platform (removed Windows-only attribute)
+
 ## [1.4.4] - 2026-03-17
 
 ### Fixed

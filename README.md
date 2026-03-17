@@ -1,21 +1,39 @@
 # HashNow
 
-**Right-click any file in Windows Explorer to instantly generate 70 different hashes to JSON.**
+**Right-click any file to instantly generate 70 different hashes to JSON — on Windows, Linux, and macOS.**
 
 [![License: Unlicense](https://img.shields.io/badge/License-Unlicense-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
+[![Build](https://github.com/TheAnsarya/HashNow/actions/workflows/build.yml/badge.svg)](https://github.com/TheAnsarya/HashNow/actions/workflows/build.yml)
 [![Tests](https://img.shields.io/badge/tests-296%20passing-brightgreen)](tests/)
 [![Release](https://img.shields.io/github/v/release/TheAnsarya/HashNow)](https://github.com/TheAnsarya/HashNow/releases/latest)
 
-HashNow is a Windows file hashing utility that computes **70 hash algorithms** in a single pass and outputs results to a clean, tab-indented JSON file. It integrates directly into the Windows Explorer context menu for instant right-click hashing — no command line required.
+HashNow is a cross-platform file hashing utility that computes **70 hash algorithms** in a single pass and outputs results to a clean, tab-indented JSON file. It integrates directly into your file manager's context menu for instant right-click hashing — no command line required.
+
+| Platform | File Manager Integration |
+|----------|--------------------------|
+| **Windows** | Explorer context menu (registry-based) |
+| **Linux** | Nautilus, Nemo, Dolphin, Thunar scripts/actions |
+| **macOS** | Finder Quick Actions (Automator workflow) |
 
 All 70 hash algorithms are powered by [**StreamHash**](https://github.com/TheAnsarya/StreamHash) ([NuGet](https://www.nuget.org/packages/StreamHash)), a high-performance streaming hash library written entirely in native C# with SIMD acceleration. No external cryptography libraries — every algorithm is implemented from scratch with zero `unsafe` code.
 
 ## 📥 Download & Install
 
-### Step 1: Download
+Download the latest release for your platform from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest):
 
-**[Download HashNow v1.4.4](https://github.com/TheAnsarya/HashNow/releases/latest)** — single self-contained `.exe`, no installer needed.
+| Platform | Download |
+|----------|----------|
+| **Windows x64** | `HashNow-Windows-x64-vX.Y.Z.exe` |
+| **Linux x64** | `HashNow-Linux-x64-vX.Y.Z.tar.gz` |
+| **Linux ARM64** | `HashNow-Linux-ARM64-vX.Y.Z.tar.gz` |
+| **macOS ARM64** | `HashNow-macOS-ARM64-vX.Y.Z.tar.gz` |
+
+### Windows
+
+#### Step 1: Download
+
+**[Download HashNow](https://github.com/TheAnsarya/HashNow/releases/latest)** — single self-contained `.exe`, no installer needed.
 
 Download `HashNow.exe` from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest) and save it somewhere permanent (e.g. `C:\Tools\HashNow.exe`). The context menu entry points to wherever you put the file, so don't move it after installing.
 
@@ -35,7 +53,7 @@ Click **Keep** or **Keep anyway** to save the file:
 | ![Confirm keeping the download](docs/images/hashnow-isnt-commonly-downloaded-keep-anyways.png) |
 |---|
 
-### Step 2: Unblock the File
+#### Step 2: Unblock the File
 
 Windows marks downloaded files as blocked. Before running, right-click `HashNow.exe` and select **Properties**:
 
@@ -50,7 +68,7 @@ At the bottom of the **General** tab, check the **Unblock** checkbox and click *
 | ![Unblock checkbox checked](docs/images/properties-window-unblock.png) |
 |---|
 
-### Step 3: Install Context Menu
+#### Step 3: Install Context Menu
 
 Double-click `HashNow.exe`. On first launch (with no arguments), HashNow detects it was launched directly and offers to install the Explorer context menu:
 
@@ -69,7 +87,7 @@ Click **Yes** to grant admin access. A confirmation dialog confirms the installa
 
 You're done! The context menu is now available on all file types in Explorer.
 
-### Step 4: Hash a File
+#### Step 4: Hash a File
 
 Right-click any file in Windows Explorer and select **"Hash this file now"**:
 
@@ -83,7 +101,7 @@ A progress dialog appears while hashing:
 
 The dialog shows the file name, a progress bar (0–100%), percentage complete, and a **Cancel** button to abort at any time. It closes automatically when done.
 
-### Step 5: View Results
+#### Step 5: View Results
 
 Find `{filename}.hashes.json` in the same folder as the original file:
 
@@ -95,14 +113,55 @@ Open the JSON file to see all 70 hashes organized by category:
 | ![JSON output file contents showing hash values](docs/images/json-output.png) |
 |---|
 
+### Linux
+
+1. **Extract** the tarball and place `HashNow` somewhere on your PATH (e.g. `~/.local/bin/`):
+
+	```bash
+	tar xzf HashNow-Linux-x64-*.tar.gz
+	mv HashNow-Linux-x64/HashNow ~/.local/bin/
+	chmod +x ~/.local/bin/HashNow
+	```
+
+2. **Install context menu integration** — HashNow auto-detects your file managers and installs for all of them:
+
+	```bash
+	HashNow --install
+	```
+
+	Supported file managers: **Nautilus** (GNOME Files), **Nemo** (Cinnamon), **Dolphin** (KDE), **Thunar** (Xfce). All installs are user-level (no sudo required).
+
+3. **Hash a file** — right-click any file in your file manager and select **"Hash this file now"**. The output `{filename}.hashes.json` appears in the same directory.
+
+### macOS
+
+1. **Extract** the tarball and place `HashNow` somewhere on your PATH (e.g. `/usr/local/bin/`):
+
+	```bash
+	tar xzf HashNow-macOS-ARM64-*.tar.gz
+	mv HashNow-macOS-ARM64/HashNow /usr/local/bin/
+	chmod +x /usr/local/bin/HashNow
+	```
+
+2. **Install Finder Quick Action**:
+
+	```bash
+	HashNow --install
+	```
+
+	This installs an Automator workflow to `~/Library/Services/`. No admin privileges required.
+
+3. **Hash a file** — right-click any file in Finder and choose **Quick Actions → Hash this file now**. The output `{filename}.hashes.json` appears next to the original file.
+
 ## ✨ Features
 
 - **70 Algorithms** in 4 categories (checksums, fast non-crypto, cryptographic, other crypto)
+- **Cross-Platform** — Windows, Linux, and macOS with native file manager integration
 - **Single Pass** — all 70 hashes computed in one file read
 - **Parallel Processing** — all algorithms run concurrently
 - **JSON Output** — tab-indented, organized by category with metadata
-- **Progress Dialog** — shows progress bar with percentage, closes automatically
-- **Cancellation** — cancel button stops hashing immediately
+- **Progress Reporting** — GUI progress dialog (Windows) or console progress bar (Linux/macOS)
+- **Cancellation** — cancel button/Ctrl+C stops hashing immediately
 - **Reusable Library** — `HashNow.Core` can be used in any .NET project
 - **Powered by [StreamHash](https://www.nuget.org/packages/StreamHash)** — all 70 algorithms in pure native C#
 - **Public Domain** — [The Unlicense](LICENSE), free for any use
@@ -113,10 +172,10 @@ HashNow can also be used entirely from the command line:
 
 ```powershell
 # Hash a single file
-HashNow.exe myfile.zip
+HashNow myfile.zip
 
 # Hash multiple files (each gets its own .hashes.json)
-HashNow.exe file1.iso file2.zip file3.bin
+HashNow file1.iso file2.zip file3.bin
 ```
 
 | ![CLI output showing hashing progress and completion](docs/images/cli-hash-output.png) |
@@ -125,20 +184,20 @@ HashNow.exe file1.iso file2.zip file3.bin
 ### Management Commands
 
 ```powershell
-# Install context menu (requires admin)
-HashNow.exe --install
+# Install context menu (requires admin on Windows)
+HashNow --install
 
-# Uninstall context menu (requires admin)
-HashNow.exe --uninstall
+# Uninstall context menu
+HashNow --uninstall
 
 # Check if context menu is installed and path is correct
-HashNow.exe --status
+HashNow --status
 
 # Show all available commands
-HashNow.exe --help
+HashNow --help
 
 # Show version info
-HashNow.exe --version
+HashNow --version
 ```
 
 | ![CLI help output](docs/images/cli-help.png) |
@@ -146,24 +205,28 @@ HashNow.exe --version
 
 | Command | Description | Requires Admin |
 |---------|-------------|:--------------:|
-| `--install` | Register "Hash this file now" in Explorer | Yes |
-| `--uninstall` | Remove context menu entry | Yes |
+| `--install` | Register context menu in file manager | Windows only |
+| `--uninstall` | Remove context menu entry | Windows only |
 | `--status` | Check if context menu is correctly installed | No |
 | `--help` | Show usage information | No |
 | `--version` | Show version and algorithm count | No |
 
-The context menu entry is stored in the Windows registry under `HKEY_CLASSES_ROOT\*\shell\HashNow` and applies to all file types.
+The context menu integration is platform-specific:
+
+- **Windows**: Registry entry at `HKEY_CLASSES_ROOT\*\shell\HashNow` (requires admin)
+- **Linux**: Scripts/actions in `~/.local/share/` for Nautilus, Nemo, Dolphin, Thunar
+- **macOS**: Automator workflow at `~/Library/Services/`
 
 ### Uninstalling
 
-To remove the context menu and start fresh:
+To remove the context menu:
 
 ```powershell
-# From an admin PowerShell prompt:
-.\HashNow.exe --uninstall
+# Remove context menu integration
+HashNow --uninstall
 ```
 
-After uninstalling, double-click `HashNow.exe` again to re-trigger the install flow. If you're upgrading from an older version, **uninstall first** — the old registry entry points to the old exe path and will block the new install.
+On Windows, run from an admin prompt. On Linux/macOS, no elevation is needed.
 
 ## 📊 Output Format
 
@@ -190,7 +253,7 @@ HashNow creates `{filename}.hashes.json` next to the original file. The JSON use
 
 	"hashedAtUtc": "2025-02-05T10:30:15Z",
 	"durationMs": 1003,
-	"generatedBy": "HashNow v1.4.4",
+	"generatedBy": "HashNow v1.5.0",
 	"algorithmCount": 70
 }
 ```
@@ -239,7 +302,6 @@ var result = await FileHasher.HashFileAsync("largefile.iso", progress);
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- Windows (for context menu features and WinForms progress dialog)
 
 ### Build & Test
 
@@ -253,10 +315,20 @@ dotnet test
 ### Publish Self-Contained Executable
 
 ```bash
-dotnet publish src/HashNow.Cli -c Release -r win-x64 --self-contained true -o publish
+# Windows
+dotnet publish src/HashNow.Cli -c Release -f net10.0-windows -r win-x64 -o publish/win-x64
+
+# Linux x64
+dotnet publish src/HashNow.Cli -c Release -f net10.0 -r linux-x64 -o publish/linux-x64
+
+# Linux ARM64
+dotnet publish src/HashNow.Cli -c Release -f net10.0 -r linux-arm64 -o publish/linux-arm64
+
+# macOS ARM64
+dotnet publish src/HashNow.Cli -c Release -f net10.0 -r osx-arm64 -o publish/osx-arm64
 ```
 
-This produces a single `HashNow.exe` (~50 MB) that includes the .NET runtime and all dependencies — no installation required.
+Each produces a single self-contained binary (~50 MB) that includes the .NET runtime and all dependencies — no installation required.
 
 ## ⚡ Performance
 

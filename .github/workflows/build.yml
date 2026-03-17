@@ -1,0 +1,177 @@
+name: Build HashNow
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+
+      - name: Restore packages
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+
+      - name: Run tests
+        run: dotnet test --no-build -c Release --verbosity normal
+
+  windows:
+    needs: test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+
+      - name: Publish HashNow (Windows x64)
+        run: dotnet publish src/HashNow.Cli/HashNow.Cli.csproj -c Release -f net10.0-windows -r win-x64 -o build/win-x64
+
+      - name: Upload HashNow (Windows x64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: HashNow (Windows x64)
+          path: build/win-x64/HashNow.exe
+
+  linux:
+    needs: test
+    strategy:
+      matrix:
+        platform: [
+          {os: ubuntu-22.04, rid: linux-x64, name: x64},
+          {os: ubuntu-22.04-arm, rid: linux-arm64, name: ARM64}
+        ]
+      fail-fast: false
+    runs-on: ${{ matrix.platform.os }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+
+      - name: Publish HashNow (Linux ${{ matrix.platform.name }})
+        run: dotnet publish src/HashNow.Cli/HashNow.Cli.csproj -c Release -f net10.0 -r ${{ matrix.platform.rid }} -o build/${{ matrix.platform.rid }}
+
+      - name: Make executable
+        run: chmod +x build/${{ matrix.platform.rid }}/HashNow
+
+      - name: Upload HashNow (Linux ${{ matrix.platform.name }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: HashNow (Linux ${{ matrix.platform.name }})
+          path: build/${{ matrix.platform.rid }}/HashNow
+
+  macos:
+    needs: test
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.x
+
+      - name: Publish HashNow (macOS ARM64)
+        run: dotnet publish src/HashNow.Cli/HashNow.Cli.csproj -c Release -f net10.0 -r osx-arm64 -o build/osx-arm64
+
+      - name: Make executable
+        run: chmod +x build/osx-arm64/HashNow
+
+      - name: Upload HashNow (macOS ARM64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: HashNow (macOS ARM64)
+          path: build/osx-arm64/HashNow
+
+  # Create GitHub Release with artifacts when a version tag is pushed
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, linux, macos]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+          mkdir -p tarball-staging
+
+          VERSION="${GITHUB_REF_NAME}"
+
+          # Windows build
+          cp "artifacts/HashNow (Windows x64)/HashNow.exe" "release-assets/HashNow-Windows-x64-${VERSION}.exe" || true
+
+          # Linux builds - create tarballs with LICENSE
+          for arch in "x64" "ARM64"; do
+            artifact_dir="artifacts/HashNow (Linux ${arch})"
+            if [ -f "${artifact_dir}/HashNow" ]; then
+              staging="tarball-staging/HashNow-Linux-${arch}"
+              mkdir -p "$staging"
+              cp "${artifact_dir}/HashNow" "$staging/HashNow"
+              chmod +x "$staging/HashNow"
+              cp LICENSE "$staging/" || true
+              tar -czvf "release-assets/HashNow-Linux-${arch}-${VERSION}.tar.gz" -C tarball-staging "HashNow-Linux-${arch}"
+              rm -rf "$staging"
+            fi
+          done
+
+          # macOS build - create tarball with LICENSE
+          if [ -f "artifacts/HashNow (macOS ARM64)/HashNow" ]; then
+            staging="tarball-staging/HashNow-macOS-ARM64"
+            mkdir -p "$staging"
+            cp "artifacts/HashNow (macOS ARM64)/HashNow" "$staging/HashNow"
+            chmod +x "$staging/HashNow"
+            cp LICENSE "$staging/" || true
+            tar -czvf "release-assets/HashNow-macOS-ARM64-${VERSION}.tar.gz" -C tarball-staging "HashNow-macOS-ARM64"
+            rm -rf "$staging"
+          fi
+
+          # Cleanup
+          rm -rf tarball-staging
+          ls -la release-assets/
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          fail_on_unmatched_files: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

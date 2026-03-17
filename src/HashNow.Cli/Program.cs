@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+using HashNow.Cli.Platform;
 using HashNow.Core;
 
 namespace HashNow.Cli;
@@ -9,7 +9,8 @@ namespace HashNow.Cli;
 /// <remarks>
 /// <para>
 /// This is the main entry point for the HashNow command-line application.
-/// It provides a simple, user-friendly interface for computing file hashes.
+/// It provides a simple, user-friendly interface for computing file hashes
+/// across Windows, Linux, and macOS.
 /// </para>
 /// <para>
 /// <strong>Usage Modes:</strong>
@@ -23,7 +24,7 @@ namespace HashNow.Cli;
 ///   </item>
 ///   <item>
 ///     <description>
-///       <strong>Explorer Mode:</strong> Invoked via right-click context menu.
+///       <strong>File Manager Mode:</strong> Invoked via right-click context menu.
 ///       Silently creates JSON file next to the original.
 ///     </description>
 ///   </item>
@@ -40,66 +41,7 @@ namespace HashNow.Cli;
 /// and file metadata in a human-readable, tab-indented JSON format.
 /// </para>
 /// </remarks>
-/// <example>
-/// <code>
-/// # Hash a file from command line
-/// HashNow myfile.zip
-///
-/// # Install context menu (requires admin)
-/// HashNow --install
-///
-/// # Double-click the exe to auto-install (prompts for admin)
-/// </code>
-/// </example>
-[SupportedOSPlatform("windows")]
 internal static class Program {
-	#region P/Invoke for Console Attachment
-
-	/// <summary>
-	/// Attaches the calling process to the console of the parent process.
-	/// </summary>
-	[DllImport("kernel32.dll", SetLastError = true)]
-	private static extern bool AttachConsole(int dwProcessId);
-
-	/// <summary>
-	/// Allocates a new console for the calling process.
-	/// </summary>
-	[DllImport("kernel32.dll", SetLastError = true)]
-	private static extern bool AllocConsole();
-
-	/// <summary>
-	/// Detaches the calling process from its console.
-	/// </summary>
-	[DllImport("kernel32.dll", SetLastError = true)]
-	private static extern bool FreeConsole();
-
-	/// <summary>
-	/// Special value for AttachConsole to attach to parent process console.
-	/// </summary>
-	private const int ATTACH_PARENT_PROCESS = -1;
-
-	#endregion
-
-	#region Constants
-
-	/// <summary>
-	/// Time threshold in milliseconds before showing progress UI for long operations.
-	/// </summary>
-	/// <remarks>
-	/// Set to 0 to always show progress feedback to the user for immediate visual confirmation.
-	/// </remarks>
-	private const long ProgressUiThresholdMs = 0;
-
-	/// <summary>
-	/// Environment variable name used to detect Explorer-launched instances.
-	/// </summary>
-	/// <remarks>
-	/// This can be set to "1" to force Explorer mode behavior (no console output).
-	/// </remarks>
-	private const string ExplorerEnvVar = "HASHNOW_EXPLORER";
-
-	#endregion
-
 	#region Main Entry Point
 
 	/// <summary>
@@ -111,8 +53,8 @@ internal static class Program {
 	///   <item><description>No args: Auto-install mode (check/prompt for context menu)</description></item>
 	///   <item><description><c>--help</c>, <c>-h</c>, <c>/?</c>: Show usage information</description></item>
 	///   <item><description><c>--version</c>, <c>-v</c>: Show version number</description></item>
-	///   <item><description><c>--install</c>: Install Explorer context menu</description></item>
-	///   <item><description><c>--uninstall</c>: Remove Explorer context menu</description></item>
+	///   <item><description><c>--install</c>: Install file manager context menu</description></item>
+	///   <item><description><c>--uninstall</c>: Remove file manager context menu</description></item>
 	///   <item><description><c>--status</c>: Check context menu installation status</description></item>
 	///   <item><description>File path(s): Hash the specified files</description></item>
 	/// </list>
@@ -126,63 +68,48 @@ internal static class Program {
 	/// </list>
 	/// </returns>
 	private static async Task<int> Main(string[] args) {
-		// Initialize WinForms for proper MessageBox rendering, DPI scaling,
-		// and ensuring dialogs appear in front of other windows
-		Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
-		Application.EnableVisualStyles();
-		Application.SetCompatibleTextRenderingDefault(false);
+		// Create platform-specific integration
+		var platform = PlatformFactory.Create();
 
-		// Attach to console if running from command line (WinExe doesn't auto-attach)
-		// This allows console output when invoked from cmd/powershell while suppressing
-		// console window when double-clicked or launched from Explorer
-		if (args.Length > 0 || !DetectDoubleClickLaunch()) {
-			AttachConsole(ATTACH_PARENT_PROCESS);
-			RedirectConsoleStreams();
-		}
+		// Perform platform-specific initialization (e.g., WinForms init, console attachment)
+		platform.Initialize(args);
 
 		// No arguments provided - auto-install mode
-		// This enables "double-click to install" behavior
 		if (args.Length == 0) {
-			return HandleNoArguments();
+			return HandleNoArguments(platform);
 		}
 
 		// Parse command-line switches
 		var firstArg = args[0];
 
-		// Help command
 		if (IsHelpSwitch(firstArg)) {
 			ShowUsage();
 			return 0;
 		}
 
-		// Version command
 		if (IsVersionSwitch(firstArg)) {
 			Console.WriteLine($"HashNow v{FileHasher.Version}");
 			return 0;
 		}
 
-		// Install context menu command
 		if (firstArg.Equals("--install", StringComparison.OrdinalIgnoreCase)) {
-			return InstallContextMenu();
+			return InstallContextMenu(platform);
 		}
 
-		// GUI install command (used when restarting as admin from double-click)
 		if (firstArg.Equals("--gui-install", StringComparison.OrdinalIgnoreCase)) {
-			return InstallContextMenuGui();
+			return InstallContextMenuGui(platform);
 		}
 
-		// Uninstall context menu command
 		if (firstArg.Equals("--uninstall", StringComparison.OrdinalIgnoreCase)) {
-			return UninstallContextMenu();
+			return UninstallContextMenu(platform);
 		}
 
-		// Status check command
 		if (firstArg.Equals("--status", StringComparison.OrdinalIgnoreCase)) {
-			return ShowStatus();
+			return ShowStatus(platform);
 		}
 
-		// Detect if launched from Explorer (no attached console or env var set)
-		bool isFromExplorer = DetectExplorerLaunch();
+		// Detect if launched from file manager context menu
+		bool isFromFileManager = platform.DetectFileManagerLaunch();
 
 		// Process all file arguments
 		var exitCode = 0;
@@ -192,7 +119,7 @@ internal static class Program {
 				continue;
 			}
 
-			var result = await ProcessFileAsync(filePath, isFromExplorer);
+			var result = await ProcessFileAsync(filePath, isFromFileManager, platform);
 			if (result != 0) {
 				exitCode = result;
 			}
@@ -208,56 +135,35 @@ internal static class Program {
 	/// <summary>
 	/// Handles the case when no arguments are provided (double-click behavior).
 	/// </summary>
-	/// <returns>Exit code indicating success or failure.</returns>
-	/// <remarks>
-	/// <para>
-	/// This method implements the "double-click to install" feature:
-	/// </para>
-	/// <list type="number">
-	///   <item><description>Check if context menu is already installed correctly</description></item>
-	///   <item><description>If installed: Show success message and exit</description></item>
-	///   <item><description>If not installed: Prompt user and attempt installation</description></item>
-	///   <item><description>If not admin: Offer to restart with elevation</description></item>
-	/// </list>
-	/// <para>
-	/// Uses GUI dialogs when double-clicked, console prompts when run from terminal.
-	/// </para>
-	/// </remarks>
-	private static int HandleNoArguments() {
-		// First, check current installation status
-		bool isInstalled = ContextMenuInstaller.IsInstalled();
-		bool isCorrect = ContextMenuInstaller.IsInstalledCorrectly();
-		bool isAdmin = IsRunningAsAdmin();
-
-		// Detect if we're in a console or GUI context
-		bool isDoubleClick = DetectDoubleClickLaunch();
+	private static int HandleNoArguments(IPlatformIntegration platform) {
+		var exePath = GetExecutablePath();
+		bool isInstalled = platform.IsInstalled();
+		bool isCorrect = platform.IsInstalledCorrectly(exePath);
+		bool isDoubleClick = platform.DetectDoubleClickLaunch();
 
 		if (isDoubleClick) {
-			// Use GUI dialogs
-			return HandleNoArgumentsGui(isInstalled, isCorrect, isAdmin);
+			return HandleNoArgumentsGui(platform, isInstalled, isCorrect);
 		} else {
-			// Use console prompts
-			return HandleNoArgumentsConsole(isInstalled, isCorrect, isAdmin);
+			return HandleNoArgumentsConsole(platform, isInstalled, isCorrect);
 		}
 	}
 
 	/// <summary>
 	/// Handles no-arguments mode with GUI dialogs (double-click).
 	/// </summary>
-	private static int HandleNoArgumentsGui(bool isInstalled, bool isCorrect, bool isAdmin) {
-		var (shouldRestart, shouldInstall, cancelled) = GuiDialogs.ShowInstallPrompts(
-			isAdmin, isInstalled, isCorrect);
+	private static int HandleNoArgumentsGui(IPlatformIntegration platform,
+		bool isInstalled, bool isCorrect) {
+		var (shouldRestart, shouldInstall, cancelled) =
+			platform.ShowInstallPrompts(isInstalled, isCorrect);
 
-		if (cancelled) {
-			return 2;
-		}
+		if (cancelled) return 2;
 
 		if (shouldRestart) {
-			return RestartAsAdmin();
+			return platform.RelaunchElevated(["--gui-install"]) ? 0 : 2;
 		}
 
 		if (shouldInstall) {
-			return InstallContextMenuGui();
+			return InstallContextMenuGui(platform);
 		}
 
 		return 0;
@@ -266,57 +172,50 @@ internal static class Program {
 	/// <summary>
 	/// Handles no-arguments mode with console prompts (CLI).
 	/// </summary>
-	private static int HandleNoArgumentsConsole(bool isInstalled, bool isCorrect, bool isAdmin) {
-		// Banner
+	private static int HandleNoArgumentsConsole(IPlatformIntegration platform,
+		bool isInstalled, bool isCorrect) {
 		PrintBanner();
 
 		if (isInstalled && isCorrect) {
-			// Already installed correctly
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("✓ HashNow is already installed!");
 			Console.ResetColor();
 			Console.WriteLine();
-			Console.WriteLine("Right-click any file in Windows Explorer and select");
-			Console.WriteLine("\"Hash this file now\" to compute hashes.");
+			Console.WriteLine($"Right-click any file and select \"{GetMenuItemText()}\"");
+			Console.WriteLine("to compute hashes.");
 			Console.WriteLine();
 			ShowUsageHint();
 			return 0;
 		}
 
 		if (isInstalled && !isCorrect) {
-			// Installed but pointing to wrong location (exe was moved)
 			Console.ForegroundColor = ConsoleColor.Yellow;
-			Console.WriteLine("⚠ HashNow context menu needs to be updated.");
+			Console.WriteLine("⚠ HashNow file manager integration needs to be updated.");
 			Console.ResetColor();
 			Console.WriteLine("The executable has moved since installation.");
 			Console.WriteLine();
 		} else {
-			// Not installed at all
 			Console.ForegroundColor = ConsoleColor.Cyan;
-			Console.WriteLine("HashNow is not installed in the context menu.");
+			Console.WriteLine("HashNow is not installed in your file manager.");
 			Console.ResetColor();
 			Console.WriteLine();
 		}
 
-		// Check if we're running as admin
-		if (!IsRunningAsAdmin()) {
+		// Windows requires elevation for registry access
+		if (OperatingSystem.IsWindows() && !platform.IsElevated) {
 			Console.WriteLine("Administrator privileges are required to install.");
 			Console.WriteLine();
 			Console.Write("Would you like to restart as Administrator? [Y/n] ");
-
 			var key = Console.ReadKey(true);
 			Console.WriteLine();
 
 			if (key.Key != ConsoleKey.N) {
-				// Restart with elevation
-				return RestartAsAdmin();
-			} else {
-				Console.WriteLine("Installation cancelled.");
-				return 2;
+				return platform.RelaunchElevated(["--install"]) ? 0 : 2;
 			}
+			Console.WriteLine("Installation cancelled.");
+			return 2;
 		}
 
-		// We have admin rights - prompt to install
 		Console.Write("Install the context menu now? [Y/n] ");
 		var response = Console.ReadKey(true);
 		Console.WriteLine();
@@ -327,182 +226,23 @@ internal static class Program {
 			return 2;
 		}
 
-		// Perform installation
-		return InstallContextMenu();
+		return InstallContextMenu(platform);
 	}
 
 	/// <summary>
 	/// Installs context menu with GUI result dialog.
 	/// </summary>
-	private static int InstallContextMenuGui() {
+	private static int InstallContextMenuGui(IPlatformIntegration platform) {
 		try {
-			ContextMenuInstaller.Install();
-			GuiDialogs.ShowInstallResult(true);
+			var exePath = GetExecutablePath();
+			platform.Install(exePath);
+			platform.ShowInstallResult(true);
 			return 0;
 		} catch (UnauthorizedAccessException) {
-			GuiDialogs.ShowInstallResult(false, "Administrator privileges required.");
+			platform.ShowInstallResult(false, "Administrator privileges required.");
 			return 1;
 		} catch (Exception ex) {
-			GuiDialogs.ShowInstallResult(false, ex.Message);
-			return 1;
-		}
-	}
-
-	/// <summary>
-	/// Detects if the application was launched by double-clicking (vs command line).
-	/// </summary>
-	/// <returns><see langword="true"/> if launched by double-click; otherwise, <see langword="false"/>.</returns>
-	/// <remarks>
-	/// <para>
-	/// Detection methods:
-	/// </para>
-	/// <list type="bullet">
-	///   <item><description>Check if console is available and interactive</description></item>
-	///   <item><description>Check parent process (explorer.exe = double-click)</description></item>
-	/// </list>
-	/// </remarks>
-	private static bool DetectDoubleClickLaunch() {
-		try {
-			// Check parent process first (doesn't require console access)
-			using var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
-			using var parentProcess = GetParentProcess(currentProcess);
-
-			if (parentProcess is not null) {
-				var parentName = parentProcess.ProcessName.ToLowerInvariant();
-				// If launched from explorer, it's a double-click
-				if (parentName == "explorer") {
-					return true;
-				}
-				// If launched from cmd, powershell, pwsh, etc., it's CLI
-				if (parentName is "cmd" or "powershell" or "pwsh" or "windowsterminal"
-					or "conhost" or "code" or "devenv") {
-					return false;
-				}
-			}
-
-			// Try console check only if we have a console attached
-			// (Console.IsInputRedirected throws IOException with WinExe if no console)
-			try {
-				if (Console.IsInputRedirected) {
-					return false;
-				}
-			} catch (IOException) {
-				// No console attached - likely double-clicked
-				return true;
-			}
-
-			// Default to double-click mode if parent is unknown
-			return true;
-		} catch {
-			// If detection fails, assume double-click (safer for GUI mode)
-			return true;
-		}
-	}
-
-	/// <summary>
-	/// Gets the parent process of the specified process.
-	/// </summary>
-	private static System.Diagnostics.Process? GetParentProcess(System.Diagnostics.Process process) {
-		try {
-			using var query = new System.Management.ManagementObjectSearcher(
-				$"SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = {process.Id}");
-			var result = query.Get().Cast<System.Management.ManagementObject>().FirstOrDefault();
-			if (result?["ParentProcessId"] is uint parentId) {
-				return System.Diagnostics.Process.GetProcessById((int)parentId);
-			}
-		} catch {
-			// Ignore errors in parent process detection
-		}
-		return null;
-	}
-
-	/// <summary>
-	/// Redirects .NET Console streams to the attached console.
-	/// </summary>
-	/// <remarks>
-	/// <para>
-	/// For WinExe applications, <c>AttachConsole</c> attaches the native console
-	/// but does NOT redirect the .NET <see cref="Console"/> streams. Without this,
-	/// all <c>Console.Write</c> and <c>Console.ReadKey</c> calls go to invalid handles.
-	/// </para>
-	/// </remarks>
-	private static void RedirectConsoleStreams() {
-		try {
-			Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
-			Console.SetError(new StreamWriter(Console.OpenStandardError()) { AutoFlush = true });
-			Console.SetIn(new StreamReader(Console.OpenStandardInput()));
-		} catch {
-			// If stream redirection fails, console output won't work but GUI still will
-		}
-	}
-
-	/// <summary>
-	/// Prints the application banner with version and description.
-	/// </summary>
-	private static void PrintBanner() {
-		Console.WriteLine();
-		Console.ForegroundColor = ConsoleColor.Cyan;
-		Console.WriteLine($"╔══════════════════════════════════════════════════╗");
-		Console.WriteLine($"║          HashNow v{FileHasher.Version,-10}                    ║");
-		Console.WriteLine($"║       Instant File Hashing (70 algorithms)       ║");
-		Console.WriteLine($"╚══════════════════════════════════════════════════╝");
-		Console.ResetColor();
-		Console.WriteLine();
-	}
-
-	/// <summary>
-	/// Shows a brief hint about command-line usage.
-	/// </summary>
-	private static void ShowUsageHint() {
-		Console.ForegroundColor = ConsoleColor.DarkGray;
-		Console.WriteLine("Tip: Run 'HashNow --help' for command-line usage.");
-		Console.ResetColor();
-	}
-
-	/// <summary>
-	/// Checks if the current process has administrator privileges.
-	/// </summary>
-	/// <returns><see langword="true"/> if running elevated; otherwise, <see langword="false"/>.</returns>
-	private static bool IsRunningAsAdmin() {
-		try {
-			using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
-			var principal = new System.Security.Principal.WindowsPrincipal(identity);
-			return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
-		} catch {
-			return false;
-		}
-	}
-
-	/// <summary>
-	/// Restarts the application with administrator privileges via UAC prompt.
-	/// </summary>
-	/// <returns>Exit code (typically doesn't return as process exits).</returns>
-	private static int RestartAsAdmin() {
-		try {
-			var exePath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName;
-			if (string.IsNullOrEmpty(exePath)) {
-				GuiDialogs.ShowError("Could not determine executable path.");
-				return 1;
-			}
-
-			var startInfo = new ProcessStartInfo {
-				FileName = exePath,
-				Arguments = "--gui-install", // Tell elevated process to use GUI mode
-				UseShellExecute = true,
-				Verb = "runas" // This triggers UAC elevation prompt
-			};
-
-			Process.Start(startInfo);
-
-			// Exit current (non-elevated) process
-			Environment.Exit(0);
-			return 0;
-		} catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 1223) {
-			// ERROR_CANCELLED - User declined UAC prompt
-			// User cancelled, just return without showing error
-			return 2;
-		} catch (Exception ex) {
-			GuiDialogs.ShowError($"Error requesting elevation: {ex.Message}");
+			platform.ShowInstallResult(false, ex.Message);
 			return 1;
 		}
 	}
@@ -514,44 +254,35 @@ internal static class Program {
 	/// <summary>
 	/// Processes a single file, computing all hashes and saving results.
 	/// </summary>
-	/// <param name="filePath">Path to the file to hash.</param>
-	/// <param name="isFromExplorer">
-	/// <see langword="true"/> if launched from Explorer (minimal console output);
-	/// <see langword="false"/> for full console output.
-	/// </param>
-	/// <returns>Exit code: 0 for success, 1 for error.</returns>
-	private static async Task<int> ProcessFileAsync(string filePath, bool isFromExplorer) {
+	private static async Task<int> ProcessFileAsync(string filePath, bool isFromFileManager,
+		IPlatformIntegration platform) {
 		try {
-			// Validate file exists
 			if (!File.Exists(filePath)) {
-				if (!isFromExplorer) {
+				if (!isFromFileManager) {
 					Console.Error.WriteLine($"Error: File not found: {filePath}");
 				}
 				return 1;
 			}
 
 			var fileInfo = new FileInfo(filePath);
-			var estimatedMs = FileHasher.EstimateHashDurationMs(fileInfo.Length);
 
-			if (!isFromExplorer) {
-				// Console mode - show detailed progress and results
+			if (!isFromFileManager) {
 				return await ProcessFileConsoleMode(filePath, fileInfo);
 			} else {
-				// Explorer mode - silent or minimal UI
-				return await ProcessFileExplorerMode(filePath, fileInfo, estimatedMs);
+				return await ProcessFileFileManagerMode(filePath, fileInfo, platform);
 			}
 		} catch (UnauthorizedAccessException) {
-			if (!isFromExplorer) {
+			if (!isFromFileManager) {
 				Console.Error.WriteLine($"Error: Access denied to file: {filePath}");
 			}
 			return 1;
 		} catch (IOException ex) {
-			if (!isFromExplorer) {
+			if (!isFromFileManager) {
 				Console.Error.WriteLine($"Error reading file {filePath}: {ex.Message}");
 			}
 			return 1;
 		} catch (Exception ex) {
-			if (!isFromExplorer) {
+			if (!isFromFileManager) {
 				Console.Error.WriteLine($"Error processing {filePath}: {ex.Message}");
 			}
 			return 1;
@@ -561,32 +292,22 @@ internal static class Program {
 	/// <summary>
 	/// Processes a file with full console output (progress bar, results, timing).
 	/// </summary>
-	/// <param name="filePath">Path to the file.</param>
-	/// <param name="fileInfo">FileInfo object for the file.</param>
-	/// <returns>Exit code.</returns>
 	private static async Task<int> ProcessFileConsoleMode(string filePath, FileInfo fileInfo) {
-		// Display file info header
 		Console.WriteLine($"Hashing: {fileInfo.Name} ({FileHasher.FormatFileSize(fileInfo.Length)})");
 
-		// Create console progress bar
 		using var progressBar = new ConsoleProgressBar(useColor: true);
 
-		// Hash with progress callback
 		var result = await FileHasher.HashFileAsync(
 			filePath,
 			progress => progressBar.Update(progress));
 
-		// Complete the progress bar
 		progressBar.Complete();
 
-		// Save results to JSON
 		var outputPath = filePath + ".hashes.json";
 		await FileHasher.SaveResultAsync(result, outputPath);
 
-		// Print all hash results to console
 		PrintResults(result);
 
-		// Show summary
 		Console.WriteLine($"Saved:  {outputPath}");
 		Console.WriteLine($"Time:   {result.DurationMs}ms");
 		Console.WriteLine();
@@ -595,77 +316,26 @@ internal static class Program {
 	}
 
 	/// <summary>
-	/// Processes a file silently or with GUI progress dialog (Explorer mode).
+	/// Processes a file from file manager mode with platform-appropriate progress.
 	/// </summary>
-	/// <param name="filePath">Path to the file.</param>
-	/// <param name="fileInfo">FileInfo object for the file.</param>
-	/// <param name="estimatedMs">Estimated processing time in milliseconds.</param>
-	/// <returns>Exit code.</returns>
-	private static async Task<int> ProcessFileExplorerMode(string filePath, FileInfo fileInfo, long estimatedMs) {
-		if (estimatedMs > ProgressUiThresholdMs) {
-			// Long operation - show progress dialog
-			return await ProcessWithProgressDialogAsync(filePath, fileInfo);
+	private static async Task<int> ProcessFileFileManagerMode(string filePath, FileInfo fileInfo,
+		IPlatformIntegration platform) {
+		FileHashResult? result;
+
+		if (platform.SupportsGuiProgress) {
+			result = await platform.HashFileWithProgress(filePath);
 		} else {
-			// Short operation - process silently
-			var result = await FileHasher.HashFileAsync(filePath);
-			var outputPath = filePath + ".hashes.json";
-			await FileHasher.SaveResultAsync(result, outputPath);
+			// No GUI progress available - hash silently
+			result = await FileHasher.HashFileAsync(filePath);
 		}
 
-		return 0;
-	}
-
-	/// <summary>
-	/// Processes a file with a GUI progress dialog for long operations.
-	/// </summary>
-	/// <param name="filePath">Path to the file.</param>
-	/// <param name="fileInfo">FileInfo object for the file.</param>
-	/// <returns>Exit code: 0 for success, 2 for cancelled.</returns>
-	private static async Task<int> ProcessWithProgressDialogAsync(string filePath, FileInfo fileInfo) {
-		FileHashResult? result = null;
-		var outputPath = filePath + ".hashes.json";
-		var wasCancelled = false;
-
-		var success = await ProgressDialog.ShowDialogAsync(
-			filePath,
-			async (progressCallback, cancellationToken) => {
-				try {
-					result = await FileHasher.HashFileAsync(filePath, progressCallback, cancellationToken);
-				} catch (OperationCanceledException) {
-					wasCancelled = true;
-					throw;
-				}
-			});
-
-		// Only save JSON if completed successfully (not cancelled)
-		if (success && result is not null && !wasCancelled) {
-			// Save JSON before dialog closes
+		if (result is not null) {
+			var outputPath = filePath + ".hashes.json";
 			await FileHasher.SaveResultAsync(result, outputPath);
 			return 0;
 		}
 
-		return 2; // Cancelled or failed
-	}
-
-	/// <summary>
-	/// Detects if the application was launched from Windows Explorer.
-	/// </summary>
-	/// <returns><see langword="true"/> if launched from Explorer; otherwise, <see langword="false"/>.</returns>
-	/// <remarks>
-	/// Detection methods:
-	/// <list type="bullet">
-	///   <item><description>Check for <c>HASHNOW_EXPLORER</c> environment variable</description></item>
-	///   <item><description>Check if input is redirected (no attached console)</description></item>
-	/// </list>
-	/// </remarks>
-	private static bool DetectExplorerLaunch() {
-		// Check explicit environment variable
-		if (Environment.GetEnvironmentVariable(ExplorerEnvVar) == "1") {
-			return true;
-		}
-
-		// Check if running without console input (typical for Explorer launch)
-		return Console.IsInputRedirected;
+		return 2; // Cancelled
 	}
 
 	#endregion
@@ -675,12 +345,7 @@ internal static class Program {
 	/// <summary>
 	/// Prints all hash results to the console in a formatted layout.
 	/// </summary>
-	/// <param name="result">The hash result to display.</param>
-	/// <remarks>
-	/// Results are organized by category with aligned columns for readability.
-	/// </remarks>
 	private static void PrintResults(FileHashResult result) {
-		// Checksums & CRCs
 		Console.WriteLine("--- Checksums & CRCs ---");
 		Console.WriteLine($"CRC32:      {result.Crc32}");
 		Console.WriteLine($"CRC32C:     {result.Crc32C}");
@@ -689,7 +354,6 @@ internal static class Program {
 		Console.WriteLine($"Fletcher16: {result.Fletcher16}");
 		Console.WriteLine($"Fletcher32: {result.Fletcher32}");
 
-		// Fast Non-Crypto Hashes
 		Console.WriteLine("--- Fast Non-Crypto Hashes ---");
 		Console.WriteLine($"XXH32:      {result.XxHash32}");
 		Console.WriteLine($"XXH64:      {result.XxHash64}");
@@ -704,13 +368,11 @@ internal static class Program {
 		Console.WriteLine($"SipHash24:  {result.SipHash24}");
 		Console.WriteLine($"Highway64:  {result.HighwayHash64}");
 
-		// MD Family
 		Console.WriteLine("--- MD Family ---");
 		Console.WriteLine($"MD2:        {result.Md2}");
 		Console.WriteLine($"MD4:        {result.Md4}");
 		Console.WriteLine($"MD5:        {result.Md5}");
 
-		// SHA-1/2 Family
 		Console.WriteLine("--- SHA-1/2 Family ---");
 		Console.WriteLine($"SHA-0:      {result.Sha0}");
 		Console.WriteLine($"SHA-1:      {result.Sha1}");
@@ -721,7 +383,6 @@ internal static class Program {
 		Console.WriteLine($"SHA512/224: {result.Sha512_224}");
 		Console.WriteLine($"SHA512/256: {result.Sha512_256}");
 
-		// SHA-3 & Keccak
 		Console.WriteLine("--- SHA-3 & Keccak ---");
 		Console.WriteLine($"SHA3-224:   {result.Sha3_224}");
 		Console.WriteLine($"SHA3-256:   {result.Sha3_256}");
@@ -730,7 +391,6 @@ internal static class Program {
 		Console.WriteLine($"Keccak-256: {result.Keccak256}");
 		Console.WriteLine($"Keccak-512: {result.Keccak512}");
 
-		// BLAKE Family
 		Console.WriteLine("--- BLAKE Family ---");
 		Console.WriteLine($"BLAKE-256:  {result.Blake256}");
 		Console.WriteLine($"BLAKE-512:  {result.Blake512}");
@@ -738,14 +398,12 @@ internal static class Program {
 		Console.WriteLine($"BLAKE2s:    {result.Blake2s}");
 		Console.WriteLine($"BLAKE3:     {result.Blake3}");
 
-		// RIPEMD Family
 		Console.WriteLine("--- RIPEMD Family ---");
 		Console.WriteLine($"RIPEMD-128: {result.Ripemd128}");
 		Console.WriteLine($"RIPEMD-160: {result.Ripemd160}");
 		Console.WriteLine($"RIPEMD-256: {result.Ripemd256}");
 		Console.WriteLine($"RIPEMD-320: {result.Ripemd320}");
 
-		// Other Crypto Hashes
 		Console.WriteLine("--- Other Crypto Hashes ---");
 		Console.WriteLine($"Whirlpool:  {result.Whirlpool}");
 		Console.WriteLine($"Tiger-192:  {result.Tiger192}");
@@ -768,30 +426,32 @@ internal static class Program {
 	#region Context Menu Commands
 
 	/// <summary>
-	/// Installs the Windows Explorer context menu entry.
+	/// Installs the file manager context menu entry.
 	/// </summary>
-	/// <returns>Exit code: 0 for success, 1 for error.</returns>
-	private static int InstallContextMenu() {
+	private static int InstallContextMenu(IPlatformIntegration platform) {
 		try {
-			ContextMenuInstaller.Install();
+			var exePath = GetExecutablePath();
+			platform.Install(exePath);
 
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("✓ Context menu installed successfully!");
 			Console.ResetColor();
 			Console.WriteLine();
-			Console.WriteLine("Right-click any file in Windows Explorer and select");
-			Console.WriteLine("\"Hash this file now\" to compute all 70 hashes.");
+			Console.WriteLine($"Right-click any file and select \"{GetMenuItemText()}\"");
+			Console.WriteLine("to compute all 70 hashes.");
 			Console.WriteLine();
 			Console.WriteLine("A .hashes.json file will be created next to the original.");
 
 			return 0;
 		} catch (UnauthorizedAccessException) {
 			Console.ForegroundColor = ConsoleColor.Red;
-			Console.Error.WriteLine("✗ Error: Administrator privileges required.");
+			Console.Error.WriteLine("✗ Error: Administrator/root privileges required.");
 			Console.ResetColor();
-			Console.Error.WriteLine();
-			Console.Error.WriteLine("Please run HashNow as Administrator to install the context menu.");
-			Console.Error.WriteLine("Right-click HashNow.exe and select 'Run as administrator'.");
+			if (OperatingSystem.IsWindows()) {
+				Console.Error.WriteLine();
+				Console.Error.WriteLine("Please run HashNow as Administrator to install the context menu.");
+				Console.Error.WriteLine("Right-click HashNow.exe and select 'Run as administrator'.");
+			}
 			return 1;
 		} catch (Exception ex) {
 			Console.ForegroundColor = ConsoleColor.Red;
@@ -802,12 +462,11 @@ internal static class Program {
 	}
 
 	/// <summary>
-	/// Removes the Windows Explorer context menu entry.
+	/// Removes the file manager context menu entry.
 	/// </summary>
-	/// <returns>Exit code: 0 for success, 1 for error.</returns>
-	private static int UninstallContextMenu() {
+	private static int UninstallContextMenu(IPlatformIntegration platform) {
 		try {
-			ContextMenuInstaller.Uninstall();
+			platform.Uninstall();
 
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("✓ Context menu removed successfully!");
@@ -816,10 +475,8 @@ internal static class Program {
 			return 0;
 		} catch (UnauthorizedAccessException) {
 			Console.ForegroundColor = ConsoleColor.Red;
-			Console.Error.WriteLine("✗ Error: Administrator privileges required.");
+			Console.Error.WriteLine("✗ Error: Administrator/root privileges required.");
 			Console.ResetColor();
-			Console.Error.WriteLine();
-			Console.Error.WriteLine("Please run HashNow as Administrator to uninstall the context menu.");
 			return 1;
 		} catch (Exception ex) {
 			Console.ForegroundColor = ConsoleColor.Red;
@@ -832,55 +489,85 @@ internal static class Program {
 	/// <summary>
 	/// Shows the current installation status.
 	/// </summary>
-	/// <returns>Exit code: 0 always (informational only).</returns>
-	private static int ShowStatus() {
+	private static int ShowStatus(IPlatformIntegration platform) {
 		PrintBanner();
-
-		bool isInstalled = ContextMenuInstaller.IsInstalled();
-		bool isCorrect = ContextMenuInstaller.IsInstalledCorrectly();
 
 		Console.WriteLine("Installation Status:");
 		Console.WriteLine("────────────────────");
+		Console.WriteLine($"Platform:   {platform.PlatformName}");
 
-		if (isInstalled && isCorrect) {
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine("✓ Context menu: Installed (current)");
+		foreach (var detail in platform.GetStatusDetails()) {
+			if (detail.StartsWith('✓')) {
+				Console.ForegroundColor = ConsoleColor.Green;
+			} else if (detail.StartsWith('⚠')) {
+				Console.ForegroundColor = ConsoleColor.Yellow;
+			} else if (detail.StartsWith('✗')) {
+				Console.ForegroundColor = ConsoleColor.Red;
+			}
+			Console.WriteLine(detail);
 			Console.ResetColor();
-		} else if (isInstalled) {
-			Console.ForegroundColor = ConsoleColor.Yellow;
-			Console.WriteLine("⚠ Context menu: Installed (outdated path)");
-			Console.ResetColor();
-			Console.WriteLine("  The executable has moved. Run --install to update.");
-		} else {
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine("✗ Context menu: Not installed");
-			Console.ResetColor();
-			Console.WriteLine("  Run --install or double-click the exe to install.");
 		}
 
 		Console.WriteLine();
-		Console.WriteLine($"Executable: {Environment.ProcessPath ?? "Unknown"}");
-		Console.WriteLine($"Admin:      {(IsRunningAsAdmin() ? "Yes" : "No")}");
 		Console.WriteLine($"Version:    {FileHasher.Version}");
 		Console.WriteLine($"Algorithms: {FileHasher.AlgorithmCount}");
-
-		var command = ContextMenuInstaller.GetInstalledCommand();
-		if (command is not null) {
-			Console.WriteLine($"Registered: {command}");
-		}
 
 		return 0;
 	}
 
 	#endregion
 
-	#region Command-Line Parsing Helpers
+	#region Helpers
+
+	/// <summary>
+	/// Prints the application banner.
+	/// </summary>
+	private static void PrintBanner() {
+		Console.WriteLine();
+		Console.ForegroundColor = ConsoleColor.Cyan;
+		Console.WriteLine($"╔══════════════════════════════════════════════════╗");
+		Console.WriteLine($"║          HashNow v{FileHasher.Version,-10}                    ║");
+		Console.WriteLine($"║       Instant File Hashing (70 algorithms)       ║");
+		Console.WriteLine($"╚══════════════════════════════════════════════════╝");
+		Console.ResetColor();
+		Console.WriteLine();
+	}
+
+	/// <summary>
+	/// Shows a brief hint about command-line usage.
+	/// </summary>
+	private static void ShowUsageHint() {
+		Console.ForegroundColor = ConsoleColor.DarkGray;
+		Console.WriteLine("Tip: Run 'HashNow --help' for command-line usage.");
+		Console.ResetColor();
+	}
+
+	/// <summary>
+	/// Gets the full path to the currently running executable.
+	/// </summary>
+	private static string GetExecutablePath() {
+		var exePath = Environment.ProcessPath;
+
+		if (string.IsNullOrEmpty(exePath)) {
+			exePath = Process.GetCurrentProcess().MainModule?.FileName;
+		}
+
+		if (string.IsNullOrEmpty(exePath)) {
+			var exeName = OperatingSystem.IsWindows() ? "HashNow.exe" : "HashNow";
+			exePath = Path.Combine(AppContext.BaseDirectory, exeName);
+		}
+
+		return exePath;
+	}
+
+	/// <summary>
+	/// Gets the menu item text.
+	/// </summary>
+	private static string GetMenuItemText() => "Hash this file now";
 
 	/// <summary>
 	/// Checks if an argument is a help switch.
 	/// </summary>
-	/// <param name="arg">The argument to check.</param>
-	/// <returns><see langword="true"/> if it's a help switch.</returns>
 	private static bool IsHelpSwitch(string arg) =>
 		arg.Equals("--help", StringComparison.OrdinalIgnoreCase) ||
 		arg.Equals("-h", StringComparison.OrdinalIgnoreCase) ||
@@ -890,28 +577,28 @@ internal static class Program {
 	/// <summary>
 	/// Checks if an argument is a version switch.
 	/// </summary>
-	/// <param name="arg">The argument to check.</param>
-	/// <returns><see langword="true"/> if it's a version switch.</returns>
 	private static bool IsVersionSwitch(string arg) =>
 		arg.Equals("--version", StringComparison.OrdinalIgnoreCase) ||
 		arg.Equals("-v", StringComparison.OrdinalIgnoreCase) ||
 		arg.Equals("/version", StringComparison.OrdinalIgnoreCase);
 
-	#endregion
-
-	#region Usage Display
-
 	/// <summary>
-	/// Displays the full usage information and help text.
+	/// Displays the full usage information.
 	/// </summary>
 	private static void ShowUsage() {
+		var platformHint = OperatingSystem.IsWindows()
+			? "Windows Explorer"
+			: OperatingSystem.IsMacOS()
+				? "Finder"
+				: "your file manager";
+
 		Console.WriteLine($@"HashNow v{FileHasher.Version} - Instant File Hashing ({FileHasher.AlgorithmCount} algorithms)
 
 Usage:
   HashNow                              Auto-install: check and prompt to install
   HashNow <file> [file2] [file3] ...   Hash one or more files
-  HashNow --install                    Install Explorer context menu (requires admin)
-  HashNow --uninstall                  Remove Explorer context menu (requires admin)
+  HashNow --install                    Install file manager context menu
+  HashNow --uninstall                  Remove file manager context menu
   HashNow --status                     Show installation status
   HashNow --help                       Show this help
   HashNow --version                    Show version
@@ -931,14 +618,13 @@ Output:
   JSON is formatted with tab indentation for readability.
 
 Quick Install:
-  Just double-click HashNow.exe and follow the prompts!
-  Administrator privileges are required for context menu registration.
+  Just run HashNow without arguments and follow the prompts!
+  Right-click any file in {platformHint} to hash it.
 
 Examples:
   HashNow                              Install via interactive prompt
   HashNow myfile.zip                   Hash a single file
   HashNow *.iso                        Hash multiple files (shell expansion)
-  HashNow ""C:\My Files\doc.pdf""        Hash file with spaces in path
   HashNow --install                    Add right-click menu option
 ");
 	}
