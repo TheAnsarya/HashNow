@@ -7,6 +7,10 @@
 [![Tests](https://img.shields.io/badge/tests-296%20passing-brightgreen)](tests/)
 [![Release](https://img.shields.io/github/v/release/TheAnsarya/HashNow)](https://github.com/TheAnsarya/HashNow/releases/latest)
 
+HashNow is a Windows file hashing utility that computes **70 hash algorithms** in a single pass and outputs results to a clean, tab-indented JSON file. It integrates directly into the Windows Explorer context menu for instant right-click hashing — no command line required.
+
+All 70 hash algorithms are powered by [**StreamHash**](https://github.com/TheAnsarya/StreamHash) ([NuGet](https://www.nuget.org/packages/StreamHash)), a high-performance streaming hash library written entirely in native C# with SIMD acceleration. No external cryptography libraries — every algorithm is implemented from scratch with zero `unsafe` code.
+
 ## 📥 Download & Install
 
 ### Step 1: Download
@@ -207,7 +211,7 @@ HashNow creates `{filename}.hashes.json` next to the original file. The JSON use
 | **Cryptographic** | 26 | MD2, MD4, MD5, SHA-0/1/224/256/384/512, SHA-512/224, SHA-512/256, SHA3 (224/256/384/512), Keccak (256/512), BLAKE (256/512), BLAKE2b/2s, BLAKE3, RIPEMD (128/160/256/320) |
 | **Other Crypto** | 14 | Whirlpool, Tiger, GOST, Streebog (256/512), Skein (256/512/1024), Groestl (256/512), JH (256/512), KangarooTwelve, SM3 |
 
-For the full algorithm list with output sizes and notes, see [Algorithm Roadmap](docs/ALGORITHM_ROADMAP.md).
+All algorithms are provided by [StreamHash](https://github.com/TheAnsarya/StreamHash) ([NuGet](https://www.nuget.org/packages/StreamHash)). For the full per-algorithm list, see the [StreamHash README](https://github.com/TheAnsarya/StreamHash#readme).
 
 ## 📚 Using the Core Library
 
@@ -267,15 +271,9 @@ For detailed benchmark results, see [Performance](docs/PERFORMANCE.md). For per-
 ## 📖 Documentation
 
 - [Changelog](CHANGELOG.md) — version history and release notes
-- [Algorithm Roadmap](docs/ALGORITHM_ROADMAP.md) — all 70 algorithms with implementation status
 - [Performance](docs/PERFORMANCE.md) — benchmarks, architecture, and optimization details
 - [Manual Testing Guide](docs/MANUAL_TESTING.md) — step-by-step testing procedures
-- [Screenshot Guide](docs/SCREENSHOT_GUIDE.md) — how to capture screenshots for documentation
-- [StreamHash Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md) — per-algorithm performance data
-
-### Release Notes
-
-- [v1.0.0](RELEASE-v1.0.0.md) | [v1.0.1](RELEASE-v1.0.1.md) | [v1.0.2](RELEASE-v1.0.2.md)
+- [StreamHash](https://github.com/TheAnsarya/StreamHash) — the hash algorithm library powering HashNow ([NuGet](https://www.nuget.org/packages/StreamHash) · [Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md))
 
 ## 📄 License
 

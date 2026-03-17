@@ -75,6 +75,7 @@ OK, I took all the screen shots, I think, let me know if I missed one; Also, Has
 
 [HashNow] A lot of documentation is inaccurate, update the documentation, for instance `/docs/ALGORITHM_ROADMAP.md` still says we're using bouncycastle and other nuget packages, but were should only be using streamhash, although, show more clearly that we are using streamhash and clean up the documentation; use the other unused screen shots to add instructions at the begining for when the browser blocks the download ("keep" download) and after downloading how to open properties and set the "unblock" flag so the exe will run, remove this ol;d smart screen stuff, I am not seeing any smart screen, and also the screen shot for smart screen is a dupe of another one and doesn't actually show it; continue;
 
+[HashNow] In the `readme.md` at the very top add an explanation of the utility and reference the StreamHash project, with links to the nuget package and to the github repos, and the links to `docs/ALGORITHM_ROADMAP.md` and the file itself could probably be replaced by links to StreamHash (nuget and github), and if we're done with making screenshots, move the `screenshot_guide.md` to the `~docs` folder since it is for developers, not users, and i've done it already; and fix the "release notes" section of the readme, maybe link to the current version of the notes, then also link to a doc that has all of them listed or just ignore them; continue;
 
 
 
