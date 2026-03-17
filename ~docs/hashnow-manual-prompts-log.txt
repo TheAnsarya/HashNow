@@ -63,7 +63,9 @@ open the file you're recording these benchmarks in, run the missing benchmarks, 
 
 Update StreamHash #9 with current status and tackle remaining distribution tasks
 
+Did you do the remaining issue? " Coverage badge for README — needs a CI run with coverage to complete first. That'll happen automatically on the next push that touches code (this push was .md-excluded paths but the workflow files themselves triggered it)."
 
+[StreamHash] Well, if there's a problem with release 1.11.0, then make a new release 1.11.1 and also finish StreamHash issue #9 and then update nuget and then after publishing StreamHash to nuget (wait if needed):[HashNow] update HashNow to use the new version and republish/release HashNow updating to version 1.4.2 and update the readme and other documentation for HashNow with current state and instructions and descriptions of how to install and use the utility, add inline screenshots to the markdown instructions and documentation and add a document that tells me what screenshots to take and save as specific file names so they fill the documentation; continue;
 
 
 

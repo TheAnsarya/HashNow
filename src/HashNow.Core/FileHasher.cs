@@ -27,7 +27,7 @@ public static class FileHasher {
 	/// <summary>
 	/// The current version of the HashNow library.
 	/// </summary>
-	public const string Version = "1.4.1";
+	public const string Version = "1.4.2";
 
 	/// <summary>
 	/// The total number of hash algorithms supported.

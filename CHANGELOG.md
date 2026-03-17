@@ -5,6 +5,20 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2026-03-17
+
+### Changed
+
+- **StreamHash v1.11.1** — Updated dependency from v1.11.0 to v1.11.1
+	- NuGet package now includes icon
+	- CI/CD with code coverage reporting
+	- All hash algorithm code identical to v1.11.0
+
+### Improved
+
+- **Documentation overhaul** — comprehensive README with visual guides, installation steps, usage instructions
+- **Screenshot placeholders** — inline image references for documentation screenshots
+
 ## [1.4.1] - 2026-03-16
 
 ### Changed

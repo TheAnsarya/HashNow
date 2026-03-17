@@ -7,18 +7,62 @@
 [![Tests](https://img.shields.io/badge/tests-296%20passing-brightgreen)](tests/)
 [![Release](https://img.shields.io/github/v/release/TheAnsarya/HashNow)](https://github.com/TheAnsarya/HashNow/releases/latest)
 
-## 📥 Download
+## 📥 Download & Install
 
-**[Download HashNow v1.4.1](https://github.com/TheAnsarya/HashNow/releases/latest)** - Windows single-file executable
+### Step 1: Download
 
-## 🚀 Quick Start
+**[Download HashNow v1.4.2](https://github.com/TheAnsarya/HashNow/releases/latest)** — single self-contained `.exe`, no installer needed.
 
-1. **Download** `HashNow.exe` from [Releases](https://github.com/TheAnsarya/HashNow/releases/latest)
-2. **Double-click** `HashNow.exe` - it will prompt to install the context menu
-3. **Right-click any file** → Select **"Hash this file now"**
-4. **Find** `{filename}.hashes.json` in the same folder
+Download `HashNow.exe` from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest) and save it somewhere permanent (e.g. `C:\Tools\HashNow.exe`). The context menu entry points to wherever you put the file, so don't move it after installing.
 
-> **Tip:** If prompted by Windows SmartScreen, click "More info" → "Run anyway"
+![Download HashNow from GitHub Releases](docs/images/download-release.png)
+
+### Step 2: First Launch & SmartScreen
+
+Double-click `HashNow.exe`. Since this is a new download, Windows SmartScreen may appear:
+
+1. Click **"More info"**
+2. Click **"Run anyway"**
+
+![Windows SmartScreen warning — click More info then Run anyway](docs/images/smartscreen-warning.png)
+
+### Step 3: Install Context Menu
+
+On first launch (double-click with no arguments), HashNow detects it was launched directly and offers to install the Explorer context menu:
+
+![HashNow auto-install prompt](docs/images/auto-install-prompt.png)
+
+Click **Yes** to install. A Windows UAC prompt will appear requesting administrator privileges (required to write to the Windows registry):
+
+![UAC elevation prompt](docs/images/uac-prompt.png)
+
+Click **Yes** to grant admin access. A confirmation dialog confirms the installation:
+
+![Context menu installed successfully](docs/images/install-success.png)
+
+You're done! The context menu is now available on all file types in Explorer.
+
+### Step 4: Hash a File
+
+Right-click any file in Windows Explorer and select **"Hash this file now"**:
+
+![Explorer right-click context menu showing Hash this file now](docs/images/context-menu.png)
+
+A progress dialog appears while hashing:
+
+![Progress dialog showing hashing progress with percentage and cancel button](docs/images/progress-dialog.png)
+
+The dialog shows the file name, a progress bar (0–100%), percentage complete, and a **Cancel** button to abort at any time. It closes automatically when done.
+
+### Step 5: View Results
+
+Find `{filename}.hashes.json` in the same folder as the original file:
+
+![Explorer showing the generated .hashes.json file next to the original](docs/images/output-file-explorer.png)
+
+Open the JSON file to see all 70 hashes organized by category:
+
+![JSON output file contents showing hash values](docs/images/json-output.png)
 
 ## ✨ Features
 
@@ -32,35 +76,9 @@
 - **Powered by [StreamHash](https://www.nuget.org/packages/StreamHash)** — all 70 algorithms in pure native C#
 - **Public Domain** — [The Unlicense](LICENSE), free for any use
 
-## 📋 How to Use
+## 📋 Command-Line Usage
 
-### Auto-Install (Easiest)
-
-1. **Double-click** `HashNow.exe`
-2. Windows may show a SmartScreen prompt — click **"More info"** → **"Run anyway"**
-3. HashNow detects it was launched without arguments and offers to install the context menu
-4. Click **Yes** when prompted for administrator privileges (required for registry access)
-5. A confirmation dialog appears — you're done!
-
-Now right-click any file in Explorer → **"Hash this file now"**
-
-### Explorer Context Menu
-
-After installation, the context menu appears on every file type:
-
-1. **Right-click** any file in Windows Explorer
-2. Select **"Hash this file now"**
-3. A progress dialog appears showing the hashing progress
-4. When complete, find `{filename}.hashes.json` in the same folder as the original file
-
-The progress dialog shows:
-
-- File name being hashed
-- Progress bar (0–100%)
-- Percentage complete
-- **Cancel** button to abort at any time
-
-### Command Line
+HashNow can also be used entirely from the command line:
 
 ```powershell
 # Hash a single file
@@ -68,30 +86,38 @@ HashNow.exe myfile.zip
 
 # Hash multiple files (each gets its own .hashes.json)
 HashNow.exe file1.iso file2.zip file3.bin
+```
 
+![CLI output showing hashing progress and completion](docs/images/cli-hash-output.png)
+
+### Management Commands
+
+```powershell
 # Install context menu (requires admin)
 HashNow.exe --install
 
-# Uninstall context menu
+# Uninstall context menu (requires admin)
 HashNow.exe --uninstall
 
-# Check if context menu is installed
+# Check if context menu is installed and path is correct
 HashNow.exe --status
 
-# Show help
+# Show all available commands
 HashNow.exe --help
 
-# Show version
+# Show version info
 HashNow.exe --version
 ```
 
-### Context Menu Management
+![CLI help output](docs/images/cli-help.png)
 
 | Command | Description | Requires Admin |
 |---------|-------------|:--------------:|
 | `--install` | Register "Hash this file now" in Explorer | Yes |
 | `--uninstall` | Remove context menu entry | Yes |
 | `--status` | Check if context menu is correctly installed | No |
+| `--help` | Show usage information | No |
+| `--version` | Show version and algorithm count | No |
 
 The context menu entry is stored in the Windows registry under `HKEY_CLASSES_ROOT\*\shell\HashNow` and applies to all file types.
 
@@ -120,7 +146,7 @@ HashNow creates `{filename}.hashes.json` next to the original file. The JSON use
 
 	"hashedAtUtc": "2025-02-05T10:30:15Z",
 	"durationMs": 1003,
-	"generatedBy": "HashNow v1.4.1",
+	"generatedBy": "HashNow v1.4.2",
 	"algorithmCount": 70
 }
 ```
@@ -145,7 +171,7 @@ For the full algorithm list with output sizes and notes, see [Algorithm Roadmap]
 
 ## 📚 Using the Core Library
 
-The `HashNow.Core` NuGet package can be used in any .NET project:
+The `HashNow.Core` library can be referenced in any .NET 10 project:
 
 ```csharp
 using HashNow.Core;
@@ -154,9 +180,14 @@ using HashNow.Core;
 var result = FileHasher.HashFile("myfile.zip");
 Console.WriteLine($"SHA256: {result.Sha256}");
 Console.WriteLine($"BLAKE3: {result.Blake3}");
+Console.WriteLine($"CRC32:  {result.Crc32}");
 
 // Save results to JSON
 FileHasher.SaveResult(result, "myfile.zip.hashes.json");
+
+// Async with progress reporting
+var progress = new Progress<double>(p => Console.Write($"\r{p:P0}"));
+var result = await FileHasher.HashFileAsync("largefile.iso", progress);
 ```
 
 ## 🏗️ Building from Source
@@ -164,9 +195,9 @@ FileHasher.SaveResult(result, "myfile.zip.hashes.json");
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- Windows (for context menu features)
+- Windows (for context menu features and WinForms progress dialog)
 
-### Build
+### Build & Test
 
 ```bash
 git clone https://github.com/TheAnsarya/HashNow.git
@@ -175,11 +206,13 @@ dotnet build
 dotnet test
 ```
 
-### Publish
+### Publish Self-Contained Executable
 
 ```bash
 dotnet publish src/HashNow.Cli -c Release -r win-x64 --self-contained true -o publish
 ```
+
+This produces a single `HashNow.exe` (~50 MB) that includes the .NET runtime and all dependencies — no installation required.
 
 ## ⚡ Performance
 
@@ -187,17 +220,18 @@ All 70 hashes are computed in a **single file read** with parallel processing:
 
 - **1 MB buffer** with ArrayPool memory management
 - **Single pass** — file is read once, all algorithms fed concurrently
-- **Powered by [StreamHash](https://www.nuget.org/packages/StreamHash)** — native C# with zero unsafe code
+- **Powered by [StreamHash](https://www.nuget.org/packages/StreamHash)** — native C# with SIMD acceleration (AVX2, SSE4.2, AES-NI)
 
 For detailed benchmark results, see [Performance](docs/PERFORMANCE.md). For per-algorithm data, see [StreamHash Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md).
 
 ## 📖 Documentation
 
-- [📝 Changelog](CHANGELOG.md) — version history and release notes
-- [📊 Algorithm Roadmap](docs/ALGORITHM_ROADMAP.md) — all 70 algorithms with implementation status
-- [⚡ Performance](docs/PERFORMANCE.md) — benchmarks, architecture, and optimization details
-- [🧪 Manual Testing Guide](docs/MANUAL_TESTING.md) — step-by-step testing procedures
-- [📈 StreamHash Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md) — per-algorithm performance data
+- [Changelog](CHANGELOG.md) — version history and release notes
+- [Algorithm Roadmap](docs/ALGORITHM_ROADMAP.md) — all 70 algorithms with implementation status
+- [Performance](docs/PERFORMANCE.md) — benchmarks, architecture, and optimization details
+- [Manual Testing Guide](docs/MANUAL_TESTING.md) — step-by-step testing procedures
+- [Screenshot Guide](docs/SCREENSHOT_GUIDE.md) — how to capture screenshots for documentation
+- [StreamHash Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md) — per-algorithm performance data
 
 ### Release Notes
 
