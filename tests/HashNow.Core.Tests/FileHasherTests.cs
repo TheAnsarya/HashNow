@@ -140,13 +140,13 @@ var progressValues = new List<double>();
 await FileHasher.HashFileAsync(path, progress => progressValues.Add(progress));
 
 Assert.NotEmpty(progressValues);
-Assert.All(progressValues, value => Assert.InRange(value, 0, 100));
+Assert.All(progressValues, value => Assert.InRange(value, 0.0, 1.0));
 
 for (var i = 1; i < progressValues.Count; i++) {
 	Assert.True(progressValues[i] >= progressValues[i - 1], "Progress must be monotonic.");
 }
 
-Assert.True(progressValues[^1] >= 99.99, "Final progress should approach 100%. ");
+Assert.True(progressValues[^1] >= 0.99, "Final progress should approach 1.0");
 }
 
 #endregion

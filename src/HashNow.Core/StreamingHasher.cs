@@ -90,13 +90,13 @@ internal sealed class StreamingHasher : IDisposable {
 					ProcessChunk(buffer.AsSpan(0, bytesThisRead));
 					bytesRead += bytesThisRead;
 					while (nextPercent < 100 && bytesRead >= nextProgressAt) {
-						progress(nextPercent);
+						progress(nextPercent / 100.0);
 						nextPercent++;
 						nextProgressAt = progressStep * nextPercent;
 					}
 				}
 				// Always report 100% at the end
-				progress(100.0);
+				progress(1.0);
 			}
 
 			sw.Stop();

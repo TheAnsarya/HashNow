@@ -112,9 +112,9 @@ public class StreamingConsistencyTests {
 			streamer.HashFile(tempFile, progress: p => progressValues.Add(p));
 
 			Assert.NotEmpty(progressValues);
-			Assert.All(progressValues, p => Assert.InRange(p, 0.0, 100.0));
-			// Last progress should be ~100%
-			Assert.True(progressValues[^1] >= 99.0, $"Final progress was {progressValues[^1]}%");
+			Assert.All(progressValues, p => Assert.InRange(p, 0.0, 1.0));
+			// Last progress should be 1.0 (100%)
+			Assert.True(progressValues[^1] >= 0.99, $"Final progress was {progressValues[^1]}");
 		} finally {
 			File.Delete(tempFile);
 		}

@@ -5,6 +5,13 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.4] - 2026-03-17
+
+### Fixed
+
+- **Progress bar showing 68000%+** — StreamingHasher reported progress as 0–100 but consumers expected 0.0–1.0 fraction, causing the percentage label to overflow and the bar to jump to 100% immediately
+- Updated progress tests to validate 0.0–1.0 range
+
 ## [1.4.3] - 2026-03-17
 
 ### Fixed

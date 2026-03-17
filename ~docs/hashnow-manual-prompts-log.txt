@@ -71,6 +71,8 @@ how do i uninstall hashnow so I can start from scratch? make it easy for me; con
 
 The older version is blocking the install from the fresh 1.4.2 version, so I had to uninstall it, add uninstall instructions to the readme, but running the hashnow exe afterwards doesn't do anbything. Why is it not installing? and why is it not bother me with a a UAC prompt? I need screen shots!
 
+OK, I took all the screen shots, I think, let me know if I missed one; Also, HashNow's progress bar is setup incorrectly, it hits 100% immediately and then goes to like 68000%, and higher when I canceled it. Also, it took like 28 seconds to fully hash (all 70 algorithms) a ~50mb file, is that the speed we are expecting?
+
 
 
 
