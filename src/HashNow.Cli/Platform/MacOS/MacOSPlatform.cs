@@ -59,7 +59,7 @@ internal sealed class MacOSPlatform : IPlatformIntegration {
 	}
 
 	/// <inheritdoc/>
-	public bool SupportsGuiProgress => false;
+	public bool SupportsGuiProgress => true;
 
 	#endregion
 
@@ -422,13 +422,172 @@ internal sealed class MacOSPlatform : IPlatformIntegration {
 
 	/// <inheritdoc/>
 	public async Task<FileHashResult?> HashFileWithProgress(string filePath, CancellationToken ct = default) {
-		// Use console progress bar on macOS
-		using var progressBar = new ConsoleProgressBar(useColor: true);
-		return await FileHasher.HashFileAsync(
-			filePath,
-			progress => progressBar.Update(progress),
-			ct);
+		// Try zenity first (available via Homebrew: brew install zenity)
+		if (IsCommandAvailable("zenity")) {
+			return await HashWithZenityProgress(filePath, ct);
+		}
+
+		// Use osascript dialog with cancel button (always available on macOS)
+		return await HashWithOsascriptProgress(filePath, ct);
 	}
+
+	/// <summary>
+	/// Hashes a file with a zenity progress dialog (if installed via Homebrew).
+	/// </summary>
+	private static async Task<FileHashResult?> HashWithZenityProgress(
+		string filePath, CancellationToken ct) {
+		var fileName = Path.GetFileName(filePath);
+		using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+		var psi = new ProcessStartInfo {
+			FileName = "zenity",
+			ArgumentList = {
+				"--progress",
+				"--title", "HashNow — Computing Hashes...",
+				"--text", $"Hashing: {fileName}",
+				"--percentage", "0",
+				"--auto-close",
+				"--width", "400"
+			},
+			RedirectStandardInput = true,
+			UseShellExecute = false,
+			CreateNoWindow = true
+		};
+
+		using var zenity = Process.Start(psi);
+		if (zenity is null) {
+			return await FileHasher.HashFileAsync(filePath, cancellationToken: ct);
+		}
+
+		// Monitor zenity for cancel (user clicks Cancel → exit code 1)
+		_ = Task.Run(() => {
+			zenity.WaitForExit();
+			if (zenity.ExitCode != 0 && !cts.IsCancellationRequested) {
+				cts.Cancel();
+			}
+		}, CancellationToken.None);
+
+		FileHashResult? result = null;
+		try {
+			int lastPercent = -1;
+			result = await FileHasher.HashFileAsync(filePath, progress => {
+				int percent = Math.Clamp((int)(progress * 100), 0, 100);
+				if (percent != lastPercent && !zenity.HasExited) {
+					lastPercent = percent;
+					try {
+						zenity.StandardInput.WriteLine(percent);
+						zenity.StandardInput.Flush();
+					} catch {
+						// zenity already exited (cancelled or closed)
+					}
+				}
+			}, cts.Token);
+
+			// Hash completed — close zenity
+			if (!zenity.HasExited) {
+				try {
+					zenity.StandardInput.WriteLine(100);
+					zenity.StandardInput.Close();
+				} catch {
+					// zenity already closed
+				}
+			}
+		} catch (OperationCanceledException) {
+			if (!zenity.HasExited) {
+				zenity.Kill();
+			}
+			return null;
+		}
+
+		return result;
+	}
+
+	/// <summary>
+	/// Hashes a file with an osascript dialog that shows progress status and a cancel button.
+	/// The dialog displays the file name and a "Computing hashes..." message.
+	/// Clicking Cancel or closing the dialog stops the hashing operation.
+	/// </summary>
+	private static async Task<FileHashResult?> HashWithOsascriptProgress(
+		string filePath, CancellationToken ct) {
+		var fileName = Path.GetFileName(filePath);
+		using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+		// Show a dialog with Cancel button that blocks osascript until dismissed
+		var escapedFileName = EscapeAppleScript(fileName);
+		var script = $"display dialog \"Hashing: {escapedFileName}\\n\\n" +
+					 "Computing 70 hash algorithms...\\n" +
+					 "This dialog will close automatically when complete.\" " +
+					 "with title \"HashNow\" " +
+					 "buttons {\"Cancel\"} " +
+					 "default button \"Cancel\" " +
+					 "giving up after 3600";
+
+		var psi = new ProcessStartInfo {
+			FileName = "osascript",
+			ArgumentList = { "-e", script },
+			UseShellExecute = false,
+			RedirectStandardOutput = true,
+			RedirectStandardError = true,
+			CreateNoWindow = true
+		};
+
+		using var osascript = Process.Start(psi);
+		if (osascript is null) {
+			return await FileHasher.HashFileAsync(filePath, cancellationToken: ct);
+		}
+
+		// Monitor dialog for cancel (user clicks Cancel → osascript exits with code 1)
+		_ = Task.Run(() => {
+			osascript.WaitForExit();
+			if (!cts.IsCancellationRequested) {
+				cts.Cancel();
+			}
+		}, CancellationToken.None);
+
+		FileHashResult? result = null;
+		try {
+			result = await FileHasher.HashFileAsync(filePath, cancellationToken: cts.Token);
+
+			// Hash completed — kill the dialog
+			if (!osascript.HasExited) {
+				osascript.Kill();
+			}
+		} catch (OperationCanceledException) {
+			if (!osascript.HasExited) {
+				osascript.Kill();
+			}
+			return null;
+		}
+
+		return result;
+	}
+
+	/// <summary>
+	/// Checks if a command is available on the system PATH.
+	/// </summary>
+	private static bool IsCommandAvailable(string command) {
+		try {
+			using var proc = Process.Start(new ProcessStartInfo {
+				FileName = "which",
+				Arguments = command,
+				RedirectStandardOutput = true,
+				RedirectStandardError = true,
+				UseShellExecute = false,
+				CreateNoWindow = true
+			});
+			if (proc is null) return false;
+			proc.WaitForExit();
+			return proc.ExitCode == 0;
+		} catch {
+			return false;
+		}
+	}
+
+	/// <summary>
+	/// Escapes a string for use in AppleScript.
+	/// </summary>
+	private static string EscapeAppleScript(string value) =>
+		value.Replace("\\", "\\\\").Replace("\"", "\\\"");
 
 	#endregion
 

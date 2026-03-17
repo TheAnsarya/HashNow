@@ -79,7 +79,8 @@ internal sealed class LinuxPlatform : IPlatformIntegration {
 	}
 
 	/// <inheritdoc/>
-	public bool SupportsGuiProgress => false;
+	public bool SupportsGuiProgress =>
+		IsCommandAvailable("zenity") || IsCommandAvailable("kdialog");
 
 	#endregion
 
@@ -613,12 +614,202 @@ internal sealed class LinuxPlatform : IPlatformIntegration {
 
 	/// <inheritdoc/>
 	public async Task<FileHashResult?> HashFileWithProgress(string filePath, CancellationToken ct = default) {
-		// Use console progress bar on Linux
-		using var progressBar = new ConsoleProgressBar(useColor: true);
-		return await FileHasher.HashFileAsync(
-			filePath,
-			progress => progressBar.Update(progress),
-			ct);
+		// Try zenity GUI progress (GTK - GNOME, Xfce, etc.)
+		if (IsCommandAvailable("zenity")) {
+			return await HashWithZenityProgress(filePath, ct);
+		}
+
+		// Try kdialog GUI progress (KDE)
+		if (IsCommandAvailable("kdialog")) {
+			return await HashWithKdialogProgress(filePath, ct);
+		}
+
+		// Fallback: hash without visible progress (no terminal in file manager mode)
+		return await FileHasher.HashFileAsync(filePath, cancellationToken: ct);
+	}
+
+	/// <summary>
+	/// Hashes a file with a zenity progress dialog showing live percentage and cancel button.
+	/// </summary>
+	private static async Task<FileHashResult?> HashWithZenityProgress(
+		string filePath, CancellationToken ct) {
+		var fileName = Path.GetFileName(filePath);
+		using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+		var psi = new ProcessStartInfo {
+			FileName = "zenity",
+			ArgumentList = {
+				"--progress",
+				"--title", "HashNow — Computing Hashes...",
+				"--text", $"Hashing: {fileName}",
+				"--percentage", "0",
+				"--auto-close",
+				"--width", "400"
+			},
+			RedirectStandardInput = true,
+			UseShellExecute = false,
+			CreateNoWindow = true
+		};
+
+		using var zenity = Process.Start(psi);
+		if (zenity is null) {
+			return await FileHasher.HashFileAsync(filePath, cancellationToken: ct);
+		}
+
+		// Monitor zenity for cancel (user clicks Cancel → exit code 1)
+		_ = Task.Run(() => {
+			zenity.WaitForExit();
+			if (zenity.ExitCode != 0 && !cts.IsCancellationRequested) {
+				cts.Cancel();
+			}
+		}, CancellationToken.None);
+
+		FileHashResult? result = null;
+		try {
+			int lastPercent = -1;
+			result = await FileHasher.HashFileAsync(filePath, progress => {
+				int percent = Math.Clamp((int)(progress * 100), 0, 100);
+				if (percent != lastPercent && !zenity.HasExited) {
+					lastPercent = percent;
+					try {
+						zenity.StandardInput.WriteLine(percent);
+						zenity.StandardInput.Flush();
+					} catch {
+						// zenity already exited (cancelled or closed)
+					}
+				}
+			}, cts.Token);
+
+			// Hash completed — close zenity
+			if (!zenity.HasExited) {
+				try {
+					zenity.StandardInput.WriteLine(100);
+					zenity.StandardInput.Close();
+				} catch {
+					// zenity already closed
+				}
+			}
+		} catch (OperationCanceledException) {
+			if (!zenity.HasExited) {
+				zenity.Kill();
+			}
+			return null;
+		}
+
+		return result;
+	}
+
+	/// <summary>
+	/// Hashes a file with a kdialog progress dialog showing live percentage and cancel button.
+	/// </summary>
+	private static async Task<FileHashResult?> HashWithKdialogProgress(
+		string filePath, CancellationToken ct) {
+		var fileName = Path.GetFileName(filePath);
+		using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+		// kdialog --progressbar returns a D-Bus reference for updates
+		var psi = new ProcessStartInfo {
+			FileName = "kdialog",
+			ArgumentList = {
+				"--title", "HashNow",
+				"--progressbar", $"Hashing: {fileName}",
+				"100"
+			},
+			RedirectStandardOutput = true,
+			UseShellExecute = false,
+			CreateNoWindow = true
+		};
+
+		using var kdialog = Process.Start(psi);
+		if (kdialog is null) {
+			return await FileHasher.HashFileAsync(filePath, cancellationToken: ct);
+		}
+
+		var dbusRef = kdialog.StandardOutput.ReadToEnd().Trim();
+		kdialog.WaitForExit();
+
+		// Parse D-Bus service and path (format: "org.kde.kdialog-NNNNN /ProgressDialog")
+		var parts = dbusRef.Split(' ', 2);
+		if (parts.Length < 2) {
+			return await FileHasher.HashFileAsync(filePath, cancellationToken: ct);
+		}
+		var dbusService = parts[0];
+		var dbusPath = parts[1];
+
+		FileHashResult? result = null;
+		try {
+			int lastPercent = -1;
+			result = await FileHasher.HashFileAsync(filePath, progress => {
+				int percent = Math.Clamp((int)(progress * 100), 0, 100);
+				if (percent != lastPercent) {
+					lastPercent = percent;
+					// Update progress via qdbus
+					try {
+						using var update = Process.Start(new ProcessStartInfo {
+							FileName = "qdbus",
+							ArgumentList = {
+								dbusService, dbusPath,
+								"Set", "", "value", percent.ToString()
+							},
+							UseShellExecute = false,
+							CreateNoWindow = true,
+							RedirectStandardOutput = true
+						});
+						update?.WaitForExit();
+					} catch {
+						// qdbus call failed — dialog may have been closed
+					}
+
+					// Check if user cancelled
+					try {
+						using var check = Process.Start(new ProcessStartInfo {
+							FileName = "qdbus",
+							ArgumentList = {
+								dbusService, dbusPath, "wasCancelled"
+							},
+							RedirectStandardOutput = true,
+							UseShellExecute = false,
+							CreateNoWindow = true
+						});
+						if (check is not null) {
+							var cancelled = check.StandardOutput.ReadToEnd().Trim();
+							check.WaitForExit();
+							if (cancelled == "true" && !cts.IsCancellationRequested) {
+								cts.Cancel();
+							}
+						}
+					} catch {
+						// qdbus call failed
+					}
+				}
+			}, cts.Token);
+
+			// Close the dialog
+			KdialogClose(dbusService, dbusPath);
+		} catch (OperationCanceledException) {
+			KdialogClose(dbusService, dbusPath);
+			return null;
+		}
+
+		return result;
+	}
+
+	/// <summary>
+	/// Closes a kdialog progress dialog via D-Bus.
+	/// </summary>
+	private static void KdialogClose(string dbusService, string dbusPath) {
+		try {
+			using var close = Process.Start(new ProcessStartInfo {
+				FileName = "qdbus",
+				ArgumentList = { dbusService, dbusPath, "close" },
+				UseShellExecute = false,
+				CreateNoWindow = true,
+				RedirectStandardOutput = true
+			});
+			close?.WaitForExit();
+		} catch {
+			// Dialog may already be closed
+		}
 	}
 
 	#endregion

@@ -320,14 +320,9 @@ internal static class Program {
 	/// </summary>
 	private static async Task<int> ProcessFileFileManagerMode(string filePath, FileInfo fileInfo,
 		IPlatformIntegration platform) {
-		FileHashResult? result;
-
-		if (platform.SupportsGuiProgress) {
-			result = await platform.HashFileWithProgress(filePath);
-		} else {
-			// No GUI progress available - hash silently
-			result = await FileHasher.HashFileAsync(filePath);
-		}
+		// Always use platform progress — each platform handles its own fallback chain
+		// (Windows: WinForms dialog, Linux: zenity/kdialog, macOS: osascript/zenity)
+		var result = await platform.HashFileWithProgress(filePath);
 
 		if (result is not null) {
 			var outputPath = filePath + ".hashes.json";

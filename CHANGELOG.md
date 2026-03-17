@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Platform Abstraction Layer** — `IPlatformIntegration` interface with platform-specific implementations
 - **Linux File Manager Integration** — Nautilus scripts, Nemo actions, Dolphin service menus, Thunar custom actions (all user-level, no root required)
 - **macOS Finder Integration** — Automator Quick Action workflow for right-click hashing
+- **GUI Progress on Linux** — zenity progress bar with live percentage and cancel button (GTK); kdialog progressbar with cancel (KDE)
+- **GUI Progress on macOS** — osascript dialog with cancel button; zenity progress if installed via Homebrew
 - **Multi-TFM Build** — `net10.0-windows` for Windows (WinForms GUI), `net10.0` for Linux/macOS (console)
 - **CI/CD Pipeline** — GitHub Actions workflow building for Windows x64, Linux x64/ARM64, macOS ARM64 with automatic releases
 
