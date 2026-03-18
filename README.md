@@ -22,136 +22,14 @@ All 70 hash algorithms are powered by [**StreamHash**](https://github.com/TheAns
 
 Download the latest release for your platform from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest):
 
-| Platform | Download |
-|----------|----------|
-| **Windows x64** | `HashNow-Windows-x64-vX.Y.Z.exe` |
-| **Linux x64** | `HashNow-Linux-x64-vX.Y.Z.tar.gz` |
-| **Linux ARM64** | `HashNow-Linux-ARM64-vX.Y.Z.tar.gz` |
-| **macOS ARM64** | `HashNow-macOS-ARM64-vX.Y.Z.tar.gz` |
+| Platform | Download | Install Guide |
+|----------|----------|---------------|
+| **Windows x64** | `HashNow-Windows-x64-v1.5.0.exe` | [Windows Installation Guide](docs/install-windows.md) |
+| **Linux x64** | `HashNow-Linux-x64-v1.5.0.tar.gz` | [Linux Installation Guide](docs/install-linux.md) |
+| **Linux ARM64** | `HashNow-Linux-ARM64-v1.5.0.tar.gz` | [Linux Installation Guide](docs/install-linux.md) |
+| **macOS ARM64** | `HashNow-macOS-ARM64-v1.5.0.tar.gz` | [macOS Installation Guide](docs/install-macos.md) |
 
-### Windows
-
-#### Step 1: Download
-
-**[Download HashNow](https://github.com/TheAnsarya/HashNow/releases/latest)** — single self-contained `.exe`, no installer needed.
-
-Download `HashNow.exe` from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest) and save it somewhere permanent (e.g. `C:\Tools\HashNow.exe`). The context menu entry points to wherever you put the file, so don't move it after installing.
-
-| ![Download HashNow from GitHub Releases](docs/images/download-release.png) |
-|---|
-
-Your browser may warn that the file "isn't commonly downloaded." This is normal for new executables — click the keep/download option:
-
-| ![Browser warning that HashNow.exe isn't commonly downloaded](docs/images/hashnow-isnt-commonly-downloaded.png) |
-|---|
-
-Click **Keep** or **Keep anyway** to save the file:
-
-| ![Click Keep to save the download](docs/images/hashnow-isnt-commonly-downloaded-keep.png) |
-|---|
-
-| ![Confirm keeping the download](docs/images/hashnow-isnt-commonly-downloaded-keep-anyways.png) |
-|---|
-
-#### Step 2: Unblock the File
-
-Windows marks downloaded files as blocked. Before running, right-click `HashNow.exe` and select **Properties**:
-
-| ![Right-click HashNow.exe and select Properties](docs/images/properties-window-contextmenu.png) |
-|---|
-
-At the bottom of the **General** tab, check the **Unblock** checkbox and click **OK**:
-
-| ![Properties dialog showing the Unblock checkbox](docs/images/properties-window-unblock-before.png) |
-|---|
-
-| ![Unblock checkbox checked](docs/images/properties-window-unblock.png) |
-|---|
-
-#### Step 3: Install Context Menu
-
-Double-click `HashNow.exe`. On first launch (with no arguments), HashNow detects it was launched directly and offers to install the Explorer context menu:
-
-| ![HashNow auto-install prompt](docs/images/auto-install-prompt.png) |
-|---|
-
-Click **Yes** to install. A Windows UAC prompt will appear requesting administrator privileges (required to write to the Windows registry):
-
-| ![UAC elevation prompt](docs/images/uac-prompt.png) |
-|---|
-
-Click **Yes** to grant admin access. A confirmation dialog confirms the installation:
-
-| ![Context menu installed successfully](docs/images/install-success.png) |
-|---|
-
-You're done! The context menu is now available on all file types in Explorer.
-
-#### Step 4: Hash a File
-
-Right-click any file in Windows Explorer and select **"Hash this file now"**:
-
-| ![Explorer right-click context menu showing Hash this file now](docs/images/context-menu.png) |
-|---|
-
-A progress dialog appears while hashing:
-
-| ![Progress dialog showing hashing progress with percentage and cancel button](docs/images/progress-dialog.png) |
-|---|
-
-The dialog shows the file name, a progress bar (0–100%), percentage complete, and a **Cancel** button to abort at any time. It closes automatically when done.
-
-#### Step 5: View Results
-
-Find `{filename}.hashes.json` in the same folder as the original file:
-
-| ![Explorer showing the generated .hashes.json file next to the original](docs/images/output-file-explorer.png) |
-|---|
-
-Open the JSON file to see all 70 hashes organized by category:
-
-| ![JSON output file contents showing hash values](docs/images/json-output.png) |
-|---|
-
-### Linux
-
-1. **Extract** the tarball and place `HashNow` somewhere on your PATH (e.g. `~/.local/bin/`):
-
-	```bash
-	tar xzf HashNow-Linux-x64-*.tar.gz
-	mv HashNow-Linux-x64/HashNow ~/.local/bin/
-	chmod +x ~/.local/bin/HashNow
-	```
-
-2. **Install context menu integration** — HashNow auto-detects your file managers and installs for all of them:
-
-	```bash
-	HashNow --install
-	```
-
-	Supported file managers: **Nautilus** (GNOME Files), **Nemo** (Cinnamon), **Dolphin** (KDE), **Thunar** (Xfce). All installs are user-level (no sudo required).
-
-3. **Hash a file** — right-click any file in your file manager and select **"Hash this file now"**. The output `{filename}.hashes.json` appears in the same directory.
-
-### macOS
-
-1. **Extract** the tarball and place `HashNow` somewhere on your PATH (e.g. `/usr/local/bin/`):
-
-	```bash
-	tar xzf HashNow-macOS-ARM64-*.tar.gz
-	mv HashNow-macOS-ARM64/HashNow /usr/local/bin/
-	chmod +x /usr/local/bin/HashNow
-	```
-
-2. **Install Finder Quick Action**:
-
-	```bash
-	HashNow --install
-	```
-
-	This installs an Automator workflow to `~/Library/Services/`. No admin privileges required.
-
-3. **Hash a file** — right-click any file in Finder and choose **Quick Actions → Hash this file now**. The output `{filename}.hashes.json` appears next to the original file.
+Each download is a single self-contained binary (~50 MB) that includes the .NET runtime and all dependencies — no installation required. See the platform-specific installation guides for detailed setup instructions with screenshots.
 
 ## ✨ Features
 
@@ -342,6 +220,9 @@ For detailed benchmark results, see [Performance](docs/PERFORMANCE.md). For per-
 
 ## 📖 Documentation
 
+- [Windows Installation Guide](docs/install-windows.md) — step-by-step with screenshots
+- [Linux Installation Guide](docs/install-linux.md) — setup for Nautilus, Nemo, Dolphin, Thunar
+- [macOS Installation Guide](docs/install-macos.md) — Finder Quick Action setup
 - [Changelog](CHANGELOG.md) — version history and release notes
 - [Performance](docs/PERFORMANCE.md) — benchmarks, architecture, and optimization details
 - [Manual Testing Guide](docs/MANUAL_TESTING.md) — step-by-step testing procedures

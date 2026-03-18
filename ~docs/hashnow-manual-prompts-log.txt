@@ -93,6 +93,18 @@ OK, I took all the screen shots, I think, let me know if I missed one; Also, Has
 
 
 
+[StreamHash/HashNow] find all xml in all files and code comments andwhenever there is indention based on spaces, fix it to use tabs for indentation; do not add indentation, just fix spaces -> tabs; 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
