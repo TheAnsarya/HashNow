@@ -93,6 +93,7 @@ Make sure these chunk size changes have been implemented in StreamHash; update i
 
 [StreamHash] Verify the build, then make a new release 1.11.2 and update references and update nuget documentation and publish a new nuget package 1.11.2 and then after everything has been published, update the version in HashNow; [HashNow] Update StreamHash nuget version to 1.11.2 and then work through all the issues; continue for as many issues as you can; continue;
 
+[HashNow] you say you've updated to 1.5.1 but there is not a release on github so fix that, with full support for macos, linux, and windows; update docs to reflect 1.5.1, if there are problems, then fix them and then release 1.5.2; continue; [HashNow] for macOS, it says we have to install `zenity` separately, why? can we auto-install that? ; create a new release 1.5.1 and run it through the whol CI/CD so we have a full release with macos, linux, and windows versions, and update the readme file an other docs with info about this version; [HashNow] make a discord message explaining the utility and why it's aweseome and the streamhash library/nuget and asking for help from MacOS and Linux users to test it (include links to the release) to see if it works and also maybe take a couple screeen shots of the install and usage so we can update the documentation with better instructions since I only have Windows; continue;
 
 
 
@@ -112,7 +113,7 @@ Make sure these chunk size changes have been implemented in StreamHash; update i
 
  (with windows, macos, and linux build)
 
-[HashNow] for macOS, it says we have to install `zenity` separately, why? can we auto-install that? ; create a new release 1.5.1 and run it through the whol CI/CD so we have a full release with macos, linux, and windows versions, and update the readme file an other docs with info about this version; [HashNow] make a discord message explaining the utility and why it's aweseome and the streamhash library/nuget and asking for help from MacOS and Linux users to test it (include links to the release) to see if it works and also maybe take a couple screeen shots of the install and usage so we can update the documentation with better instructions since I only have Windows;
+
 
 
 
