@@ -138,7 +138,7 @@ jobs:
           # Windows build
           cp "artifacts/HashNow (Windows x64)/HashNow.exe" "release-assets/HashNow-Windows-x64-${VERSION}.exe" || true
 
-          # Linux builds - create tarballs with LICENSE
+          # Linux builds - create tarballs with LICENSE and install script
           for arch in "x64" "ARM64"; do
             artifact_dir="artifacts/HashNow (Linux ${arch})"
             if [ -f "${artifact_dir}/HashNow" ]; then
@@ -146,18 +146,22 @@ jobs:
               mkdir -p "$staging"
               cp "${artifact_dir}/HashNow" "$staging/HashNow"
               chmod +x "$staging/HashNow"
+              cp scripts/install.sh "$staging/install.sh"
+              chmod +x "$staging/install.sh"
               cp LICENSE "$staging/" || true
               tar -czvf "release-assets/HashNow-Linux-${arch}-${VERSION}.tar.gz" -C tarball-staging "HashNow-Linux-${arch}"
               rm -rf "$staging"
             fi
           done
 
-          # macOS build - create tarball with LICENSE
+          # macOS build - create tarball with LICENSE and install script
           if [ -f "artifacts/HashNow (macOS ARM64)/HashNow" ]; then
             staging="tarball-staging/HashNow-macOS-ARM64"
             mkdir -p "$staging"
             cp "artifacts/HashNow (macOS ARM64)/HashNow" "$staging/HashNow"
             chmod +x "$staging/HashNow"
+            cp "scripts/install-macos.command" "$staging/Install HashNow.command"
+            chmod +x "$staging/Install HashNow.command"
             cp LICENSE "$staging/" || true
             tar -czvf "release-assets/HashNow-macOS-ARM64-${VERSION}.tar.gz" -C tarball-staging "HashNow-macOS-ARM64"
             rm -rf "$staging"

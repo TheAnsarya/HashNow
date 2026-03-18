@@ -1,12 +1,35 @@
 # macOS Installation Guide
 
-## Step 1: Download
+## Easy Install (Recommended)
+
+1. Download the latest macOS release from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest):
+	- **ARM64 (Apple Silicon)**: `HashNow-macOS-ARM64-vX.Y.Z.tar.gz`
+
+2. Extract the archive (double-click the `.tar.gz` file in Finder)
+
+3. Open the extracted folder and **double-click `Install HashNow.command`**
+
+4. macOS will ask "Are you sure you want to open this?" — click **Open**
+
+5. A dialog appears asking to install — click **Install**
+
+6. Done! Right-click any file in Finder → **Quick Actions** → **"Hash this file now"**
+
+The installer handles Gatekeeper quarantine automatically, copies HashNow to `~/.local/bin/`, adds it to your PATH, and sets up the Finder Quick Action. No admin password required.
+
+---
+
+## Manual Install
+
+If you prefer the command line:
+
+### Step 1: Download
 
 Download the latest macOS release from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest):
 
 - **ARM64 (Apple Silicon)**: `HashNow-macOS-ARM64-vX.Y.Z.tar.gz`
 
-## Step 2: Extract and Install
+### Step 2: Extract and Install
 
 Extract the tarball and place `HashNow` somewhere on your PATH (e.g. `/usr/local/bin/`):
 
@@ -30,7 +53,7 @@ Make sure the directory is in your PATH. Add this to `~/.zshrc` if needed:
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-## Step 3: Install Finder Quick Action
+### Step 3: Install Finder Quick Action
 
 ```bash
 HashNow --install
@@ -38,7 +61,7 @@ HashNow --install
 
 This installs an Automator workflow to `~/Library/Services/`. No admin privileges required.
 
-## Step 4: Hash a File
+### Step 4: Hash a File
 
 Right-click any file in Finder and choose **Quick Actions → Hash this file now**.
 

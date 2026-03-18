@@ -29,7 +29,15 @@ Download the latest release for your platform from the [Releases page](https://g
 | **Linux ARM64** | `HashNow-Linux-ARM64-v1.5.0.tar.gz` | [Linux Installation Guide](docs/install-linux.md) |
 | **macOS ARM64** | `HashNow-macOS-ARM64-v1.5.0.tar.gz` | [macOS Installation Guide](docs/install-macos.md) |
 
-Each download is a single self-contained binary (~50 MB) that includes the .NET runtime and all dependencies — no installation required. See the platform-specific installation guides for detailed setup instructions with screenshots.
+Each download is a single self-contained binary (~50 MB) that includes the .NET runtime and all dependencies — no installation required.
+
+**Easy Install:** Every platform has a guided installer — just download, extract, and double-click:
+
+- **Windows**: Double-click `HashNow.exe` → click through dialogs → done
+- **Linux**: Extract tar.gz → double-click `install.sh` → click through dialogs → done
+- **macOS**: Extract tar.gz → double-click `Install HashNow.command` → click through dialogs → done
+
+See the platform-specific installation guides for detailed instructions.
 
 ## ✨ Features
 

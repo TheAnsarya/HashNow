@@ -1,13 +1,37 @@
 # Linux Installation Guide
 
-## Step 1: Download
+## Easy Install (Recommended)
+
+1. Download the latest Linux release from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest):
+	- **x64**: `HashNow-Linux-x64-vX.Y.Z.tar.gz`
+	- **ARM64**: `HashNow-Linux-ARM64-vX.Y.Z.tar.gz`
+
+2. Extract the archive (right-click → **Extract Here** in most file managers)
+
+3. Open the extracted folder and **double-click `install.sh`**
+
+4. Your file manager will ask if you want to run it — click **Run** (or **Run in Terminal**)
+
+5. A dialog appears asking to install — click **Yes**
+
+6. Done! Right-click any file → **"Hash this file now"**
+
+The installer copies HashNow to `~/.local/bin/`, adds it to your PATH, and sets up your file manager's right-click menu. No `sudo` required.
+
+---
+
+## Manual Install
+
+If you prefer the command line, or if double-clicking `install.sh` doesn't work on your system:
+
+### Step 1: Download
 
 Download the latest Linux release from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest):
 
 - **x64**: `HashNow-Linux-x64-vX.Y.Z.tar.gz`
 - **ARM64**: `HashNow-Linux-ARM64-vX.Y.Z.tar.gz`
 
-## Step 2: Extract and Install
+### Step 2: Extract and Install
 
 Extract the tarball and place `HashNow` somewhere on your PATH (e.g. `~/.local/bin/`):
 
@@ -29,7 +53,7 @@ Make sure `~/.local/bin` is in your PATH. Add this to `~/.bashrc` or `~/.profile
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-## Step 3: Install Context Menu Integration
+### Step 3: Install Context Menu Integration
 
 HashNow auto-detects your installed file managers and installs for all of them:
 
@@ -48,7 +72,7 @@ Supported file managers:
 
 All installs are user-level — no `sudo` required.
 
-## Step 4: Hash a File
+### Step 4: Hash a File
 
 Right-click any file in your file manager and select **"Hash this file now"**.
 

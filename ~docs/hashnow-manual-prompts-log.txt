@@ -81,6 +81,25 @@ OK, I took all the screen shots, I think, let me know if I missed one; Also, Has
 
 [HashNow] The GUI progress indicator and cancel button are important, move those issues up in priority and implement them on linux and macOS; continue;
 
+[HashNow] The `RELEASE-v1.0.0.md` type files seem unnecessary so remove them, Linux and MacOS builds are not working, fix them; The Readme needs updating, the release table has fake release names lik `HashNow-Windows-x64-vX.Y.Z.exe` please fix these to real release file names, after fixing the releases obviously, move the the windows instructions with screenshots to a sub page and link to that subpage, make subpages for linux and macos installs too; continue;
+
+[HashNow] add easy install to linux and macOS versions just like Windows has easy install, don't make them run commands, just double click and then click a couple dialog boxes; continue;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
