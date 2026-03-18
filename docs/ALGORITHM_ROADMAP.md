@@ -18,7 +18,7 @@ All 70 hash algorithms are provided by [StreamHash](https://www.nuget.org/packag
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| [StreamHash](https://www.nuget.org/packages/StreamHash) | 1.11.1 | All 70 hash algorithm implementations |
+| [StreamHash](https://www.nuget.org/packages/StreamHash) | 1.11.2 | All 70 hash algorithm implementations |
 
 HashNow calls `HashFacade.ComputeHashHex()` from StreamHash for every algorithm. StreamHash handles all the internals: streaming, buffering, SIMD dispatch, and finalization. No other hash libraries are used.
 

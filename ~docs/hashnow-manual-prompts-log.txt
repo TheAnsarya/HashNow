@@ -85,6 +85,13 @@ OK, I took all the screen shots, I think, let me know if I missed one; Also, Has
 
 [HashNow] add easy install to linux and macOS versions just like Windows has easy install, don't make them run commands, just double click and then click a couple dialog boxes; continue;
 
+[StreamHash] run performance benchmarks for various chunk sizes, and decide what chunk size is best for each file size, so we do we need a 16mb chunk size for a 16k file? does small file performance benchmarking really display real results when chunks are that large? fix the 70 hashes at once and the 4 hashes at once methods to use real chunk sizes; continue;
+
+OK, looks like it finsished? continue;
+
+Make sure these chunk size changes have been implemented in StreamHash; update issues, etc; continue;
+
+[StreamHash] Verify the build, then make a new release 1.11.2 and update references and update nuget documentation and publish a new nuget package 1.11.2 and then after everything has been published, update the version in HashNow; [HashNow] Update StreamHash nuget version to 1.11.2 and then work through all the issues; continue for as many issues as you can; continue;
 
 
 
@@ -103,12 +110,27 @@ OK, I took all the screen shots, I think, let me know if I missed one; Also, Has
 
 
 
+ (with windows, macos, and linux build)
+
+[HashNow] for macOS, it says we have to install `zenity` separately, why? can we auto-install that? ; create a new release 1.5.1 and run it through the whol CI/CD so we have a full release with macos, linux, and windows versions, and update the readme file an other docs with info about this version; [HashNow] make a discord message explaining the utility and why it's aweseome and the streamhash library/nuget and asking for help from MacOS and Linux users to test it (include links to the release) to see if it works and also maybe take a couple screeen shots of the install and usage so we can update the documentation with better instructions since I only have Windows;
 
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+[StreamHash] run performance benchmarks for various chunk sizes, and decide what chunk size is best for each file size, so we do we need a 16mb chunk size for a 16k file? does small file performance benchmarking really display real results when chunks are that large? fix the 70 hashes at once and the 4 hashes at once methods to use real chunk sizes; continue;
 
 
 

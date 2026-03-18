@@ -5,6 +5,14 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-03-18
+
+### Changed
+
+- **StreamHash v1.11.2** — Updated dependency from v1.11.1 to v1.11.2
+	- Fixed benchmark chunk sizes to use realistic I/O buffer sizes
+	- Added chunk-size matrix benchmarks for performance analysis
+
 ## [1.5.0] - 2026-03-18
 
 ### Added
