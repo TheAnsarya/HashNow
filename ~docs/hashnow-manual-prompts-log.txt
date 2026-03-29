@@ -97,6 +97,7 @@ Make sure these chunk size changes have been implemented in StreamHash; update i
 
 Great discord announcement! however, please list all the alorithms instead of saying "50+" and then also put the full announcemnt with discord formatting in a file and oopen that file so I can post it, copying from the chat window does not preserve formatting; continue;
 
+In the HashNow readme file, in the `Download & Install` section in the version table link the "download" column values to the actual download file for the release, like `HashNow-Windows-x64-v1.5.1.exe` should be a link to `https://github.com/TheAnsarya/HashNow/releases/download/v1.5.1/HashNow-Windows-x64-v1.5.1.exe` etc.; continue;
 
 
 

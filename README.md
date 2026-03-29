@@ -24,10 +24,10 @@ Download the latest release for your platform from the [Releases page](https://g
 
 | Platform | Download | Install Guide |
 |----------|----------|---------------|
-| **Windows x64** | `HashNow-Windows-x64-v1.5.1.exe` | [Windows Installation Guide](docs/install-windows.md) |
-| **Linux x64** | `HashNow-Linux-x64-v1.5.1.tar.gz` | [Linux Installation Guide](docs/install-linux.md) |
-| **Linux ARM64** | `HashNow-Linux-ARM64-v1.5.1.tar.gz` | [Linux Installation Guide](docs/install-linux.md) |
-| **macOS ARM64** | `HashNow-macOS-ARM64-v1.5.1.tar.gz` | [macOS Installation Guide](docs/install-macos.md) |
+| **Windows x64** | [`HashNow-Windows-x64-v1.5.1.exe`](https://github.com/TheAnsarya/HashNow/releases/download/v1.5.1/HashNow-Windows-x64-v1.5.1.exe) | [Windows Installation Guide](docs/install-windows.md) |
+| **Linux x64** | [`HashNow-Linux-x64-v1.5.1.tar.gz`](https://github.com/TheAnsarya/HashNow/releases/download/v1.5.1/HashNow-Linux-x64-v1.5.1.tar.gz) | [Linux Installation Guide](docs/install-linux.md) |
+| **Linux ARM64** | [`HashNow-Linux-ARM64-v1.5.1.tar.gz`](https://github.com/TheAnsarya/HashNow/releases/download/v1.5.1/HashNow-Linux-ARM64-v1.5.1.tar.gz) | [Linux Installation Guide](docs/install-linux.md) |
+| **macOS ARM64** | [`HashNow-macOS-ARM64-v1.5.1.tar.gz`](https://github.com/TheAnsarya/HashNow/releases/download/v1.5.1/HashNow-macOS-ARM64-v1.5.1.tar.gz) | [macOS Installation Guide](docs/install-macos.md) |
 
 Each download is a single self-contained binary (~50 MB) that includes the .NET runtime and all dependencies — no installation required.
 
