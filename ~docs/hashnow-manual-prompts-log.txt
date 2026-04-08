@@ -99,7 +99,15 @@ Great discord announcement! however, please list all the alorithms instead of sa
 
 In the HashNow readme file, in the `Download & Install` section in the version table link the "download" column values to the actual download file for the release, like `HashNow-Windows-x64-v1.5.1.exe` should be a link to `https://github.com/TheAnsarya/HashNow/releases/download/v1.5.1/HashNow-Windows-x64-v1.5.1.exe` etc.; continue;
 
+[HashNow] Add a second context menu item with the same name and rename the current one addding " (full)" to the end of the label. The "full" item will run all 70+ algorithms, the new context menu item will only run the basic four algorithms. Add setup options so you can choose which of the two context menu items to display (or both). create epics/issues/chat-session-logs/docs/plans/benchmarks/tests/readmes/etc and implement everything and prepare a version for me to test; continue;
 
+there should be a GUI selection dialog for basic/full/both during the install process when installed by the  exe gui process not through the CLI; The basic version should also include `crc32`; continue;
+
+[StreamHash] Make the basic common hashes be CRC32/MD5/SHA-1/SHA-256/SHA-512 and then [HashNow] use the basic common hashes method from StreamHash to get these hashes instead of grabbing them individually; Make changes and then open the HashNow app so I can test the new install stuff and new context menu; continue;
+
+[HashNow] Problems: old context menu is not removed (from previous version) -- there is not a window during install that asks whether to install both menu items, or just the basic or just the full version but there should be -- in the output file there needs to be a blank line between the last batch of hashes and the ending metadata; fix all these problems making issues and docs etc; continue;
+
+git commit everything across all repos, release a new version of StreamHash (update patch number), prepare and release the StreamHash nuget package and then after publication update completes change HashNow to use the new version of the nuget package, and then prepare HashNow for release and then releasae a new version of HashNow (update patch number); continue;
 
 
 

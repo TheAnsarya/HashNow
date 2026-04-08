@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
+using HashNow.Cli.Platform;
 using HashNow.Core;
 
 namespace HashNow.Cli.Platform.MacOS;
@@ -75,7 +76,7 @@ internal sealed class MacOSPlatform : IPlatformIntegration {
 	#region Install/Uninstall
 
 	/// <inheritdoc/>
-	public bool Install(string executablePath) {
+	public bool Install(string executablePath, ContextMenuInstallMode mode = ContextMenuInstallMode.Both) {
 		// Create the workflow bundle directory structure
 		var contentsDir = Path.Combine(WorkflowPath, "Contents");
 		Directory.CreateDirectory(contentsDir);
@@ -98,7 +99,7 @@ internal sealed class MacOSPlatform : IPlatformIntegration {
 	}
 
 	/// <inheritdoc/>
-	public bool Uninstall() {
+	public bool Uninstall(ContextMenuInstallMode mode = ContextMenuInstallMode.Both) {
 		if (Directory.Exists(WorkflowPath)) {
 			Directory.Delete(WorkflowPath, recursive: true);
 			return true;
@@ -321,14 +322,14 @@ internal sealed class MacOSPlatform : IPlatformIntegration {
 	public void ShowSuccess(string title, string message) => ShowInfo(title, message);
 
 	/// <inheritdoc/>
-	public (bool ShouldRestart, bool ShouldInstall, bool Cancelled) ShowInstallPrompts(
+	public (bool ShouldRestart, bool ShouldInstall, ContextMenuInstallMode InstallMode, bool Cancelled) ShowInstallPrompts(
 		bool isInstalled, bool isCorrect) {
 		if (isInstalled && isCorrect) {
 			ShowInfo("HashNow",
 				"HashNow is already installed!\n\n" +
 				"Right-click any file in Finder and look under\n" +
 				"Quick Actions to find \"Hash this file now\".");
-			return (false, false, false);
+			return (false, false, ContextMenuInstallMode.Both, false);
 		}
 
 		string message = isInstalled && !isCorrect
@@ -336,7 +337,7 @@ internal sealed class MacOSPlatform : IPlatformIntegration {
 			: "HashNow is not installed in Finder.\nInstall now?";
 
 		bool install = AskYesNo("HashNow", message);
-		return (false, install, !install);
+		return (false, install, ContextMenuInstallMode.Both, !install);
 	}
 
 	/// <inheritdoc/>
@@ -350,6 +351,11 @@ internal sealed class MacOSPlatform : IPlatformIntegration {
 			ShowError("HashNow",
 				$"Error installing Quick Action:\n{errorMessage ?? "Unknown error"}");
 		}
+	}
+
+	/// <inheritdoc/>
+	public (bool Confirmed, ContextMenuInstallMode InstallMode) PromptInstallModeGui() {
+		return (true, ContextMenuInstallMode.Both);
 	}
 
 	#endregion

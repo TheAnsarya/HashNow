@@ -548,7 +548,7 @@ public async Task HashFileAsync_SetsAlgorithmCount() {
 var path = CreateTestFile("test.bin", [0x42]);
 var result = await FileHasher.HashFileAsync(path);
 
-Assert.Equal(58, result.AlgorithmCount);
+	Assert.Equal(FileHasher.AlgorithmCount, result.AlgorithmCount);
 }
 
 [Fact]

@@ -36,14 +36,16 @@ internal interface IPlatformIntegration {
 	/// Installs context menu / file manager integration for the given executable.
 	/// </summary>
 	/// <param name="executablePath">Path to the HashNow executable.</param>
+	/// <param name="mode">Which context menu entries to install.</param>
 	/// <returns><see langword="true"/> if installation succeeded.</returns>
-	bool Install(string executablePath);
+	bool Install(string executablePath, ContextMenuInstallMode mode = ContextMenuInstallMode.Both);
 
 	/// <summary>
 	/// Removes context menu / file manager integration.
 	/// </summary>
+	/// <param name="mode">Which context menu entries to remove.</param>
 	/// <returns><see langword="true"/> if uninstallation succeeded.</returns>
-	bool Uninstall();
+	bool Uninstall(ContextMenuInstallMode mode = ContextMenuInstallMode.Both);
 
 	/// <summary>
 	/// Checks if context menu / file manager integration is currently installed.
@@ -130,8 +132,8 @@ internal interface IPlatformIntegration {
 	/// </summary>
 	/// <param name="isInstalled">Whether currently installed.</param>
 	/// <param name="isCorrect">Whether installed correctly.</param>
-	/// <returns>Tuple: (ShouldRestart, ShouldInstall, Cancelled).</returns>
-	(bool ShouldRestart, bool ShouldInstall, bool Cancelled) ShowInstallPrompts(
+	/// <returns>Tuple: (ShouldRestart, ShouldInstall, InstallMode, Cancelled).</returns>
+	(bool ShouldRestart, bool ShouldInstall, ContextMenuInstallMode InstallMode, bool Cancelled) ShowInstallPrompts(
 		bool isInstalled, bool isCorrect);
 
 	/// <summary>
@@ -140,6 +142,15 @@ internal interface IPlatformIntegration {
 	/// <param name="success">Whether installation succeeded.</param>
 	/// <param name="errorMessage">Error message if failed.</param>
 	void ShowInstallResult(bool success, string? errorMessage = null);
+
+	/// <summary>
+	/// Shows a GUI prompt to select which context menu entries should be installed.
+	/// </summary>
+	/// <returns>
+	/// Tuple: (Confirmed, InstallMode). If <c>Confirmed</c> is <see langword="false"/>,
+	/// installation should be treated as cancelled.
+	/// </returns>
+	(bool Confirmed, ContextMenuInstallMode InstallMode) PromptInstallModeGui();
 
 	/// <summary>
 	/// Gets details about installed file manager integrations (for --status command).

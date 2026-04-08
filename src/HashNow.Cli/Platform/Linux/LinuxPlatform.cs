@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
+using HashNow.Cli.Platform;
 using HashNow.Core;
 
 namespace HashNow.Cli.Platform.Linux;
@@ -96,7 +97,7 @@ internal sealed class LinuxPlatform : IPlatformIntegration {
 	#region Install/Uninstall
 
 	/// <inheritdoc/>
-	public bool Install(string executablePath) {
+	public bool Install(string executablePath, ContextMenuInstallMode mode = ContextMenuInstallMode.Both) {
 		var managers = GetInstalledFileManagers();
 		bool anyInstalled = false;
 
@@ -124,7 +125,7 @@ internal sealed class LinuxPlatform : IPlatformIntegration {
 	}
 
 	/// <inheritdoc/>
-	public bool Uninstall() {
+	public bool Uninstall(ContextMenuInstallMode mode = ContextMenuInstallMode.Both) {
 		bool anyRemoved = false;
 
 		if (UninstallNautilus()) anyRemoved = true;
@@ -472,11 +473,11 @@ internal sealed class LinuxPlatform : IPlatformIntegration {
 	public void ShowSuccess(string title, string message) => ShowInfo(title, message);
 
 	/// <inheritdoc/>
-	public (bool ShouldRestart, bool ShouldInstall, bool Cancelled) ShowInstallPrompts(
+	public (bool ShouldRestart, bool ShouldInstall, ContextMenuInstallMode InstallMode, bool Cancelled) ShowInstallPrompts(
 		bool isInstalled, bool isCorrect) {
 		if (isInstalled && isCorrect) {
 			ShowInfo("HashNow", "HashNow is already installed for your file manager(s).");
-			return (false, false, false);
+			return (false, false, ContextMenuInstallMode.Both, false);
 		}
 
 		// No elevation needed on Linux (user-level install)
@@ -485,7 +486,7 @@ internal sealed class LinuxPlatform : IPlatformIntegration {
 			: "HashNow is not installed in your file manager.\nInstall now?";
 
 		bool install = AskYesNo("HashNow", message);
-		return (false, install, !install);
+		return (false, install, ContextMenuInstallMode.Both, !install);
 	}
 
 	/// <inheritdoc/>
@@ -500,6 +501,11 @@ internal sealed class LinuxPlatform : IPlatformIntegration {
 			ShowError("HashNow",
 				$"Error installing context menu:\n{errorMessage ?? "Unknown error"}");
 		}
+	}
+
+	/// <inheritdoc/>
+	public (bool Confirmed, ContextMenuInstallMode InstallMode) PromptInstallModeGui() {
+		return (true, ContextMenuInstallMode.Both);
 	}
 
 	#endregion

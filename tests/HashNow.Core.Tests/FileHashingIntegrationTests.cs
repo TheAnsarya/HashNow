@@ -186,6 +186,8 @@ public class FileHashingIntegrationTests {
 			Assert.Contains("\"fileName\":", jsonContent);
 			Assert.Contains("\"sha256\":", jsonContent);
 			Assert.Contains("\t", jsonContent); // Tab indentation
+			var expectedSeparator = $"\"sm3\": \"{result.Sm3}\",{Environment.NewLine}{Environment.NewLine}\t\"hashedAtUtc\":";
+			Assert.Contains(expectedSeparator, jsonContent, StringComparison.Ordinal);
 
 			File.Delete(jsonPath);
 		} finally {

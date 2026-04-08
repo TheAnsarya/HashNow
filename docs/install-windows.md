@@ -54,11 +54,27 @@ Click **Yes** to grant admin access. A confirmation dialog confirms the installa
 | ![Context menu installed successfully](images/install-success.png) |
 |---|
 
-You're done! The context menu is now available on all file types in Explorer.
+After elevation, HashNow now shows a selection window so you can choose install mode:
+
+- **Both (basic + full)**
+- **Basic only**
+- **Full only**
+
+If you select both, setup installs both entries:
+
+- **Hash this file now** — basic mode (CRC32, MD5, SHA-1, SHA-256, SHA-512)
+- **Hash this file now (full)** — full mode (all 70+ algorithms)
+
+You're done! The selected context menu items are now available on all file types in Explorer.
+
+If you had a previous HashNow version installed, the old single-entry legacy key is removed automatically during install/update.
 
 ## Step 4: Hash a File
 
-Right-click any file in Windows Explorer and select **"Hash this file now"**:
+Right-click any file in Windows Explorer and select either:
+
+- **"Hash this file now"** for basic mode (5 algorithms)
+- **"Hash this file now (full)"** for full mode (70+ algorithms)
 
 | ![Explorer right-click context menu showing Hash this file now](images/context-menu.png) |
 |---|
@@ -87,5 +103,23 @@ Open the JSON file to see all 70 hashes organized by category:
 To remove the context menu, run from an administrator command prompt:
 
 ```powershell
-HashNow --uninstall
+HashNow --uninstall --menu both
+```
+
+You can also remove individual entries:
+
+```powershell
+# Remove only full mode entry
+HashNow --uninstall --menu full
+
+# Remove only basic mode entry
+HashNow --uninstall --menu basic
+```
+
+To install only one mode from CLI:
+
+```powershell
+HashNow --install --menu full
+HashNow --install --menu basic
+HashNow --install --menu both
 ```

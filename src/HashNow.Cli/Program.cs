@@ -1,5 +1,6 @@
 using HashNow.Cli.Platform;
 using HashNow.Core;
+using System.Linq;
 
 namespace HashNow.Cli;
 
@@ -42,6 +43,11 @@ namespace HashNow.Cli;
 /// </para>
 /// </remarks>
 internal static class Program {
+	private enum HashExecutionMode {
+		Full,
+		Basic
+	}
+
 	#region Main Entry Point
 
 	/// <summary>
@@ -92,21 +98,47 @@ internal static class Program {
 			return 0;
 		}
 
-		if (firstArg.Equals("--install", StringComparison.OrdinalIgnoreCase)) {
-			return InstallContextMenu(platform);
+		if (IsInstallSwitch(firstArg)) {
+			if (!TryGetInstallMode(args, out var installMode, out var modeError)) {
+				Console.Error.WriteLine(modeError);
+				return 1;
+			}
+
+			return InstallContextMenu(platform, installMode);
 		}
 
 		if (firstArg.Equals("--gui-install", StringComparison.OrdinalIgnoreCase)) {
-			return InstallContextMenuGui(platform);
+			if (!TryGetInstallMode(args, out var installMode, out var modeError)) {
+				platform.ShowInstallResult(false, modeError);
+				return 1;
+			}
+
+			if (!HasExplicitInstallMode(args)) {
+				var (confirmed, selectedMode) = platform.PromptInstallModeGui();
+				if (!confirmed) {
+					return 2;
+				}
+
+				installMode = selectedMode;
+			}
+
+			return InstallContextMenuGui(platform, installMode);
 		}
 
 		if (firstArg.Equals("--uninstall", StringComparison.OrdinalIgnoreCase)) {
-			return UninstallContextMenu(platform);
+			if (!TryGetInstallMode(args, out var installMode, out var modeError)) {
+				Console.Error.WriteLine(modeError);
+				return 1;
+			}
+
+			return UninstallContextMenu(platform, installMode);
 		}
 
 		if (firstArg.Equals("--status", StringComparison.OrdinalIgnoreCase)) {
 			return ShowStatus(platform);
 		}
+
+		var hashMode = GetHashExecutionMode(args);
 
 		// Detect if launched from file manager context menu
 		bool isFromFileManager = platform.DetectFileManagerLaunch();
@@ -119,7 +151,7 @@ internal static class Program {
 				continue;
 			}
 
-			var result = await ProcessFileAsync(filePath, isFromFileManager, platform);
+			var result = await ProcessFileAsync(filePath, isFromFileManager, platform, hashMode);
 			if (result != 0) {
 				exitCode = result;
 			}
@@ -153,17 +185,17 @@ internal static class Program {
 	/// </summary>
 	private static int HandleNoArgumentsGui(IPlatformIntegration platform,
 		bool isInstalled, bool isCorrect) {
-		var (shouldRestart, shouldInstall, cancelled) =
+		var (shouldRestart, shouldInstall, installMode, cancelled) =
 			platform.ShowInstallPrompts(isInstalled, isCorrect);
 
 		if (cancelled) return 2;
 
 		if (shouldRestart) {
-			return platform.RelaunchElevated(["--gui-install"]) ? 0 : 2;
+			return platform.RelaunchElevated(Array.Empty<string>()) ? 0 : 2;
 		}
 
 		if (shouldInstall) {
-			return InstallContextMenuGui(platform);
+			return InstallContextMenuGui(platform, installMode);
 		}
 
 		return 0;
@@ -181,8 +213,8 @@ internal static class Program {
 			Console.WriteLine("✓ HashNow is already installed!");
 			Console.ResetColor();
 			Console.WriteLine();
-			Console.WriteLine($"Right-click any file and select \"{GetMenuItemText()}\"");
-			Console.WriteLine("to compute hashes.");
+			Console.WriteLine($"Right-click any file and select \"{GetMenuItemText()}\" or \"{GetMenuItemText()} (full)\"");
+			Console.WriteLine("to compute basic or full hashes.");
 			Console.WriteLine();
 			ShowUsageHint();
 			return 0;
@@ -216,7 +248,7 @@ internal static class Program {
 			return 2;
 		}
 
-		Console.Write("Install the context menu now? [Y/n] ");
+		Console.Write("Install/update the context menu now? [Y/n] ");
 		var response = Console.ReadKey(true);
 		Console.WriteLine();
 
@@ -226,16 +258,19 @@ internal static class Program {
 			return 2;
 		}
 
-		return InstallContextMenu(platform);
+		var installMode = PromptInstallModeConsole();
+		return InstallContextMenu(platform, installMode);
 	}
 
 	/// <summary>
 	/// Installs context menu with GUI result dialog.
 	/// </summary>
-	private static int InstallContextMenuGui(IPlatformIntegration platform) {
+	private static int InstallContextMenuGui(
+		IPlatformIntegration platform,
+		ContextMenuInstallMode installMode = ContextMenuInstallMode.Both) {
 		try {
 			var exePath = GetExecutablePath();
-			platform.Install(exePath);
+			platform.Install(exePath, installMode);
 			platform.ShowInstallResult(true);
 			return 0;
 		} catch (UnauthorizedAccessException) {
@@ -254,8 +289,11 @@ internal static class Program {
 	/// <summary>
 	/// Processes a single file, computing all hashes and saving results.
 	/// </summary>
-	private static async Task<int> ProcessFileAsync(string filePath, bool isFromFileManager,
-		IPlatformIntegration platform) {
+	private static async Task<int> ProcessFileAsync(
+		string filePath,
+		bool isFromFileManager,
+		IPlatformIntegration platform,
+		HashExecutionMode mode) {
 		try {
 			if (!File.Exists(filePath)) {
 				if (!isFromFileManager) {
@@ -267,9 +305,9 @@ internal static class Program {
 			var fileInfo = new FileInfo(filePath);
 
 			if (!isFromFileManager) {
-				return await ProcessFileConsoleMode(filePath, fileInfo);
+				return await ProcessFileConsoleMode(filePath, fileInfo, mode);
 			} else {
-				return await ProcessFileFileManagerMode(filePath, fileInfo, platform);
+				return await ProcessFileFileManagerMode(filePath, fileInfo, platform, mode);
 			}
 		} catch (UnauthorizedAccessException) {
 			if (!isFromFileManager) {
@@ -292,14 +330,37 @@ internal static class Program {
 	/// <summary>
 	/// Processes a file with full console output (progress bar, results, timing).
 	/// </summary>
-	private static async Task<int> ProcessFileConsoleMode(string filePath, FileInfo fileInfo) {
-		Console.WriteLine($"Hashing: {fileInfo.Name} ({FileHasher.FormatFileSize(fileInfo.Length)})");
+	private static async Task<int> ProcessFileConsoleMode(
+		string filePath,
+		FileInfo fileInfo,
+		HashExecutionMode mode) {
+		var modeLabel = mode == HashExecutionMode.Basic ? "basic 5" : $"{FileHasher.AlgorithmCount}";
+		Console.WriteLine($"Hashing ({modeLabel}): {fileInfo.Name} ({FileHasher.FormatFileSize(fileInfo.Length)})");
 
 		using var progressBar = new ConsoleProgressBar(useColor: true);
 
-		var result = await FileHasher.HashFileAsync(
-			filePath,
-			progress => progressBar.Update(progress));
+		if (mode == HashExecutionMode.Basic) {
+			var basicResult = await FileHasher.HashFileBasicAsync(
+				filePath,
+				progress => progressBar.Update(progress));
+
+			progressBar.Complete();
+
+			var basicOutputPath = filePath + ".hashes.json";
+			await FileHasher.SaveResultAsync(basicResult, basicOutputPath);
+
+			Console.WriteLine($"MD5:    {basicResult.Md5}");
+			Console.WriteLine($"CRC32:  {basicResult.Crc32}");
+			Console.WriteLine($"SHA-1:  {basicResult.Sha1}");
+			Console.WriteLine($"SHA256: {basicResult.Sha256}");
+			Console.WriteLine($"SHA512: {basicResult.Sha512}");
+			Console.WriteLine($"Saved:  {basicOutputPath}");
+			Console.WriteLine($"Time:   {basicResult.DurationMs}ms");
+			Console.WriteLine();
+			return 0;
+		}
+
+		var result = await FileHasher.HashFileAsync(filePath, progress => progressBar.Update(progress));
 
 		progressBar.Complete();
 
@@ -318,8 +379,18 @@ internal static class Program {
 	/// <summary>
 	/// Processes a file from file manager mode with platform-appropriate progress.
 	/// </summary>
-	private static async Task<int> ProcessFileFileManagerMode(string filePath, FileInfo fileInfo,
-		IPlatformIntegration platform) {
+	private static async Task<int> ProcessFileFileManagerMode(
+		string filePath,
+		FileInfo fileInfo,
+		IPlatformIntegration platform,
+		HashExecutionMode mode) {
+		if (mode == HashExecutionMode.Basic) {
+			var basicResult = await FileHasher.HashFileBasicAsync(filePath);
+			var basicOutputPath = filePath + ".hashes.json";
+			await FileHasher.SaveResultAsync(basicResult, basicOutputPath);
+			return 0;
+		}
+
 		// Always use platform progress — each platform handles its own fallback chain
 		// (Windows: WinForms dialog, Linux: zenity/kdialog, macOS: osascript/zenity)
 		var result = await platform.HashFileWithProgress(filePath);
@@ -423,17 +494,18 @@ internal static class Program {
 	/// <summary>
 	/// Installs the file manager context menu entry.
 	/// </summary>
-	private static int InstallContextMenu(IPlatformIntegration platform) {
+	private static int InstallContextMenu(
+		IPlatformIntegration platform,
+		ContextMenuInstallMode installMode = ContextMenuInstallMode.Both) {
 		try {
 			var exePath = GetExecutablePath();
-			platform.Install(exePath);
+			platform.Install(exePath, installMode);
 
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("✓ Context menu installed successfully!");
 			Console.ResetColor();
 			Console.WriteLine();
-			Console.WriteLine($"Right-click any file and select \"{GetMenuItemText()}\"");
-			Console.WriteLine("to compute all 70 hashes.");
+			Console.WriteLine(GetInstallSuccessSummary(installMode));
 			Console.WriteLine();
 			Console.WriteLine("A .hashes.json file will be created next to the original.");
 
@@ -459,9 +531,11 @@ internal static class Program {
 	/// <summary>
 	/// Removes the file manager context menu entry.
 	/// </summary>
-	private static int UninstallContextMenu(IPlatformIntegration platform) {
+	private static int UninstallContextMenu(
+		IPlatformIntegration platform,
+		ContextMenuInstallMode installMode = ContextMenuInstallMode.Both) {
 		try {
-			platform.Uninstall();
+			platform.Uninstall(installMode);
 
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("✓ Context menu removed successfully!");
@@ -561,6 +635,121 @@ internal static class Program {
 	private static string GetMenuItemText() => "Hash this file now";
 
 	/// <summary>
+	/// Gets the hash execution mode from command-line arguments.
+	/// </summary>
+	private static HashExecutionMode GetHashExecutionMode(string[] args) {
+		return args.Any(arg => arg.Equals("--basic", StringComparison.OrdinalIgnoreCase))
+			? HashExecutionMode.Basic
+			: HashExecutionMode.Full;
+	}
+
+	/// <summary>
+	/// Prompts for context menu installation mode in console mode.
+	/// </summary>
+	private static ContextMenuInstallMode PromptInstallModeConsole() {
+		Console.WriteLine("Choose which context menu items to install:");
+		Console.WriteLine("  1) Full only   (Hash this file now (full) - all 70+)");
+		Console.WriteLine("  2) Basic only  (Hash this file now - CRC32/MD5/SHA-1/SHA-256/SHA-512)");
+		Console.WriteLine("  3) Both");
+		Console.Write("Select [3]: ");
+
+		var input = Console.ReadLine()?.Trim();
+		return input switch {
+			"1" => ContextMenuInstallMode.Full,
+			"2" => ContextMenuInstallMode.Basic,
+			_ => ContextMenuInstallMode.Both
+		};
+	}
+
+	/// <summary>
+	/// Gets a user-facing install success summary for the selected mode.
+	/// </summary>
+	private static string GetInstallSuccessSummary(ContextMenuInstallMode mode) {
+		return mode switch {
+			ContextMenuInstallMode.Full => "Installed: \"Hash this file now (full)\" for all 70+ algorithms.",
+			ContextMenuInstallMode.Basic => "Installed: \"Hash this file now\" for basic 5 algorithms (CRC32/MD5/SHA-1/SHA-256/SHA-512).",
+			_ => "Installed both: \"Hash this file now\" (basic 5) and \"Hash this file now (full)\" (all 70+)."
+		};
+	}
+
+	/// <summary>
+	/// Parses install mode options from CLI args.
+	/// </summary>
+	private static bool TryGetInstallMode(
+		string[] args,
+		out ContextMenuInstallMode mode,
+		out string? error) {
+		mode = ContextMenuInstallMode.Both;
+		error = null;
+
+		if (args.Any(arg => arg.Equals("--install-full", StringComparison.OrdinalIgnoreCase))) {
+			mode = ContextMenuInstallMode.Full;
+			return true;
+		}
+
+		if (args.Any(arg => arg.Equals("--install-basic", StringComparison.OrdinalIgnoreCase))) {
+			mode = ContextMenuInstallMode.Basic;
+			return true;
+		}
+
+		if (args.Any(arg => arg.Equals("--install-both", StringComparison.OrdinalIgnoreCase))) {
+			mode = ContextMenuInstallMode.Both;
+			return true;
+		}
+
+		var menuIndex = Array.FindIndex(args, arg => arg.Equals("--menu", StringComparison.OrdinalIgnoreCase));
+		if (menuIndex < 0) {
+			return true;
+		}
+
+		if (menuIndex == args.Length - 1) {
+			error = "Error: --menu requires a value: full, basic, or both.";
+			return false;
+		}
+
+		var value = args[menuIndex + 1];
+		if (value.Equals("full", StringComparison.OrdinalIgnoreCase)) {
+			mode = ContextMenuInstallMode.Full;
+			return true;
+		}
+
+		if (value.Equals("basic", StringComparison.OrdinalIgnoreCase)) {
+			mode = ContextMenuInstallMode.Basic;
+			return true;
+		}
+
+		if (value.Equals("both", StringComparison.OrdinalIgnoreCase)) {
+			mode = ContextMenuInstallMode.Both;
+			return true;
+		}
+
+		error = $"Error: Invalid --menu value '{value}'. Use full, basic, or both.";
+		return false;
+	}
+
+	/// <summary>
+	/// Checks if an argument is any install switch.
+	/// </summary>
+	private static bool IsInstallSwitch(string arg) =>
+		arg.Equals("--install", StringComparison.OrdinalIgnoreCase) ||
+		arg.Equals("--install-full", StringComparison.OrdinalIgnoreCase) ||
+		arg.Equals("--install-basic", StringComparison.OrdinalIgnoreCase) ||
+		arg.Equals("--install-both", StringComparison.OrdinalIgnoreCase);
+
+	/// <summary>
+	/// Checks whether CLI arguments explicitly select a context menu install mode.
+	/// </summary>
+	private static bool HasExplicitInstallMode(string[] args) {
+		if (args.Any(arg => arg.Equals("--install-full", StringComparison.OrdinalIgnoreCase)
+			|| arg.Equals("--install-basic", StringComparison.OrdinalIgnoreCase)
+			|| arg.Equals("--install-both", StringComparison.OrdinalIgnoreCase))) {
+			return true;
+		}
+
+		return Array.FindIndex(args, arg => arg.Equals("--menu", StringComparison.OrdinalIgnoreCase)) >= 0;
+	}
+
+	/// <summary>
 	/// Checks if an argument is a help switch.
 	/// </summary>
 	private static bool IsHelpSwitch(string arg) =>
@@ -591,9 +780,13 @@ internal static class Program {
 
 Usage:
   HashNow                              Auto-install: check and prompt to install
-  HashNow <file> [file2] [file3] ...   Hash one or more files
-  HashNow --install                    Install file manager context menu
-  HashNow --uninstall                  Remove file manager context menu
+	HashNow <file> [file2] [file3] ...   Hash one or more files (full mode)
+	HashNow --basic <file> [file2] ...   Hash one or more files (basic 5 algorithms)
+	HashNow --install [--menu <mode>]    Install file manager context menu
+	HashNow --install-full               Install only full context menu item
+	HashNow --install-basic              Install only basic context menu item
+	HashNow --install-both               Install both context menu items
+	HashNow --uninstall [--menu <mode>]  Remove context menu item(s)
   HashNow --status                     Show installation status
   HashNow --help                       Show this help
   HashNow --version                    Show version
@@ -614,13 +807,19 @@ Output:
 
 Quick Install:
   Just run HashNow without arguments and follow the prompts!
-  Right-click any file in {platformHint} to hash it.
+	Right-click any file in {platformHint} to hash it.
+
+Context Menu Modes:
+	full:  Hash this file now (full) -> all {FileHasher.AlgorithmCount} algorithms
+	basic: Hash this file now        -> CRC32, MD5, SHA-1, SHA-256, SHA-512
+	both:  Install both entries
 
 Examples:
   HashNow                              Install via interactive prompt
   HashNow myfile.zip                   Hash a single file
+	HashNow --basic myfile.zip           Hash with basic 5 algorithms
   HashNow *.iso                        Hash multiple files (shell expansion)
-  HashNow --install                    Add right-click menu option
+	HashNow --install --menu both        Add both right-click menu options
 ");
 	}
 

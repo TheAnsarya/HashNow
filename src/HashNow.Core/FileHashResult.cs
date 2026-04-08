@@ -973,9 +973,9 @@ public sealed class FileHashResult {
 	/// <summary>
 	/// Gets the total number of hash algorithms computed.
 	/// </summary>
-	/// <value>Always 58 for the current version.</value>
+	/// <value>Always 70 for the current version.</value>
 	[JsonPropertyName("algorithmCount")]
-	public int AlgorithmCount { get; init; } = 58;
+	public int AlgorithmCount { get; init; } = FileHasher.AlgorithmCount;
 
 	#endregion
 }

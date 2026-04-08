@@ -59,30 +59,35 @@ public class FileHasherBenchmarks {
 
 	#region HashNow Full Hash (All 70 Algorithms - Parallel)
 
-	[Benchmark(Description = "HashNow Parallel 58 (1 KB)")]
+	[Benchmark(Description = "HashNow Parallel 70 (1 KB)")]
 	public async Task<FileHashResult> HashNow_SmallFile() {
 		return await FileHasher.HashFileAsync(_smallFilePath);
 	}
 
-	[Benchmark(Description = "HashNow Parallel 58 (empty file, finalize-heavy)")]
+	[Benchmark(Description = "HashNow Parallel 70 (empty file, finalize-heavy)")]
 	public async Task<FileHashResult> HashNow_EmptyFile() {
 		return await FileHasher.HashFileAsync(_emptyFilePath);
 	}
 
-	[Benchmark(Description = "HashNow Parallel 58 (1 MB)")]
+	[Benchmark(Description = "HashNow Parallel 70 (1 MB)")]
 	public async Task<FileHashResult> HashNow_MediumFile() {
 		return await FileHasher.HashFileAsync(_mediumFilePath);
 	}
 
-	[Benchmark(Baseline = true, Description = "HashNow Parallel 58 (10 MB)")]
+	[Benchmark(Baseline = true, Description = "HashNow Parallel 70 (10 MB)")]
 	public async Task<FileHashResult> HashNow_LargeFile() {
 		return await FileHasher.HashFileAsync(_largeFilePath);
 	}
 
-	[Benchmark(Description = "HashNow Parallel 58 (10 MB, with progress callback)")]
+	[Benchmark(Description = "HashNow Parallel 70 (10 MB, with progress callback)")]
 	public async Task<FileHashResult> HashNow_LargeFile_WithProgressCallback() {
 		double lastProgress = 0;
 		return await FileHasher.HashFileAsync(_largeFilePath, progress => lastProgress = progress);
+	}
+
+	[Benchmark(Description = "HashNow Basic 5 (10 MB)")]
+	public async Task<BasicFileHashResult> HashNow_Basic_LargeFile() {
+		return await FileHasher.HashFileBasicAsync(_largeFilePath);
 	}
 
 	#endregion

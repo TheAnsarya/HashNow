@@ -1,6 +1,6 @@
 # HashNow
 
-**Right-click any file to instantly generate 70 different hashes to JSON — on Windows, Linux, and macOS.**
+**Right-click any file to instantly generate hashes to JSON — full mode (70+) or basic mode (5) on Windows, plus full mode on Linux and macOS.**
 
 [![License: Unlicense](https://img.shields.io/badge/License-Unlicense-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
@@ -12,7 +12,7 @@ HashNow is a cross-platform file hashing utility that computes **70 hash algorit
 
 | Platform | File Manager Integration |
 |----------|--------------------------|
-| **Windows** | Explorer context menu (registry-based) |
+| **Windows** | Explorer context menu (registry-based, full/basic selectable) |
 | **Linux** | Nautilus, Nemo, Dolphin, Thunar scripts/actions |
 | **macOS** | Finder Quick Actions (Automator workflow) |
 
@@ -71,7 +71,13 @@ HashNow file1.iso file2.zip file3.bin
 
 ```powershell
 # Install context menu (requires admin on Windows)
-HashNow --install
+HashNow --install --menu both
+
+# Install full-only context menu item (all 70+)
+HashNow --install --menu full
+
+# Install basic-only context menu item (CRC32/MD5/SHA-1/SHA-256/SHA-512)
+HashNow --install --menu basic
 
 # Uninstall context menu
 HashNow --uninstall
@@ -91,17 +97,26 @@ HashNow --version
 
 | Command | Description | Requires Admin |
 |---------|-------------|:--------------:|
-| `--install` | Register context menu in file manager | Windows only |
-| `--uninstall` | Remove context menu entry | Windows only |
+| `--install [--menu full\|basic\|both]` | Register selected context menu item(s) in file manager | Windows only |
+| `--install-full` | Register only full context menu entry | Windows only |
+| `--install-basic` | Register only basic context menu entry | Windows only |
+| `--install-both` | Register both full and basic context menu entries | Windows only |
+| `--uninstall [--menu full\|basic\|both]` | Remove selected context menu item(s) | Windows only |
+| `--basic <file>` | Hash file(s) with basic 5 algorithms only | No |
 | `--status` | Check if context menu is correctly installed | No |
 | `--help` | Show usage information | No |
 | `--version` | Show version and algorithm count | No |
 
 The context menu integration is platform-specific:
 
-- **Windows**: Registry entry at `HKEY_CLASSES_ROOT\*\shell\HashNow` (requires admin)
+- **Windows**: Registry entries at `HKEY_CLASSES_ROOT\*\shell\HashNowFull` and `HKEY_CLASSES_ROOT\*\shell\HashNowBasic` (requires admin)
 - **Linux**: Scripts/actions in `~/.local/share/` for Nautilus, Nemo, Dolphin, Thunar
 - **macOS**: Automator workflow at `~/Library/Services/`
+
+On Windows, context menu modes are:
+
+- **Hash this file now**: basic mode (CRC32, MD5, SHA-1, SHA-256, SHA-512)
+- **Hash this file now (full)**: full mode (all 70+ algorithms)
 
 ### Uninstalling
 
@@ -234,6 +249,9 @@ For detailed benchmark results, see [Performance](docs/PERFORMANCE.md). For per-
 - [Changelog](CHANGELOG.md) — version history and release notes
 - [Performance](docs/PERFORMANCE.md) — benchmarks, architecture, and optimization details
 - [Manual Testing Guide](docs/MANUAL_TESTING.md) — step-by-step testing procedures
+- [Dual Context Menu Plan](~docs/plans/2026-04-08-dual-context-menu-plan.md) — implementation plan for full/basic menu modes
+- [Dual Mode Session Log](~docs/session-logs/2026-04-08-session-01.md) — implementation session notes and outcomes
+- [Dual Mode Chat Log](~docs/chat-logs/2026-04-08-chat-01.md) — prompt and response summary for this work
 - [StreamHash](https://github.com/TheAnsarya/StreamHash) — the hash algorithm library powering HashNow ([NuGet](https://www.nuget.org/packages/StreamHash) · [Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md))
 
 ## 📄 License

@@ -5,6 +5,46 @@ All notable changes to HashNow will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.2] - 2026-04-08
+
+### Changed
+
+- Updated dependency to **StreamHash v1.11.3**.
+	- Basic common hash set now uses CRC32, MD5, SHA-1, SHA-256, SHA-512 via StreamHash batch API.
+
+### Fixed
+
+- Removed legacy pre-dual-menu Windows context menu key (`HKCR\*\shell\HashNow`) during install/uninstall to prevent duplicate old menu entries.
+- Elevated GUI install flow now always prompts for install mode selection (basic/full/both) when no explicit CLI mode is provided.
+- JSON output now inserts a blank line between the final hash section and ending metadata (`hashedAtUtc`, `durationMs`, etc.) for both full and basic outputs.
+
+## [Unreleased]
+
+### Added
+
+- **Dual Windows context menu entries** with selectable setup modes:
+	- `Hash this file now` (basic mode: CRC32, MD5, SHA-1, SHA-256, SHA-512)
+	- `Hash this file now (full)` (full mode: all 70+ algorithms)
+- **Install mode options** for setup and teardown:
+	- `--install --menu full|basic|both`
+	- `--install-full`, `--install-basic`, `--install-both`
+	- `--uninstall --menu full|basic|both`
+- **Basic hashing execution mode** via `--basic <file>` for fast five-algorithm output.
+
+### Changed
+
+- Windows `--status` now reports full and basic context menu entries separately, including command/path correctness.
+- Full hash metadata now reports the correct algorithm count (`70`).
+- Added benchmark coverage for basic mode versus full mode.
+
+### Tests
+
+- Added `BasicModeTests` covering:
+	- Basic-mode parity with full mode for MD5/SHA-1/SHA-256/SHA-512
+	- Basic-mode parity with full mode for CRC32/MD5/SHA-1/SHA-256/SHA-512
+	- Basic-mode metadata (`algorithmCount=5`, `hashMode="basic"`)
+	- Basic-mode JSON serialization output
+
 ## [1.5.1] - 2026-03-18
 
 ### Changed

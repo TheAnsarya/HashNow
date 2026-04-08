@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using HashNow.Cli.Platform;
 using HashNow.Core;
 using Microsoft.Win32;
 
@@ -14,14 +15,29 @@ internal sealed class WindowsPlatform : IPlatformIntegration {
 	#region Constants
 
 	/// <summary>
-	/// The registry key path under HKEY_CLASSES_ROOT for the context menu entry.
+	/// The registry key path for the full context menu entry.
 	/// </summary>
-	private const string RegistryKeyPath = @"*\shell\HashNow";
+	private const string FullRegistryKeyPath = @"*\shell\HashNowFull";
+
+	/// <summary>
+	/// The registry key path for the basic context menu entry.
+	/// </summary>
+	private const string BasicRegistryKeyPath = @"*\shell\HashNowBasic";
+
+	/// <summary>
+	/// Legacy key path used by pre-dual-menu versions.
+	/// </summary>
+	private const string LegacyRegistryKeyPath = @"*\shell\HashNow";
 
 	/// <summary>
 	/// The text displayed in the context menu.
 	/// </summary>
-	private const string MenuText = "Hash this file now";
+	private const string FullMenuText = "Hash this file now (full)";
+
+	/// <summary>
+	/// Label for the basic context menu item.
+	/// </summary>
+	private const string BasicMenuText = "Hash this file now";
 
 	/// <summary>
 	/// Environment variable name used to detect Explorer-launched instances.
@@ -109,14 +125,132 @@ internal sealed class WindowsPlatform : IPlatformIntegration {
 	#region Context Menu Install/Uninstall
 
 	/// <inheritdoc/>
-	public bool Install(string executablePath) {
-		using var key = Registry.ClassesRoot.CreateSubKey(RegistryKeyPath);
+	public bool Install(string executablePath, ContextMenuInstallMode mode = ContextMenuInstallMode.Both) {
+		// Always remove legacy single-entry key from older versions to prevent duplicate menu items.
+		DeleteMenuEntry(LegacyRegistryKeyPath);
+
+		if (mode is ContextMenuInstallMode.Full or ContextMenuInstallMode.Both) {
+			InstallMenuEntry(FullRegistryKeyPath, FullMenuText, $"\"{executablePath}\" \"%1\"", executablePath);
+		}
+
+		if (mode is ContextMenuInstallMode.Basic or ContextMenuInstallMode.Both) {
+			InstallMenuEntry(BasicRegistryKeyPath, BasicMenuText, $"\"{executablePath}\" --basic \"%1\"", executablePath);
+		}
+
+		if (mode == ContextMenuInstallMode.Full) {
+			DeleteMenuEntry(BasicRegistryKeyPath);
+		}
+
+		if (mode == ContextMenuInstallMode.Basic) {
+			DeleteMenuEntry(FullRegistryKeyPath);
+		}
+
+		return true;
+	}
+
+	/// <inheritdoc/>
+	public bool Uninstall(ContextMenuInstallMode mode = ContextMenuInstallMode.Both) {
+		DeleteMenuEntry(LegacyRegistryKeyPath);
+
+		if (mode is ContextMenuInstallMode.Full or ContextMenuInstallMode.Both) {
+			DeleteMenuEntry(FullRegistryKeyPath);
+		}
+
+		if (mode is ContextMenuInstallMode.Basic or ContextMenuInstallMode.Both) {
+			DeleteMenuEntry(BasicRegistryKeyPath);
+		}
+
+		return true;
+	}
+
+	/// <inheritdoc/>
+	public bool IsInstalled() {
+		return IsEntryInstalled(FullRegistryKeyPath)
+			|| IsEntryInstalled(BasicRegistryKeyPath)
+			|| IsEntryInstalled(LegacyRegistryKeyPath);
+	}
+
+	/// <inheritdoc/>
+	public bool IsInstalledCorrectly(string executablePath) {
+		var fullInstalled = IsEntryInstalled(FullRegistryKeyPath);
+		var basicInstalled = IsEntryInstalled(BasicRegistryKeyPath);
+
+		if (!fullInstalled && !basicInstalled) {
+			return false;
+		}
+
+		var fullCorrect = !fullInstalled || IsEntryCorrect(
+			FullRegistryKeyPath,
+			executablePath,
+			mustContainBasicSwitch: false);
+
+		var basicCorrect = !basicInstalled || IsEntryCorrect(
+			BasicRegistryKeyPath,
+			executablePath,
+			mustContainBasicSwitch: true);
+
+		return fullCorrect && basicCorrect;
+	}
+
+	/// <inheritdoc/>
+	public string? GetInstalledCommand() {
+		return GetEntryCommand(FullRegistryKeyPath) ?? GetEntryCommand(BasicRegistryKeyPath);
+	}
+
+	/// <summary>
+	/// Gets the installed command for the full context menu entry.
+	/// </summary>
+	private static string? GetInstalledFullCommand() => GetEntryCommand(FullRegistryKeyPath);
+
+	/// <summary>
+	/// Gets the installed command for the basic context menu entry.
+	/// </summary>
+	private static string? GetInstalledBasicCommand() => GetEntryCommand(BasicRegistryKeyPath);
+
+	/// <summary>
+	/// Gets the command registered under a specific registry entry.
+	/// </summary>
+	private static string? GetEntryCommand(string registryPath) {
+		using var key = Registry.ClassesRoot.OpenSubKey(registryPath + @"\command");
+		return key?.GetValue("") as string;
+	}
+
+	/// <summary>
+	/// Checks whether a specific context menu entry is installed.
+	/// </summary>
+	private static bool IsEntryInstalled(string registryPath) {
+		using var key = Registry.ClassesRoot.OpenSubKey(registryPath);
+		return key is not null;
+	}
+
+	/// <summary>
+	/// Validates a specific context menu command entry.
+	/// </summary>
+	private static bool IsEntryCorrect(string registryPath, string executablePath, bool mustContainBasicSwitch) {
+		var command = GetEntryCommand(registryPath);
+		if (string.IsNullOrWhiteSpace(command)) {
+			return false;
+		}
+
+		var hasExe = command.Contains(executablePath, StringComparison.OrdinalIgnoreCase);
+		var hasBasicSwitch = command.Contains(" --basic ", StringComparison.OrdinalIgnoreCase)
+			|| command.Contains("\" --basic \"", StringComparison.OrdinalIgnoreCase)
+			|| command.Contains(" --basic\"", StringComparison.OrdinalIgnoreCase);
+
+		return mustContainBasicSwitch ? hasExe && hasBasicSwitch : hasExe && !hasBasicSwitch;
+	}
+
+	/// <summary>
+	/// Creates or updates a context menu entry.
+	/// </summary>
+	private static void InstallMenuEntry(string registryPath, string menuText, string command, string executablePath) {
+		using var key = Registry.ClassesRoot.CreateSubKey(registryPath);
 		if (key is null) {
 			throw new InvalidOperationException(
 				"Failed to create registry key. Ensure the application is running with administrator privileges.");
 		}
 
-		key.SetValue("", MenuText);
+		key.SetValue("", menuText);
 		key.SetValue("Icon", $"\"{executablePath}\",0");
 
 		using var commandKey = key.CreateSubKey("command");
@@ -125,37 +259,18 @@ internal sealed class WindowsPlatform : IPlatformIntegration {
 				"Failed to create command registry key. Ensure the application is running with administrator privileges.");
 		}
 
-		commandKey.SetValue("", $"\"{executablePath}\" \"%1\"");
-		return true;
+		commandKey.SetValue("", command);
 	}
 
-	/// <inheritdoc/>
-	public bool Uninstall() {
+	/// <summary>
+	/// Deletes a context menu entry if it exists.
+	/// </summary>
+	private static void DeleteMenuEntry(string registryPath) {
 		try {
-			Registry.ClassesRoot.DeleteSubKeyTree(RegistryKeyPath, throwOnMissingSubKey: false);
-			return true;
+			Registry.ClassesRoot.DeleteSubKeyTree(registryPath, throwOnMissingSubKey: false);
 		} catch (ArgumentException) {
-			return true; // Already uninstalled
+			// Already removed
 		}
-	}
-
-	/// <inheritdoc/>
-	public bool IsInstalled() {
-		using var key = Registry.ClassesRoot.OpenSubKey(RegistryKeyPath);
-		return key is not null;
-	}
-
-	/// <inheritdoc/>
-	public bool IsInstalledCorrectly(string executablePath) {
-		var command = GetInstalledCommand();
-		if (command is null) return false;
-		return command.Contains(executablePath, StringComparison.OrdinalIgnoreCase);
-	}
-
-	/// <inheritdoc/>
-	public string? GetInstalledCommand() {
-		using var key = Registry.ClassesRoot.OpenSubKey(RegistryKeyPath + @"\command");
-		return key?.GetValue("") as string;
 	}
 
 	#endregion
@@ -197,14 +312,15 @@ internal sealed class WindowsPlatform : IPlatformIntegration {
 		ShowForeground(message, title, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
 	/// <inheritdoc/>
-	public (bool ShouldRestart, bool ShouldInstall, bool Cancelled) ShowInstallPrompts(
+	public (bool ShouldRestart, bool ShouldInstall, ContextMenuInstallMode InstallMode, bool Cancelled) ShowInstallPrompts(
 		bool isInstalled, bool isCorrect) {
 		if (isInstalled && isCorrect) {
 			ShowInfo("HashNow - Already Installed",
 				"HashNow is already installed!\n\n" +
 				"Right-click any file in Windows Explorer and select\n" +
-				"\"Hash this file now\" to compute hashes.");
-			return (false, false, false);
+				"\"Hash this file now\" or\n" +
+				"\"Hash this file now (full)\".");
+			return (false, false, ContextMenuInstallMode.Both, false);
 		}
 
 		if (!IsElevated) {
@@ -218,7 +334,7 @@ internal sealed class WindowsPlatform : IPlatformIntegration {
 				  "Restart as Administrator?";
 
 			bool restart = AskYesNo("HashNow - Installation Required", message);
-			return (restart, false, !restart);
+			return (restart, false, ContextMenuInstallMode.Both, !restart);
 		}
 
 		string installMsg = isInstalled && !isCorrect
@@ -229,16 +345,95 @@ internal sealed class WindowsPlatform : IPlatformIntegration {
 			  "Install the context menu now?";
 
 		bool install = AskYesNo("HashNow - Install Context Menu", installMsg);
-		return (false, install, !install);
+		if (!install) {
+			return (false, false, ContextMenuInstallMode.Both, true);
+		}
+
+		var (confirmed, mode) = ShowInstallModeSelectionDialog();
+		return (false, confirmed, mode, !confirmed);
+	}
+
+	/// <summary>
+	/// Shows a GUI dialog to choose which context menu entries to install.
+	/// </summary>
+	private static (bool Confirmed, ContextMenuInstallMode Mode) ShowInstallModeSelectionDialog() {
+		using var form = new Form {
+			Text = "HashNow - Choose Context Menu Mode",
+			StartPosition = FormStartPosition.CenterScreen,
+			FormBorderStyle = FormBorderStyle.FixedDialog,
+			MaximizeBox = false,
+			MinimizeBox = false,
+			ShowInTaskbar = false,
+			TopMost = true,
+			ClientSize = new Size(500, 170)
+		};
+
+		var label = new Label {
+			AutoSize = false,
+			Location = new Point(16, 14),
+			Size = new Size(468, 56),
+			Text = "Choose which HashNow context menu items to install:\n\nBasic includes: CRC32, MD5, SHA-1, SHA-256, SHA-512"
+		};
+
+		var combo = new ComboBox {
+			DropDownStyle = ComboBoxStyle.DropDownList,
+			Location = new Point(16, 78),
+			Size = new Size(468, 28)
+		};
+
+		combo.Items.Add("Both (basic + full)");
+		combo.Items.Add("Basic only");
+		combo.Items.Add("Full only");
+		combo.SelectedIndex = 0;
+
+		var okButton = new Button {
+			Text = "Install",
+			DialogResult = DialogResult.OK,
+			Location = new Point(316, 124),
+			Size = new Size(80, 28)
+		};
+
+		var cancelButton = new Button {
+			Text = "Cancel",
+			DialogResult = DialogResult.Cancel,
+			Location = new Point(404, 124),
+			Size = new Size(80, 28)
+		};
+
+		form.Controls.Add(label);
+		form.Controls.Add(combo);
+		form.Controls.Add(okButton);
+		form.Controls.Add(cancelButton);
+		form.AcceptButton = okButton;
+		form.CancelButton = cancelButton;
+
+		var result = form.ShowDialog();
+		if (result != DialogResult.OK) {
+			return (false, ContextMenuInstallMode.Both);
+		}
+
+		var mode = combo.SelectedIndex switch {
+			1 => ContextMenuInstallMode.Basic,
+			2 => ContextMenuInstallMode.Full,
+			_ => ContextMenuInstallMode.Both
+		};
+
+		return (true, mode);
+	}
+
+	/// <inheritdoc/>
+	public (bool Confirmed, ContextMenuInstallMode InstallMode) PromptInstallModeGui() {
+		return ShowInstallModeSelectionDialog();
 	}
 
 	/// <inheritdoc/>
 	public void ShowInstallResult(bool success, string? errorMessage = null) {
 		if (success) {
 			ShowSuccess("HashNow - Installation Complete",
-				"Context menu installed successfully!\n\n" +
+				"Context menu setup completed successfully!\n\n" +
 				"Right-click any file in Windows Explorer and select\n" +
-				"\"Hash this file now\" to compute all 70 hashes.\n\n" +
+				"\"Hash this file now\" (basic 5) or\n" +
+				"\"Hash this file now (full)\" (all 70+).\n\n" +
 				"A .hashes.json file will be created next to the original.");
 		} else if (errorMessage?.Contains("Administrator") == true) {
 			ShowError("HashNow - Error",
@@ -297,7 +492,7 @@ internal sealed class WindowsPlatform : IPlatformIntegration {
 
 			var startInfo = new ProcessStartInfo {
 				FileName = exePath,
-				Arguments = "--gui-install",
+				Arguments = string.Join(" ", ["--gui-install", .. args]),
 				UseShellExecute = true,
 				Verb = "runas"
 			};
@@ -374,30 +569,62 @@ internal sealed class WindowsPlatform : IPlatformIntegration {
 	/// <inheritdoc/>
 	public IReadOnlyList<string> GetStatusDetails() {
 		var details = new List<string>();
-		bool isInstalled = IsInstalled();
+		var fullInstalled = IsEntryInstalled(FullRegistryKeyPath);
+		var basicInstalled = IsEntryInstalled(BasicRegistryKeyPath);
+		var legacyInstalled = IsEntryInstalled(LegacyRegistryKeyPath);
 
 		var exePath = Environment.ProcessPath ?? "Unknown";
-		bool isCorrect = IsInstalledCorrectly(exePath);
 
-		if (isInstalled && isCorrect) {
-			details.Add("✓ Context menu: Installed (current)");
-		} else if (isInstalled) {
-			details.Add("⚠ Context menu: Installed (outdated path)");
-			details.Add("  The executable has moved. Run --install to update.");
+		if (!fullInstalled && !basicInstalled) {
+			details.Add("✗ Context menu (full): Not installed");
+			details.Add("✗ Context menu (basic): Not installed");
+			details.Add("  Run --install --menu both to install both entries.");
 		} else {
-			details.Add("✗ Context menu: Not installed");
-			details.Add("  Run --install or double-click the exe to install.");
+			AddEntryStatus(details, "full", FullRegistryKeyPath, exePath, mustContainBasicSwitch: false);
+			AddEntryStatus(details, "basic", BasicRegistryKeyPath, exePath, mustContainBasicSwitch: true);
+		}
+
+		if (legacyInstalled) {
+			details.Add("⚠ Context menu (legacy): Installed (old single-entry key detected)");
+			details.Add("  Run --install or --uninstall --menu both to remove legacy entry.");
 		}
 
 		details.Add($"Executable: {exePath}");
 		details.Add($"Admin:      {(IsElevated ? "Yes" : "No")}");
 
-		var command = GetInstalledCommand();
-		if (command is not null) {
-			details.Add($"Registered: {command}");
+		var fullCommand = GetInstalledFullCommand();
+		if (fullCommand is not null) {
+			details.Add($"Registered (full):  {fullCommand}");
+		}
+
+		var basicCommand = GetInstalledBasicCommand();
+		if (basicCommand is not null) {
+			details.Add($"Registered (basic): {basicCommand}");
 		}
 
 		return details;
+	}
+
+	/// <summary>
+	/// Adds status details for a specific context menu entry.
+	/// </summary>
+	private static void AddEntryStatus(
+		List<string> details,
+		string label,
+		string registryPath,
+		string exePath,
+		bool mustContainBasicSwitch) {
+		if (!IsEntryInstalled(registryPath)) {
+			details.Add($"✗ Context menu ({label}): Not installed");
+			return;
+		}
+
+		if (IsEntryCorrect(registryPath, exePath, mustContainBasicSwitch)) {
+			details.Add($"✓ Context menu ({label}): Installed (current)");
+		} else {
+			details.Add($"⚠ Context menu ({label}): Installed (outdated path or command)");
+			details.Add($"  Run --install --menu {label} to repair this entry.");
+		}
 	}
 
 	#endregion

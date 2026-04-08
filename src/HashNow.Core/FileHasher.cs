@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text.Json;
 
 namespace HashNow.Core;
@@ -33,6 +34,11 @@ public static class FileHasher {
 	/// The total number of hash algorithms supported.
 	/// </summary>
 	public const int AlgorithmCount = 70;
+
+	/// <summary>
+	/// The number of algorithms used by basic mode.
+	/// </summary>
+	public const int BasicAlgorithmCount = 5;
 
 	/// <summary>
 	/// Default buffer size for file reading operations (1 MB).
@@ -401,6 +407,111 @@ public static class FileHasher {
 		}, cancellationToken);
 	}
 
+	/// <summary>
+	/// Hashes a file with the basic five algorithms (CRC32, MD5, SHA-1, SHA-256, SHA-512).
+	/// </summary>
+	/// <param name="filePath">Path to the file to hash.</param>
+	/// <param name="progress">Optional progress callback (0.0 to 1.0).</param>
+	/// <param name="cancellationToken">Cancellation token.</param>
+	/// <returns>Basic hash results for the file.</returns>
+	public static BasicFileHashResult HashFileBasic(
+		string filePath,
+		Action<double>? progress = null,
+		CancellationToken cancellationToken = default) {
+		var fileInfo = new FileInfo(filePath);
+		var sw = Stopwatch.StartNew();
+
+		using var basicHasher = HashFacade.CreateBasicCommonHashesStreaming();
+
+		byte[] buffer = ArrayPool<byte>.Shared.Rent(DefaultBufferSize);
+		try {
+			using var stream = new FileStream(
+				filePath,
+				FileMode.Open,
+				FileAccess.Read,
+				FileShare.Read,
+				DefaultBufferSize,
+				FileOptions.SequentialScan);
+
+			var totalBytes = stream.Length;
+			long bytesRead = 0;
+
+			if (progress is null || totalBytes <= 0) {
+				int bytesThisRead;
+				while ((bytesThisRead = stream.Read(buffer, 0, DefaultBufferSize)) > 0) {
+					cancellationToken.ThrowIfCancellationRequested();
+					var chunk = buffer.AsSpan(0, bytesThisRead);
+					basicHasher.Update(chunk);
+					bytesRead += bytesThisRead;
+				}
+			} else {
+				var progressStep = totalBytes / 100.0;
+				var nextPercent = 1;
+				double nextProgressAt = progressStep;
+
+				int bytesThisRead;
+				while ((bytesThisRead = stream.Read(buffer, 0, DefaultBufferSize)) > 0) {
+					cancellationToken.ThrowIfCancellationRequested();
+					var chunk = buffer.AsSpan(0, bytesThisRead);
+					basicHasher.Update(chunk);
+					bytesRead += bytesThisRead;
+
+					while (nextPercent < 100 && bytesRead >= nextProgressAt) {
+						progress(nextPercent / 100.0);
+						nextPercent++;
+						nextProgressAt = progressStep * nextPercent;
+					}
+				}
+
+				progress(1.0);
+			}
+
+			sw.Stop();
+
+			var batchResults = basicHasher.FinalizeAll();
+
+			string Hash(string algorithmName) {
+				if (batchResults.TryGetValue(algorithmName, out var value)) {
+					return value;
+				}
+
+				throw new InvalidOperationException($"Missing basic hash result for '{algorithmName}'.");
+			}
+
+			return new BasicFileHashResult {
+				FileName = fileInfo.Name,
+				FullPath = fileInfo.FullName,
+				SizeBytes = fileInfo.Length,
+				SizeFormatted = FormatFileSize(fileInfo.Length),
+				CreatedUtc = fileInfo.CreationTimeUtc.ToString("O"),
+				ModifiedUtc = fileInfo.LastWriteTimeUtc.ToString("O"),
+				Crc32 = Hash(HashAlgorithmNames.Crc32),
+				Md5 = Hash(HashAlgorithmNames.Md5),
+				Sha1 = Hash(HashAlgorithmNames.Sha1),
+				Sha256 = Hash(HashAlgorithmNames.Sha256),
+				Sha512 = Hash(HashAlgorithmNames.Sha512),
+				HashedAtUtc = DateTime.UtcNow.ToString("O"),
+				DurationMs = sw.ElapsedMilliseconds
+			};
+		} finally {
+			ArrayPool<byte>.Shared.Return(buffer);
+		}
+	}
+
+	/// <summary>
+	/// Hashes a file asynchronously with the basic five algorithms.
+	/// </summary>
+	/// <param name="filePath">Path to the file to hash.</param>
+	/// <param name="progress">Optional progress callback (0.0 to 1.0).</param>
+	/// <param name="cancellationToken">Cancellation token.</param>
+	/// <returns>Basic hash results for the file.</returns>
+	public static Task<BasicFileHashResult> HashFileBasicAsync(
+		string filePath,
+		Action<double>? progress = null,
+		CancellationToken cancellationToken = default) {
+		return Task.Run(() => HashFileBasic(filePath, progress, cancellationToken), cancellationToken);
+	}
+
 	#endregion
 
 	#region JSON Output
@@ -441,6 +552,40 @@ public static class FileHasher {
 		await File.WriteAllTextAsync(outputPath, json, cancellationToken);
 	}
 
+	/// <summary>
+	/// Saves basic hash results to a JSON file.
+	/// </summary>
+	/// <param name="result">The basic hash results to save.</param>
+	/// <param name="outputPath">Path to the output JSON file.</param>
+	public static void SaveResult(BasicFileHashResult result, string outputPath) {
+		string json = JsonSerializer.Serialize(result, JsonOptions);
+		json = AddBlankLinesBetweenSections(json);
+		if (!json.EndsWith('\n')) {
+			json += Environment.NewLine;
+		}
+
+		File.WriteAllText(outputPath, json);
+	}
+
+	/// <summary>
+	/// Saves basic hash results to a JSON file asynchronously.
+	/// </summary>
+	/// <param name="result">The basic hash results to save.</param>
+	/// <param name="outputPath">Path to the output JSON file.</param>
+	/// <param name="cancellationToken">Cancellation token.</param>
+	public static async Task SaveResultAsync(
+		BasicFileHashResult result,
+		string outputPath,
+		CancellationToken cancellationToken = default) {
+		string json = JsonSerializer.Serialize(result, JsonOptions);
+		json = AddBlankLinesBetweenSections(json);
+		if (!json.EndsWith('\n')) {
+			json += Environment.NewLine;
+		}
+
+		await File.WriteAllTextAsync(outputPath, json, cancellationToken);
+	}
+
 	#endregion
 
 	#region Utility Methods
@@ -451,9 +596,15 @@ public static class FileHasher {
 	/// <param name="json">The JSON string to format.</param>
 	/// <returns>Formatted JSON with blank lines between sections.</returns>
 	private static string AddBlankLinesBetweenSections(string json) {
-		// Section break markers: the last property in each section
-		// After metadata → checksums, after checksums → non-crypto, after non-crypto → crypto, after crypto → other crypto
-		ReadOnlySpan<string> sectionBreakProperties = ["modifiedUtc", "crc16Usb", "loseLose", "ripemd320"];
+		var sectionBreakProperties = new List<string> { "modifiedUtc" };
+
+		// Basic mode has one hash block that ends at sha512 before metadata.
+		if (json.Contains("\"hashMode\": \"basic\"", StringComparison.Ordinal)) {
+			sectionBreakProperties.Add("sha512");
+		} else {
+			// Full mode sections end at: checksums, fast non-crypto, RIPEMD, other crypto.
+			sectionBreakProperties.AddRange(["crc16Usb", "loseLose", "ripemd320", "sm3"]);
+		}
 
 		foreach (string prop in sectionBreakProperties) {
 			// Find the property line and insert a blank line after it

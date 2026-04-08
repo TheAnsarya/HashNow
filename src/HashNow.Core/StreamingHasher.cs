@@ -208,7 +208,8 @@ internal sealed class StreamingHasher : IDisposable {
 
 				// Hashing metadata
 				HashedAtUtc = DateTime.UtcNow.ToString("O"),
-				DurationMs = sw.ElapsedMilliseconds
+				DurationMs = sw.ElapsedMilliseconds,
+				AlgorithmCount = FileHasher.AlgorithmCount
 			};
 		} finally {
 			ArrayPool<byte>.Shared.Return(buffer);
