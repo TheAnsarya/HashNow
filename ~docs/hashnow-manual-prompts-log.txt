@@ -109,6 +109,23 @@ there should be a GUI selection dialog for basic/full/both during the install pr
 
 git commit everything across all repos, release a new version of StreamHash (update patch number), prepare and release the StreamHash nuget package and then after publication update completes change HashNow to use the new version of the nuget package, and then prepare HashNow for release and then releasae a new version of HashNow (update patch number); continue;
 
+git commit everything across all repos, release a new version of StreamHash (update patch number), prepare and release the StreamHash nuget package and then after publication update completes change HashNow to use the new version of the nuget package, and then build and prepare HashNow for release, and lets run it again to see if our fixes are there before we release; continue;
+
+You didn't make the builds for the release, there are missing 4 assets
+
+:::::::::::: perfect! release does what we want!
+
+
+
+
+
+
+
+
+
+
+ and then release a new version of HashNow (update patch number); continue;
+
 
 
 
