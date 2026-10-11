@@ -251,6 +251,7 @@ For detailed benchmark results, see [Performance](docs/PERFORMANCE.md). For per-
 - [Manual Testing Guide](docs/MANUAL_TESTING.md) — step-by-step testing procedures
 - [Dual Context Menu Plan](~docs/plans/2026-04-08-dual-context-menu-plan.md) — implementation plan for full/basic menu modes
 - [Dual Mode Session Log](~docs/session-logs/2026-04-08-session-01.md) — implementation session notes and outcomes
+- [Dependency Refresh Session Log](~docs/session-logs/2026-10-10-session-01.md) — dependency updates and v1.5.3 release
 - [Dual Mode Chat Log](~docs/chat-logs/2026-04-08-chat-01.md) — prompt and response summary for this work
 - [StreamHash](https://github.com/TheAnsarya/StreamHash) — the hash algorithm library powering HashNow ([NuGet](https://www.nuget.org/packages/StreamHash) · [Benchmarks](https://github.com/TheAnsarya/StreamHash/blob/main/docs/benchmarks.md))
 
