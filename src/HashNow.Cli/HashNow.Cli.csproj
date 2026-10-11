@@ -11,7 +11,7 @@
 
 		<AssemblyName>HashNow</AssemblyName>
 		<RootNamespace>HashNow.Cli</RootNamespace>
-		<Version>1.5.2</Version>
+		<Version>1.5.3</Version>
 		<Description>Hash files instantly from context menu - 70 algorithms with parallel processing powered by StreamHash. Windows, Linux, and macOS.</Description>
 		<Authors>TheAnsarya</Authors>
 		<Company>TheAnsarya</Company>
