@@ -18,6 +18,8 @@ HashNow is a cross-platform file hashing utility that computes **70 hash algorit
 
 All 70 hash algorithms are powered by [**StreamHash**](https://github.com/TheAnsarya/StreamHash) ([NuGet](https://www.nuget.org/packages/StreamHash)), a high-performance streaming hash library written entirely in native C# with SIMD acceleration. No external cryptography libraries — every algorithm is implemented from scratch with zero `unsafe` code.
 
+<img width="756" height="175" alt="hashNow context menu windows" src="https://github.com/user-attachments/assets/191c4884-7f20-4e50-b8d3-8fadbc8685cf" />
+
 ## 📥 Download & Install
 
 Download the latest release for your platform from the [Releases page](https://github.com/TheAnsarya/HashNow/releases/latest):
