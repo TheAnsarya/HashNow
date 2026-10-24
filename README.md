@@ -18,7 +18,17 @@ HashNow is a cross-platform file hashing utility that computes **70 hash algorit
 
 All 70 hash algorithms are powered by [**StreamHash**](https://github.com/TheAnsarya/StreamHash) ([NuGet](https://www.nuget.org/packages/StreamHash)), a high-performance streaming hash library written entirely in native C# with SIMD acceleration. No external cryptography libraries — every algorithm is implemented from scratch with zero `unsafe` code.
 
+### ☰ Context menu
+
+Right-click the file you want to hash and select either hashing the most-popular 5 hashes or all 70 known hashes. 
+
 <img width="756" height="175" alt="hashNow context menu windows" src="https://github.com/user-attachments/assets/191c4884-7f20-4e50-b8d3-8fadbc8685cf" />
+
+### 📤 Results
+
+Running HashNow makes a hash-filled file next to the original file.
+
+<img width="858" height="525" alt="hashNow windows output" src="https://github.com/user-attachments/assets/17e34c70-13ed-4183-8a1f-340c949f14f3" />
 
 ## 📥 Download & Install
 
